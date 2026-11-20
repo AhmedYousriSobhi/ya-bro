@@ -1,0 +1,23 @@
+# secrets
+.env
+*.pem
+*.key
+
+# python
+__pycache__/
+*.pyc
+.venv/
+dist/
+build/
+*.egg-info/
+
+# node
+node_modules/
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# local Claude Code state
+.claude/settings.local.json
