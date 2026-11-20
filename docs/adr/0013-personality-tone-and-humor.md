@@ -1,0 +1,98 @@
+# ADR-0013: Personality, tone and humour system
+
+- Status: Proposed
+- Date: 2026-11-20
+- Issue: #13
+- Depends on: ADR-0008, ADR-0010, ADR-0019
+
+## Context
+The product is a "bro". It offers help "with humour", and when told "no" it says "I don't think so, but I'm here". Personality is part of the brand, but research shows it is also a liability.
+
+- **Clippy.** Users reacted to the Office Assistant socially. Labels, appearance and behaviour shaped whether it was perceived as helpful or annoying (Swartz 2003, via secondary summaries). Being impolite (Whitworth 2005) got it disabled.
+- **Whitworth's polite-computing rules:** respect user choice, disclose identity, offer useful choices, remember past choices.
+- **Wrong help gets followed** (Lumière). Humour must never obscure what the bro is unsure about.
+- **Gemini Live's "proactive audio"** lets the model stay silent, which is a reminder that saying nothing is a valid output.
+
+Sources: [factsheet.md B.1](../research/factsheet.md), [ai-tools.md §3.4](../research/ai-tools.md).
+
+The maintainer is Arabic-speaking. The persona should sound natural in Egyptian Arabic ("يا برو", "إنت متلخبط ولا إيه؟") and in English, and switch with the user.
+
+## Decision drivers
+- Consistency: same character across LLM calls, languages and offline templates.
+- Safety: humour never in errors, security or destructive steps, and never at the user's expense on sensitive topics.
+- Controllability: the user sets how much humour they want.
+- Cost and latency: frequent short lines shouldn't need an LLM call.
+- Testability.
+
+## Options considered
+| Option | For | Against |
+|---|---|---|
+| **Free-form LLM persona via system prompt only** | Natural, contextual | Drift, uneven humour, costs a call per line, hard to test |
+| **Template library only** | Deterministic, offline, cheap | Repetitive and stale fast; no context |
+| **Persona spec + template library for frequent moments + LLM for contextual lines under a style contract (recommended)** | Consistent and cheap where frequent, fresh where it matters, testable with a rubric | Two mechanisms to keep aligned |
+
+## Decision
+1. **A `persona` module in core** (not in packs). It owns:
+   - `persona.toml`: name, voice, register per locale, a humour intensity scale of 0–3, and banned topics;
+   - `lines/<locale>.toml`: templated lines per **moment** (`offer_stuck`, `offer_declined`, `back_off_long`, `step_done`, `task_done`, `unsure`, `error_recovered`, `greeting`), with 10–30 variants each, carrying weights and humour levels;
+   - `style.md`: a tone guide that is included in the Brain's frozen system prompt (ADR-0008).
+2. **Tone guide (summary).**
+   - Warm, brief, teammate energy.
+   - One sentence per bubble.
+   - Address the user as "bro" or "يا برو" at most once per task.
+   - Confident when the target is High confidence. Explicitly hedged when Medium or Low (ADR-0007). Humour never replaces the hedge.
+   - Self-deprecating rather than user-deprecating ("my bad, wrong button" rather than "you clicked wrong").
+3. **Where humour is allowed:**
+
+   | Moment | Humour allowed? |
+   |---|---|
+   | Proactive offers and back-off acknowledgements | Yes, up to the user's intensity |
+   | Step done / task done | Light (level ≤ 2) |
+   | Narration of a step | No jokes; clarity first |
+   | Errors, uncertainty, recovery | Only gentle reassurance, no jokes |
+   | R2/R3 risk confirmations, privacy or security prompts, anything about credentials or money | **Never** |
+   | User frustration detected (repeated failures plus "no") | Humour drops one level automatically |
+
+4. **How a line is produced.**
+   - Frequent moments use a **template** chosen by locale, intensity and recency (no repeat within the last 10 lines).
+   - Contextual lines, such as an offer naming the actual menu or a "why?" answer, are produced by the LLM under the style contract and limited to ≤ 140 characters.
+   - Templates are the offline fallback.
+5. **Language.**
+   - Follow the user's last language.
+   - Egyptian Arabic is the default Arabic register. MSA is used for TTS fallback when the offline voice is MSA-trained (ADR-0011).
+   - Code-switching mirrors the user.
+   - UI element names are quoted in the UI's own language, isolated for bidi (ADR-0019).
+6. **User controls.**
+   - Humour slider: 0 = plain, 3 = full bro.
+   - "Less chatty" toggle.
+   - Persona name and avatar choice (later).
+7. **Safety filter.**
+   - Every LLM-generated persona line passes a deterministic check before display: length, banned-topic keyword list in EN and AR, and no imperative to perform an R2+ action unless it came from the policy-approved step.
+   - A line that fails falls back to a template.
+
+## Consequences
+- **Positive:**
+  - A recognisable character that stays out of the way when it matters.
+  - Cheap and offline for frequent lines.
+  - Tests are possible: rubric evals and template linting.
+- **Negative:**
+  - Template authoring in two languages.
+  - Egyptian Arabic needs native review. The maintainer does it.
+- **Risks:**
+  - Humour misfires culturally.
+  - LLM lines drift from the style. Mitigation: a rubric eval in ADR-0016.
+
+## Validation plan
+- **Rubric eval.** 100 generated offers and acknowledgements per locale, graded by an LLM judge plus spot-checked by the maintainer on: brevity, correct hedging, humour level matching the setting, no banned content, and natural Egyptian phrasing. Target ≥ 90% pass.
+- **Dogfood.** Track how often users lower the humour slider in the first week. If more than 40% of users lower it, reduce the default.
+
+## Revisit if
+- Users consistently set humour to 0. Then lower the default and reconsider the brand.
+- Voice TTS cannot carry the intended tone in Arabic. Then simplify Arabic lines.
+
+## Sources
+- Whitworth 2005, Polite computing: https://digitalcommons.njit.edu/fac_pubs/19576
+- Swartz, "Why People Hate the Paperclip" (summary): https://jerz.setonhill.edu/?p=1399
+- Horvitz 1999 (social appropriateness, graceful degradation): https://www.erichorvitz.com/chi99horvitz.pdf
+- [docs/research/ai-tools.md](../research/ai-tools.md): §2.4, §3.4
+- [docs/research/factsheet.md](../research/factsheet.md): Part B

@@ -9,8 +9,10 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 ## Docs
 - [SPEC.md](SPEC.md) — what we're building and why
 - [docs/PRIOR_ART.md](docs/PRIOR_ART.md) — who else is doing this
+- [docs/adr/](docs/adr/README.md) — architecture decisions, risks and MVP build plan
+- [docs/research/](docs/research/) — how other AI and non-AI tools work, and Linux platform facts
 - [CLAUDE.md](CLAUDE.md) — contributor/agent workflow (issues → PR to `dev` → release to `main`)
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## Platform
-Linux only for now (X11 + Wayland). macOS/Windows later.
+Linux only for now (Wayland first, X11 secondary). macOS/Windows later.

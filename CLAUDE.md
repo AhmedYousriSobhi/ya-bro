@@ -18,7 +18,8 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 ## Repo map
 - `SPEC.md` — product spec, scope, architecture, roadmap
 - `docs/PRIOR_ART.md` — survey of existing tools and how Ya-Bro differs
-- `docs/adr/` — architecture decision records (one file per decision, numbered)
+- `docs/adr/` — architecture decision records (one file per decision, numbered; index and MVP plan in `docs/adr/README.md`)
+- `docs/research/` — landscape research (AI tools, non-AI tools, Linux platform facts, factsheet)
 - `CHANGELOG.md` — Keep a Changelog format
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
@@ -34,7 +35,8 @@ Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` f
 - **No app-specific code in the core.** App knowledge lives in per-app packs (`packs/<app>/`); first pack is workbench. See SPEC.md "Global core + app packs".
 - Struggle monitoring is opt-in, local, and records event types/counts only, never typed text or screen content.
 - Prefer the **accessibility tree (AT-SPI)** for finding elements; fall back to screenshots + vision only when needed.
-- Detect and handle both **Wayland and X11**; never assume X11.
+- Reference platform is **KWin Wayland**, X11 secondary, GNOME via Shell extension later (ADR-0002); never assume X11. AT-SPI screen coordinates are unusable on Wayland; use the coordinate pipeline in ADR-0004.
+- Beyond the five interfaces, ADR-0003 adds CompositorBridge, Capture, IdleSource, Hotkeys, ShellHook, SecretStore and Policy. Every action passes the `Policy` engine (ADR-0014).
 - App knowledge comes from the app itself (UI tree, `--help`, docs, MCP/skills), not hardcoded per-app scripts.
 
 ## Safety rules for the bro
