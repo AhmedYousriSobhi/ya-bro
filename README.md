@@ -4,6 +4,10 @@
 
 Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when you're stuck ("you stuck, bro?") or you can just ask it (by voice or text) how to do something in any app, and it walks you through the **real app, one step at a time** — pointing at the exact button, explaining why, and doing the step for you whenever you'd rather just watch.
 
+![Ya-Bro concept sketch](docs/assets/ya-bro-concept.png)
+
+*Concept sketch (source: `docs/assets/ya-bro-concept.svg`), not a final design.*
+
 **Status:** pre-alpha, spec phase. See [SPEC.md](SPEC.md).
 
 ## Docs
