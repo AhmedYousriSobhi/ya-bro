@@ -3,14 +3,21 @@
 - Status: Proposed
 - Date: 2026-11-20
 - Issue: #13
-- Depends on: ADR-0002, ADR-0003, ADR-0006, ADR-0020
+- Depends on: ADR-0002, ADR-0003, ADR-0006, ADR-0020, ADR-0023
+
+> **Amended for GNOME-first (2026-11-20).**
+> - The GNOME Shell extension is part of **v0.1**, not v0.2.
+> - A source or `uv tool` install copies `extension/` to `~/.local/share/gnome-shell/extensions/<uuid>/` and compiles its schemas. The later .deb ships it in `/usr/share/gnome-shell/extensions/<uuid>/`.
+> - `ya-bro setup` adds the UUID to `org.gnome.shell enabled-extensions` after consent and asks for **one logout/login**: a running Wayland shell does not pick up a newly installed extension ([ADR-0023](0023-gnome-shell-extension-bridge.md) §9). Extension updates need a re-login too, and doctor flags a version mismatch between core and extension.
+> - Ubuntu dependencies gain `gnome-shell` (≥ 48) as a recommendation. `gir1.2-gtk4layershell-1.0` becomes optional (KWin, v0.2).
+> - EGO publication remains out of scope until the code is human-written or human-reviewed.
 
 ## Context
 Ya-Bro needs four things from the system that sandboxes restrict:
 - read access to *other* apps' AT-SPI trees;
-- a layer-shell or X11 overlay;
-- D-Bus access to KWin scripting or a GNOME extension;
-- optionally, portals or XTest.
+- an overlay: the GNOME Shell extension (reference), or layer-shell on KWin (v0.2);
+- D-Bus access to the GNOME extension, or KWin scripting (v0.2);
+- optionally, portals.
 
 Facts ([factsheet.md D](../research/factsheet.md); [linux-platform.md §0, §3.13](../research/linux-platform.md)):
 
@@ -44,11 +51,11 @@ Facts ([factsheet.md D](../research/factsheet.md); [linux-platform.md §0, §3.1
 ## Decision
 1. **v0.x: source install.**
    - `uv tool install ya-bro` (or `pipx install --system-site-packages`) on top of a `scripts/install-deps.sh` that prints and, after confirmation, runs the distro package command:
-     - Ubuntu/Debian: `python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-atspi-2.0 gir1.2-gtk4layershell-1.0 at-spi2-core`, plus optional `tesseract-ocr tesseract-ocr-ara`;
+     - Ubuntu/Debian: `python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-atspi-2.0 at-spi2-core`, plus optional `gir1.2-gtk4layershell-1.0` (KWin) and `tesseract-ocr tesseract-ocr-ara`;
      - Fedora and Arch equivalents.
    - Python ≥ 3.12 is required. Note that PyGObject from the distro must match the interpreter, which is why the system Python is used.
 2. **v0.3+: native `.deb`** built with dh-python/pybuild, installed to a private dir.
-   - The package ships the desktop file, the autostart template (not enabled), the KWin script (loaded at runtime, so it also works from a source install) and the GNOME Shell extension.
+   - The package ships the desktop file, the autostart template (not enabled), the GNOME Shell extension (system-wide, enabled per user) and the KWin script (loaded at runtime, so it also works from a source install).
    - rpm and AUR follow when there is demand.
 3. **Not supported:** Flatpak, Snap and AppImage. The README states why: the sandbox blocks cross-app accessibility, and a reduced Flatpak build would mislead users. Revisit when Newton or a11y portals exist.
 4. **Voice engines** are separate optional installs, each carrying its own licence:
@@ -56,12 +63,12 @@ Facts ([factsheet.md D](../research/factsheet.md); [linux-platform.md §0, §3.1
    - Piper (GPL) through its own package or the Wyoming Piper server, as the user chooses.
 
    Model weights download on first use, with checksums and licence display (ADR-0020).
-5. **GNOME extension** (v0.2): shipped in the repo and in the deb, installed per user with `gnome-extensions install`. Publication on extensions.gnome.org only once a human has reviewed or written the code (their guidelines reject AI-generated code).
+5. **GNOME extension** (v0.1): shipped in the repo and in the deb. It is installed per user by `ya-bro setup` (or `gnome-extensions install` on a packed zip), enabled after consent, and activated by one re-login (ADR-0023 §9). Publication on extensions.gnome.org only once a human has reviewed or written the code (their guidelines reject AI-generated code).
 6. **Autostart.** Off by default. The settings toggle writes `~/.config/autostart/ya-bro.desktop`; turning it off writes `Hidden=true` or removes the file. Optional systemd `--user` unit later, for restart-on-crash.
 7. **Permissions disclosure.** `ya-bro doctor` lists every capability, its status and how to grant it:
    - the a11y bus;
-   - layer-shell;
-   - the KWin script;
+   - the GNOME extension (state, errors, API version);
+   - layer-shell and the KWin script (v0.2);
    - the portal (RemoteDesktop / ScreenCast / GlobalShortcuts);
    - the shell hook;
    - PipeWire AEC.

@@ -81,7 +81,7 @@ On the Claude side:
 
 ## Validation plan
 **Pointing eval harness (ADR-0016)**
-- About 300 labelled targets: fixture apps plus recorded snapshots (AT-SPI tree JSON + screenshot + ground-truth rect) from GIMP, Inkscape, LibreOffice, KDE Settings, Firefox/workbench and Konsole, in EN and AR UI locales.
+- About 300 labelled targets: fixture apps plus recorded snapshots (AT-SPI tree JSON + screenshot + ground-truth rect) from GIMP, Inkscape, LibreOffice, GNOME Settings, Firefox/workbench and Ptyxis, in EN and AR UI locales (amended for GNOME-first 2026-11-20; KDE System Settings and Konsole join with the KWin port).
 - Metrics:
   - **pointed-correct rate**: target ≥ 80% overall, SPEC §8;
   - **confidently-wrong rate**: High tier but wrong, target ≤ 2%;

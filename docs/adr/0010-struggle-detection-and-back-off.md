@@ -6,6 +6,13 @@
 - Depends on: ADR-0002, ADR-0003, ADR-0005, ADR-0014, ADR-0021
 - Related: ADR-0013 (tone of the offer), ADR-0017 (local state)
 
+> **Amended for GNOME-first (2026-11-20).**
+> - The **GNOME Wayland column is now the reference**, and S5b runs on GNOME 50 first.
+> - Idle comes from `org.gnome.Mutter.IdleMonitor`, verified working on the maintainer's machine.
+> - Focus and fullscreen come from the extension's `FocusChanged` / `FullscreenChanged` signals ([ADR-0023](0023-gnome-shell-extension-bridge.md)).
+> - The terminal signals assume Ptyxis, the Ubuntu 26.04 default (ADR-0021).
+> - KWin Wayland is verified in v0.2. X11-only signals (rage/dead click, XRecord undo) are out of scope, because X11 is CI-only.
+
 ## Context
 Proactive mode is the headline feature. The closest ancestor is Microsoft's Office Assistant, and the HCI record on it is specific ([factsheet.md Part B](../research/factsheet.md); [ai-tools.md §2.4, §3.4](../research/ai-tools.md)).
 
@@ -135,10 +142,10 @@ Hard caps: **≤ 3 offers per hour** and **≤ 10 per day** by default.
 - **Risks:**
   - The Clippy effect, if cooldowns are too short or offers are badly timed.
   - GTK4 popover menus may not emit reliable showing/hidden events (spike S5b).
-  - Idle source availability on KWin 6.6.
+  - Idle source availability on KWin 6.6 (v0.2; GNOME's IdleMonitor is verified).
 
 ## Validation plan
-- **Spike S5b (signal observability).** Script each signal in fixture apps on KWin Wayland and GNOME, and record whether the event arrives and its latency. **Go:** at least 5 of the 8 Wayland-observable signals are reliable (≥ 95% detection in scripted runs).
+- **Spike S5b (signal observability).** Script each signal in fixture apps on GNOME 50 Wayland (then KWin in v0.2), and record whether the event arrives and its latency. **Go:** at least 5 of the 8 Wayland-observable signals are reliable (≥ 95% detection in scripted runs).
 - **Replay eval set.**
   - Record the maintainer's opt-in, content-free event streams (JSONL) while doing scripted "stuck" and "not stuck" scenarios: 40 scenarios, 2 people if possible.
   - Label them, then replay through the detector in CI (ADR-0016).

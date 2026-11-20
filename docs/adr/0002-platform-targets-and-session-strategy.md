@@ -1,99 +1,93 @@
-# ADR-0002: Platform targets and session strategy (KWin Wayland as reference, X11 demoted)
+# ADR-0002: Platform targets and session strategy (GNOME Wayland as reference, KWin second, X11 CI-only)
 
-- Status: Proposed
+- Status: Proposed (maintainer-decided 2026-11-20; becomes Accepted when spike S1 passes)
 - Date: 2026-11-20
 - Issue: #13
-- Refines: SPEC.md §5 "KDE Plasma and X11 first", PRIOR_ART "Recommended wedge"
-- Depends on: none. Everything about the overlay, actuation, pointing, struggle signals and test infrastructure (ADR-0004, 0006, 0007, 0009, 0010, 0016, 0022) builds on this one.
+- Refines: SPEC.md §5, PRIOR_ART "Recommended wedge"
+- Depends on: none. ADR-0004, 0006, 0007, 0009, 0010, 0016, 0022 and 0023 build on this one.
+
+## History
+The first version of this ADR (same day, PR #14) chose **KWin Wayland (Plasma ≥ 6.6) as reference**. It left the maintainer's dogfooding desktop open (README Q1: (a) install Plasma, (b) nested KWin, (c) GNOME-first). Its reasoning was that KWin is the cheapest Wayland target: layer-shell overlay, runtime KWin scripts with no install or review, and fake-input/ScreenShot2 opening up in 6.8.
+
+**What changed:** the maintainer chose option (c). GNOME on Wayland is the desktop they use every day, and it is Ubuntu's default, so it is where proactive mode actually gets dogfooded. The KWin facts below are still true. They now describe the **second** target.
 
 ## Context
-SPEC.md says the MVP targets "KDE Plasma and X11 first" and puts Do-it mode on "X11 XTest first". The brief says not to reopen that unless there is strong evidence. There are now three independent pieces of primary-source evidence, all checked during this research:
-
 1. **X11 sessions are end-of-life on both major desktops.**
-   - KDE Plasma 6.8 (KWin v6.8.0, tagged 2026-10-08) has no X11 session. 6.7 is the last series with one. KDE announced it on 2025-11-26 and D. Edmundson confirmed it on 2026-06-02.
    - Mutter dropped its X11 session code in GNOME 50.
+   - Plasma 6.8 (KWin v6.8.0, 2026-10-08) has no X11 session.
    - Sources: [linux-platform.md §V16](../research/linux-platform.md), https://blogs.kde.org/2025/11/26/going-all-in-on-a-wayland-future/
-2. **On GTK4, X11 does not give us correct pointing coordinates either.**
-   - GTK4 returns `(0,0)` for `ATSPI_COORD_TYPE_SCREEN` on every backend, X11 included. This was checked in `gtk/a11y/gtkatspiutils.c` on main: the SCREEN branch assigns `*xo = 0; *yo = 0`.
-   - On Wayland, no toolkit gives correct global coordinates.
-   - Either way we need a window origin from the window manager or compositor (ADR-0004). Easy pointing was most of X11's advantage, and for GTK4 apps it is gone.
-3. **The maintainer's own machine cannot run an X11 desktop session today.**
-   - Local check: Ubuntu 26.04.1 LTS, GNOME Shell 50.1, `XDG_SESSION_TYPE=wayland`.
-   - The Ubuntu archive does offer Plasma 6.6.7 (`kwin-wayland`, `plasma-workspace`) and `kwin-x11` 6.6.4 / `plasma-session-x11`. Installing a Plasma session would therefore give the maintainer **both** KWin Wayland and KWin X11 on the same machine.
-
-X11 is still easier in three places:
-- global input observation (XRecord/XInput2);
-- input injection (XTest, no consent dialog);
-- screen capture (XGetImage).
-
-LTS distros still ship X11 Plasma: Plasma 6.7 gets bugfixes into early 2027, and AlmaLinux 9 is supported to 2032.
+2. **X11 does not give GTK4 apps correct pointing coordinates either.** GTK4 returns `(0,0)` for `ATSPI_COORD_TYPE_SCREEN` on every backend (`gtkatspiutils.c`). Every session needs a window origin from the compositor (ADR-0004).
+3. **The maintainer's machine** (checked 2026-11-20):
+   - Ubuntu 26.04.1 LTS, GNOME Shell 50.1, Wayland session via gdm3, `layout-mode` logical, fractional scaling on.
+   - a11y bus `IsEnabled = false`, at-spi2-core 2.60.4.
+   - Default terminal Ptyxis 50.1. Firefox 160 and Chromium as Snaps.
+   - xdg-desktop-portal 1.21.1, x-d-p-gnome 50.0, libei 1.5.0.
+4. **What GNOME 50 allows a normal client** (details in [ADR-0023](0023-gnome-shell-extension-bridge.md) and [linux-platform.md §3.17](../research/linux-platform.md)):
+   - no layer-shell and no always-on-top request;
+   - `org.gnome.Shell.Introspect.GetWindows` returns AccessDenied, and `Shell.Eval` is off;
+   - Shell screenshot D-Bus is portal-only;
+   - KeyboardMonitor is Orca-only.
+   - It does allow: `org.gnome.Mutter.IdleMonitor`, the RemoteDesktop/ScreenCast/Screenshot/GlobalShortcuts portals (consent), and AT-SPI.
+   - A **GNOME Shell extension** can see every window's geometry and draw above all windows, from inside the compositor.
 
 ## Decision drivers
 - The maintainer must dogfood daily on the target. Proactive mode needs real use.
-- Pointing must be correct, since a wrong highlight destroys trust (PRIOR_ART risk 5).
-- The cost of each overlay path (ADR-0006).
-- Where Linux desktops are heading over the next 2–3 years.
-- Keep OS- and compositor-specific code behind interfaces (CLAUDE.md).
+- Pointing must be correct, since a wrong highlight destroys trust.
+- Where the users are: GNOME is the Ubuntu and Fedora default.
+- The cost and risk of each overlay/bridge path (ADR-0006, ADR-0023).
+- Keep compositor-specific code behind interfaces, so a second desktop is a port.
 
 ## Options considered
 | Option | For | Against |
 |---|---|---|
-| **A. KDE X11 first (status quo)** | Cheapest injection (XTest), observation (XRecord) and capture; GTK4 overlay works with Xlib hints plus an empty XShape input region | The session no longer exists in Plasma ≥ 6.8 or GNOME ≥ 50. GTK4 apps still need WM origin math. The maintainer must log into a legacy session to dogfood. Builds the habit of relying on global input hooks that will not survive. |
-| **B. KWin Wayland as reference, X11 as secondary/dev/LTS (recommended)** | `gtk4-layer-shell` OVERLAY sits above fullscreen windows (KWin source `layershellv1window.cpp`). A KWin script can be loaded at runtime over D-Bus to supply window geometry, with no install or review. Plasma 6.8 opens `org_kde_kwin_fake_input` and `ScreenShot2` to unsandboxed clients (KWin MR 6057). The RemoteDesktop portal with `ConnectToEIS` exists since x-d-p-kde 6.1. Matches where KDE is going. | Ubuntu 26.04 ships Plasma **6.6**, where fake-input and ScreenShot2 are still restricted behind `.desktop` permissions. No global input observation (KeyboardMonitor is Orca-only). Screen capture needs portal consent on ≤ 6.7. |
-| **C. GNOME Wayland first** | It is the maintainer's current desktop, the largest user base, and the Ubuntu default | No layer-shell and no client "above" request: wayland-protocols MR 369 closed Dec 2024. Needs a **GNOME Shell extension for both overlay and window geometry**, in JS, versioned per Shell release. extensions.gnome.org review rejects AI-generated code (verified on gjs.guide). Every capability needs consent. Highest cost and risk for a first spike. |
-| **D. wlroots (Sway/Hyprland) first** | Layer-shell, virtual pointer/keyboard and screencopy all exist with no consent | Small audience, not the maintainer's desktop, no RemoteDesktop portal, Hyprland click-through quirk (discussion #14136) |
+| **A. KDE X11 first (original SPEC)** | XTest, XRecord and XGetImage are cheap | The session is gone in Plasma ≥ 6.8 and GNOME ≥ 50. GTK4 still needs WM origin math. Not the maintainer's desktop. |
+| **B. KWin Wayland first (previous decision)** | `gtk4-layer-shell` overlay above fullscreen. KWin script geometry with no install or review. fake-input/ScreenShot2 open in 6.8. | Not the maintainer's desktop. Ubuntu 26.04 ships Plasma 6.6, where the privileged protocols are still restricted. Dogfooding of proactive mode slips. |
+| **C. GNOME Wayland first (chosen)** | The maintainer's daily desktop. Ubuntu/Fedora default and the largest audience. One extension supplies both geometry and overlay in the same coordinate space. Portals are mature (x-d-p-gnome ≥ 48 has GlobalShortcuts, ≥ 45 has `ConnectToEIS`). | A Shell extension is required (GJS, in-compositor, ported every release). First install needs a re-login. EGO rejects AI-generated code (local install unaffected). Every capture/injection needs portal consent. |
+| **D. wlroots (Sway/Hyprland) first** | No-consent layer-shell, virtual input and screencopy | Small audience, not the maintainer's desktop |
 
 ## Decision
-1. **Reference platform: KDE Plasma on Wayland (KWin), Plasma ≥ 6.6.** All MVP acceptance criteria (SPEC §8) are measured here first.
-2. **X11 is a supported secondary backend, not the lead.** Use it for:
-   - CI (Xvfb is the cheapest headless display, ADR-0016);
-   - LTS users on Plasma 6.6/6.7 X11 sessions;
-   - development convenience.
-
-   No feature may depend on an X11-only capability unless it also has a Wayland plan in the same ADR.
-3. **GNOME Wayland is the second desktop, via a hand-written GNOME Shell extension** (ADR-0006, ADR-0004) in v0.2, as SPEC already says. The extension is the only GNOME path to correct coordinates, so it is a perception dependency, not just an overlay nicety.
-4. **wlroots and Hyprland are best-effort.** They get the layer-shell overlay and a `swaymsg`/`hyprctl` geometry bridge, with no acceptance gate.
-5. **Detect the session at runtime and pick backends by capability.** Probe Wayland globals (`zwlr_layer_shell_v1`) and D-Bus names (`org.kde.KWin`, `org.gnome.Shell`) rather than trusting `XDG_CURRENT_DESKTOP` alone. `ya-bro doctor` prints the chosen backends (ADR-0017).
-6. **The maintainer has to choose how to dogfood. This is open question Q1 in the README.**
-   - (a) Install a Plasma 6.6 session on Ubuntu 26.04 and log into it (gives KWin Wayland and X11).
-   - (b) Develop inside a nested or virtual `kwin_wayland` window on GNOME. The exact flags are unverified; to be checked in spike S1.
-   - (c) Reverse the order and go GNOME-first, paying the Shell-extension cost now.
-
-   This ADR recommends (a) for development, keeping GNOME as the daily desktop until proactive mode needs dogfooding. It does not decide (c) on the maintainer's behalf.
+1. **Reference platform: GNOME 50 on Wayland** (Ubuntu 26.04 LTS). All MVP acceptance criteria (SPEC §8) are measured here.
+2. **The GNOME Shell extension is the CompositorBridge *and* the overlay on GNOME** ([ADR-0023](0023-gnome-shell-extension-bridge.md)). Without it, Ya-Bro runs in docked mode with no live ring (ADR-0006).
+3. **Second target: KWin Wayland (Plasma ≥ 6.6), in v0.2.** It uses the KWin script bridge (ADR-0004) and the `gtk4-layer-shell` overlay (ADR-0006), driven by the same draw protocol. wlroots/Hyprland are best-effort on the same layer-shell backend.
+4. **X11 is CI-only.** Xvfb stays as the cheapest headless display for AT-SPI and core tests (ADR-0016). There is no X11 product target and no X11 acceptance gate. No feature may depend on an X11-only capability.
+5. **GNOME support window.** Reference 50. Support 48–51 where CI is green (ADR-0023 §8). Older than 48 is out of scope.
+6. **Detect at runtime, pick by capability.** Probe D-Bus names (`org.gnome.Shell`, our extension's name, `org.kde.KWin`) and Wayland globals (`zwlr_layer_shell_v1`) rather than trusting `XDG_CURRENT_DESKTOP` alone (it reads `ubuntu:GNOME` here). `ya-bro doctor` prints the chosen backends (ADR-0017).
+7. **Development loop:** a nested `gnome-shell --devkit` session for extension work (ADR-0023 §10). Dogfood in the real session.
 
 ## Consequences
 - **Positive:**
-  - We design against the APIs that will exist in 2027+.
-  - Pointing uses one pipeline (origin + WINDOW extents) on every session.
-  - Struggle detection is designed around AT-SPI object events from day one (ADR-0010) instead of X11 key hooks.
+  - The maintainer dogfoods the product, proactive mode included, from week 1.
+  - Pointing uses the compositor's own geometry, and the ring and the geometry share one coordinate space.
+  - The stop key lives in the compositor and works even if core hangs.
 - **Negative:**
-  - Do-it mode on Wayland needs a consent dialog (portal), or Plasma 6.8 for silent fake-input.
-  - Screen capture needs a portal consent on Plasma ≤ 6.7.
-  - Some convenience is lost early on.
+  - The riskiest code (GJS in `gnome-shell`) comes first.
+  - The first install and every extension update need a logout.
+  - Do-it injection and screen capture always need portal consent on GNOME. No silent fast path exists, unlike KWin 6.8.
 - **Risks:**
-  - Ubuntu 26.04's Plasma 6.6 differs from upstream 6.8 in privileged-protocol policy, so test both.
-  - If the maintainer stays on GNOME, the KDE-first order delays dogfooding of proactive mode. Mitigation: the GNOME extension spike moves earlier (ADR-0022, S6).
+  - Extension API churn every six months (49 and 51 both broke APIs we could use).
+  - An extension crash takes down the Wayland session.
+  - KWin support arrives later, so KWin-specific bugs surface later.
 
 ## Validation plan
-- **Spike S1 (ADR-0022), coordinate pipeline.**
-  - Setup: on KWin Wayland 6.6 and on KWin X11, run a KWin script to get the window origin, then AT-SPI WINDOW extents for GTK3, GTK4, Qt6 and Firefox targets.
-  - Measure the pointing error in physical pixels at 100% and 150% scale.
-  - Go: median error ≤ 4 px and p95 ≤ 12 px for top-level-window widgets.
-- **Spike S6, GNOME.** A ~150-line Shell extension that exports `get_frame_rect()` over D-Bus and draws one ring. Go: the same error bounds on GNOME 50.
+- **Spike S1 (ADR-0022): GNOME extension bridge + overlay** on GNOME 50 Wayland at 100% and 150% scale, against GTK3, GTK4/libadwaita, Qt6, Firefox and XWayland targets.
+  - **Coordinates go:** median ≤ 4 px, p95 ≤ 12 px for in-window widgets.
+  - **Overlay go:** 0/1,000 clicks blocked, and the ring is visible above maximized and fullscreen windows.
+  - Full criteria in ADR-0023.
+- **KWin port (v0.2):** the same thresholds on KWin Wayland 6.6.
 
 ## Revisit if
-- The maintainer picks option (c).
-- A cross-desktop "always on top / overlay" Wayland protocol lands (e.g. ext-layer-shell adopted by Mutter).
-- KDE re-opens an X11 session (very unlikely).
+- S1 is a no-go on GNOME. Then re-plan around docked mode plus vision, or around KWin-first.
+- Mutter adopts layer-shell or an always-on-top protocol for clients. Then the overlay moves to GTK, and the extension shrinks to the bridge.
+- GNOME restricts extensions in a way that breaks the bridge.
 - An upstream fix makes AT-SPI SCREEN coordinates correct on Wayland (Newton or similar).
 
 ## Sources
-- [docs/research/linux-platform.md](../research/linux-platform.md): §0 TL;DR, §1 matrix, V1, V3, V5, V16
+- [docs/research/linux-platform.md](../research/linux-platform.md): §0, §1 matrix, V1, V3, V5, V16, §3.8, §3.17
+- [ADR-0023](0023-gnome-shell-extension-bridge.md) and its sources
+- GNOME X11 session removal: https://blogs.gnome.org/alatiera/2025/06/08/the-x11-session-removal/
 - KDE: https://blogs.kde.org/2025/11/26/going-all-in-on-a-wayland-future/
-- KDE: https://planet.kde.org/david-edmundson-2026-06-02-ex-11-prepping-for-plasmas-last-x11-supported-release/
-- GTK4 SCREEN coords: https://gitlab.gnome.org/GNOME/gtk/-/raw/main/gtk/a11y/gtkatspiutils.c (lines ~522–527 on main, 2026-11-20)
-- GTK4 SCREEN coords: https://gitlab.gnome.org/GNOME/gtk/-/issues/6343
+- GTK4 SCREEN coords: https://gitlab.gnome.org/GNOME/gtk/-/raw/main/gtk/a11y/gtkatspiutils.c ; https://gitlab.gnome.org/GNOME/gtk/-/issues/6343
 - KWin MR 6057: https://invent.kde.org/plasma/kwin/-/merge_requests/6057
 - gtk4-layer-shell: https://github.com/wmww/gtk4-layer-shell
-- GNOME extension review rules ("Extensions must not be AI-generated"): https://gjs.guide/extensions/review-guidelines/review-guidelines.html
-- Local machine facts: `apt-cache policy`, `gnome-shell --version`, `$XDG_SESSION_TYPE` (run 2026-11-20)
+- EGO review guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
+- Local machine facts: `gnome-shell --version`, `gsettings`, `gdbus`, `dpkg -l`, `snap list`, xdg-terminal-exec lists (run 2026-11-20)

@@ -3,7 +3,13 @@
 - Status: Proposed
 - Date: 2026-11-20
 - Issue: #13 (implements #3)
-- Depends on: ADR-0002, ADR-0003, ADR-0004
+- Depends on: ADR-0002, ADR-0003, ADR-0004, ADR-0023
+
+> **Amended for GNOME-first (2026-11-20).** ADR-0002 now makes GNOME 50 Wayland the reference platform.
+> - Backend order: `GnomeShellOverlay` (the extension draws, [ADR-0023](0023-gnome-shell-extension-bridge.md)) first. `LayerShellOverlay` second (KWin, v0.2). `DockedOverlay` everywhere else.
+> - `X11Overlay` is dropped as a product backend. It may exist only as a CI test double.
+> - Spike S3 is merged into S1 and measured on GNOME.
+> - The rest of this ADR (bubble UX, drawing, missing-target rules, self-exclusion, HiDPI) applies to every backend unchanged.
 
 ## Context
 The overlay draws four things:
@@ -63,14 +69,16 @@ Platform facts ([linux-platform.md §1, V2, V3, V8](../research/linux-platform.m
 ## Decision
 1. **`Overlay` backends:**
 
-   | Session | Backend |
-   |---|---|
-   | KWin Wayland, wlroots, Hyprland, COSMIC | **`LayerShellOverlay`** |
-   | X11 | **`X11Overlay`** |
-   | GNOME Wayland | **`GnomeShellOverlay`**: the Shell extension draws and core sends it the same draw commands over D-Bus |
-   | GNOME without the extension, or any unknown compositor | **`DockedOverlay`** |
+   | Order | Session | Backend |
+   |---|---|---|
+   | 1 (MVP) | GNOME Wayland | **`GnomeShellOverlay`**: the Shell extension draws St/Clutter actors via `addTopChrome`, and core sends it draw commands over D-Bus ([ADR-0023](0023-gnome-shell-extension-bridge.md)) |
+   | 2 (v0.2) | KWin Wayland, wlroots, Hyprland, COSMIC | **`LayerShellOverlay`** |
+   | — | GNOME without the extension, or any unknown compositor | **`DockedOverlay`** |
+   | CI only | X11 (Xvfb) | `X11Overlay` test double, no product support |
 
-   The XWayland keep-above path is only an experiment in spike S6, not a supported backend.
+   The XWayland keep-above path is not a supported backend. It fails when the window is maximized, sits below fullscreen, and is a poor fit with `xwayland-native-scaling`.
+
+   **On GNOME the Python `ya-bro-overlay` process still exists.** It hosts the focusable "ask" text window, docked mode and settings. Only the always-on-top drawing moves into the extension.
 2. **Surface layout.**
    - One full-output transparent surface per monitor, re-created on hotplug.
    - The avatar and bubble get a non-empty input region; everything else stays click-through.
@@ -90,7 +98,7 @@ Platform facts ([linux-platform.md §1, V2, V3, V8](../research/linux-platform.m
 5. **Following the target.**
    - Subscribe to bridge `geometry_changed` and AT-SPI `bounds-changed` and re-layout within one frame.
    - Hide the ring while the window is being moved or is occluded. Occlusion comes from the bridge stacking order where available.
-6. **Fullscreen.** Layer-shell OVERLAY shows above fullscreen windows on KWin. On X11 a keep-above window shows below the active fullscreen window. That is accepted, and the bubble then appears as a notification-style dock.
+6. **Fullscreen.** On GNOME, `addTopChrome` actors without `trackFullscreen` stay above fullscreen windows. Unredirect may need disabling while a ring is shown (ADR-0023 §5, unverified). Layer-shell OVERLAY shows above fullscreen windows on KWin.
 7. **Self-exclusion from perception.** Before any capture the overlay is either hidden for one frame, or its rects are masked out of the image (Navisual pattern), so vision never sees the bro's own pointer.
 8. **Accessibility of the overlay itself.** The bubble is an AT-SPI-exposed label with a live-region-like announcement, so Orca users hear steps. The overlay process is also excluded from Ya-Bro's own perception by PID.
 9. **HiDPI.** Logical pixels end-to-end. GTK handles device scale and `wp_fractional_scale_v1` on Wayland. For each monitor, read `Gdk.Monitor.get_scale()` (fractional, GTK ≥ 4.14, unverified version) and the bridge's output scale, and log any mismatch.
@@ -109,14 +117,14 @@ Platform facts ([linux-platform.md §1, V2, V3, V8](../research/linux-platform.m
   - Fractional-scale rounding giving 1–2 px ring offsets.
 
 ## Validation plan
-Spike **S3** (= issue #3), on KWin Wayland 6.6 and KWin X11:
+**GNOME (MVP):** part of spike **S1** (its own new issue), with the criteria in ADR-0023. The product renderer is then built under #3. **KWin (v0.2):** the same criteria on KWin Wayland 6.6 for `LayerShellOverlay`. Criteria common to both:
 - **Click-through:** 1,000 synthetic clicks land on the app beneath, at 0 failures.
 - **Avatar:** clickable.
 - **Frame rate:** 60 fps pointer flight on the maintainer's laptop (i7-11800H, Intel + RTX 3050).
 - **Placement:** correct on 2 monitors with mixed 100%/150% scale.
-- **Fullscreen:** the overlay stays above a fullscreen window on KWin Wayland.
+- **Fullscreen:** the overlay stays above a fullscreen window.
 
-**Go/no-go:** failing click-through on either session blocks that backend.
+**Go/no-go:** failing click-through blocks that backend. On GNOME that means docked mode only.
 
 ## Revisit if
 - Mutter adopts layer-shell or an always-on-top protocol. Then drop the extension overlay.

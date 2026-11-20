@@ -15,4 +15,4 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## Platform
-Linux only for now (Wayland first, X11 secondary). macOS/Windows later.
+Linux only for now: GNOME on Wayland first (through a small GNOME Shell extension), KDE Plasma Wayland next. X11 is used only in CI. macOS/Windows later.

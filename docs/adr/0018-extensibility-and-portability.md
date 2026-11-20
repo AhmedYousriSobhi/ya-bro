@@ -37,8 +37,8 @@ On other platforms, the equivalents of the Linux mechanisms are well known from 
    | Interface | Linux implementations | macOS (later) | Windows (later) |
    |---|---|---|---|
    | `Perception` | AT-SPI (`gi.repository.Atspi`), OCR, vision | AX API (`AXUIElement`) | UI Automation |
-   | `CompositorBridge` | KWin script, GNOME extension, sway/hyprland IPC, EWMH | `CGWindowListCopyWindowInfo` | `EnumWindows` / DWM frame bounds |
-   | `Overlay` | GTK4 + layer-shell / X11; GNOME extension; docked | `NSPanel` non-activating, `ignoresMouseEvents` | Layered window `WS_EX_TRANSPARENT \| WS_EX_TOPMOST` |
+   | `CompositorBridge` | GNOME extension (reference), KWin script (v0.2), sway/hyprland IPC, EWMH (CI) | `CGWindowListCopyWindowInfo` | `EnumWindows` / DWM frame bounds |
+   | `Overlay` | GNOME extension (reference); GTK4 + layer-shell (v0.2); docked | `NSPanel` non-activating, `ignoresMouseEvents` | Layered window `WS_EX_TRANSPARENT \| WS_EX_TOPMOST` |
    | `Actuator` | AT-SPI Action, XTest, portal + libei, fake-input, wlr virtual | AX actions, `CGEvent` | UIA patterns, `SendInput` |
    | `Capture` | Portal + PipeWire, XShm, KWin ScreenShot2 | ScreenCaptureKit | Windows.Graphics.Capture |
    | `Hotkeys` | XGrabKey, kglobalaccel, GlobalShortcuts portal | `RegisterEventHotKey` / CGEventTap | `RegisterHotKey` |

@@ -23,6 +23,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `CHANGELOG.md` — Keep a Changelog format
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
+- `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - Source code will live in `src/` (created by the first implementation issue)
 
 ## Tech stack (ADR-0001)
@@ -35,7 +36,8 @@ Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` f
 - **No app-specific code in the core.** App knowledge lives in per-app packs (`packs/<app>/`); first pack is workbench. See SPEC.md "Global core + app packs".
 - Struggle monitoring is opt-in, local, and records event types/counts only, never typed text or screen content.
 - Prefer the **accessibility tree (AT-SPI)** for finding elements; fall back to screenshots + vision only when needed.
-- Reference platform is **KWin Wayland**, X11 secondary, GNOME via Shell extension later (ADR-0002); never assume X11. AT-SPI screen coordinates are unusable on Wayland; use the coordinate pipeline in ADR-0004.
+- Reference platform is **GNOME 50 Wayland** (Ubuntu 26.04). KWin Wayland is the second target (v0.2), and X11 is CI-only (ADR-0002). Never assume X11. AT-SPI screen coordinates are unusable on Wayland; use the coordinate pipeline in ADR-0004.
+- On GNOME the CompositorBridge and the overlay are the Ya-Bro **GNOME Shell extension** in `extension/` (GJS, ADR-0023). Keep it a dumb renderer plus geometry bridge: no app logic, no sync D-Bus calls, no screenshot or input-injection methods, and everything undone in `disable()`. Develop it in a nested `gnome-shell --devkit` session, never by reloading the live one.
 - Beyond the five interfaces, ADR-0003 adds CompositorBridge, Capture, IdleSource, Hotkeys, ShellHook, SecretStore and Policy. Every action passes the `Policy` engine (ADR-0014).
 - App knowledge comes from the app itself (UI tree, `--help`, docs, MCP/skills), not hardcoded per-app scripts.
 

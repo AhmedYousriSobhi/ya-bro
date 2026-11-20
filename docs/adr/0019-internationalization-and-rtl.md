@@ -3,7 +3,9 @@
 - Status: Proposed
 - Date: 2026-11-20
 - Issue: #13
-- Depends on: ADR-0006, ADR-0011, ADR-0013
+- Depends on: ADR-0006, ADR-0011, ADR-0013, ADR-0023
+
+> **Amended for GNOME-first (2026-11-20).** On GNOME the bubble is an `St.Label` drawn by the Shell extension (ADR-0023 §6), still rendered by Pango. Core sends already-localized, already-isolated text plus an explicit `dir` (`ltr`/`rtl`). The extension sets the label's text direction from `dir` instead of auto-detecting, and mirrors button order. The golden rendering tests run against both the St bubble (headless GNOME shell) and the GTK bubble (KWin/docked).
 
 ## Context
 The maintainer is an Arabic speaker. Ya-Bro's own text appears in several places: the bubble, the ask box, settings, doctor output and persona lines. It must work in Arabic, right to left, and in English, and it often mixes the two. A typical Arabic line still quotes English UI names, for example "دوس على **Export** فوق على اليمين".

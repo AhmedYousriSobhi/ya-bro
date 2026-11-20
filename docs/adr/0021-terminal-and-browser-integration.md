@@ -6,6 +6,16 @@
 - Depends on: ADR-0005, ADR-0010, ADR-0012, ADR-0014
 - Why a separate ADR: the first pack (workbench) is a CLI plus a web UI, so the first demo runs in a terminal and a browser, not in GTK apps (SPEC §6). AT-SPI is weak inside both.
 
+> **Amended for GNOME-first (2026-11-20).** On the reference platform (Ubuntu 26.04, GNOME 50):
+> - **Terminal.** The default terminal is **Ptyxis 50.1** (GTK4 + VTE-gtk4, per the xdg-terminal-exec lists). GNOME Terminal 3.58 (GTK3 VTE) is also installed.
+>   - Ptyxis exposes its buffer to AT-SPI only when `org.gnome.Ptyxis enable-a11y` is true. The upstream schema default is `false` and the key is labelled "experimental". Ubuntu ships an override setting it to `true` (`10_ptyxis.gschema.override`, checked locally).
+>   - Neither terminal offers a text D-Bus API like Konsole's.
+>   - Adapter order on GNOME: **shell hook (primary) → VTE via AT-SPI Text (Ptyxis, GNOME Terminal) → clipboard paste for typing**. The Konsole D-Bus adapter moves to the KWin target (v0.2).
+>   - VTE's OSC 133 support remains unverified.
+> - **Browser.** Firefox 160 and Chromium are **Snaps** on Ubuntu 26.04. Firefox's `desktop-legacy` plug, which grants AT-SPI access, is connected (checked locally).
+>   - Coordinates come from the GNOME extension's window origin plus AT-SPI WINDOW extents (ADR-0004).
+>   - Native messaging for the v0.3 WebExtension from a Snap browser has extra constraints (unverified). Re-check before v0.3.
+
 ## Context
 
 ### Terminal ([non-ai-tools.md §12](../research/non-ai-tools.md))
@@ -60,10 +70,10 @@
    - Once the user accepts help, the full last command and its output are read *then*, from shell history (`fc -ln -1`) and a terminal adapter.
    - The output is redacted (ADR-0014).
 3. **Terminal adapters**, used to read the last command output or to type a suggested command:
-   - **Konsole D-Bus** (KDE reference platform, first);
+   - **VTE via AT-SPI Text** (Ptyxis, GNOME Terminal; GNOME reference platform, first);
+   - **Konsole D-Bus** (KWin target, v0.2);
    - kitty (`allow_remote_control` required);
-   - WezTerm CLI;
-   - **VTE via AT-SPI Text** as the generic fallback.
+   - WezTerm CLI.
 
    Typing a command into the terminal is **R2** (it needs confirmation) and **never presses Enter** for commands matching the destructive list (R3: the user runs it).
 4. **Fix-it rules.**

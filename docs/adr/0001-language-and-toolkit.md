@@ -19,7 +19,7 @@ Ya-Bro needs: AT-SPI access, a transparent click-through overlay (X11 now, Wayla
 **Python 3.12 + GTK4 (PyGObject)** for the MVP, managed with `uv`, tests with `pytest`, lint/format with `ruff`. Components stay behind the interfaces in SPEC.md section 6 (`Perception`, `Overlay`, `Actuator`, `Voice`, `Brain`), so any one can be rewritten in another language or toolkit.
 
 ## Amendment (2026-11-20, issue #13)
-The rationale and "Revisit if" below assumed X11/KDE. ADR-0002 moves the reference platform to KWin Wayland, and GTK's X11 backend is deprecated since 4.18. The decision itself (Python + GTK4) still holds; the overlay backends are in ADR-0006.
+The rationale and "Revisit if" below assumed X11/KDE. The first version of ADR-0002 moved the reference platform to KWin Wayland, and GTK's X11 backend is deprecated since 4.18. The decision itself (Python + GTK4) still holds; the overlay backends are in ADR-0006. *Amended 2026-11-20:* ADR-0002 now makes GNOME Wayland the reference, so the first overlay is drawn by a GJS Shell extension (ADR-0023). Python + GTK4 still covers core, the ask window, docked mode and the v0.2 layer-shell overlay.
 
 ## Consequences
 - Positive: fastest path to validating Show-me mode; Atspi and layer-shell are directly usable.

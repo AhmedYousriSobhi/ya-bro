@@ -59,7 +59,7 @@ Two caveats for Ya-Bro specifically:
 |---|---|---|---|
 | 0 | **Pack adapters / app-side hooks** (ADR-0012) | Apps that report their own state or element rectangles. Examples: the workbench web UI posting state, the LibreOffice UNO bridge. | Optional and opt-in. Highest trust for *state*. Rectangles are still converted through ADR-0004. |
 | 1 | **AT-SPI** via `gi.repository.Atspi` (not the deprecated pyatspi wrapper) | Tree snapshots of the *focused window only*, element lookup, events | Lookup is by fingerprint (below). Never walk the whole desktop. |
-| 2 | **Terminal / browser structured sources** (ADR-0021) | Shell hook events, Konsole D-Bus text, browser accessibility (Firefox/Chromium AT-SPI with ARIA), later a WebExtension | Keeps terminal and web out of vision |
+| 2 | **Terminal / browser structured sources** (ADR-0021) | Shell hook events, VTE/Ptyxis AT-SPI text (Konsole D-Bus on KWin, v0.2), browser accessibility (Firefox/Chromium AT-SPI with ARIA), later a WebExtension | Keeps terminal and web out of vision |
 | 3 | **OCR on a window crop**: Tesseract (Apache-2.0, has Arabic traineddata) or RapidOCR (Apache-2.0) | Text labels missing from AT-SPI | Arabic OCR quality is unverified, so measure it in S2 |
 | 4 | **Vision grounding** on the window crop | Icons and canvas | Default is Claude with a set-of-marks prompt (ADR-0007). Optional local grounder (UI-TARS-1.5-7B, Apache-2.0) if hardware allows. |
 
@@ -94,6 +94,7 @@ Verification has three outcomes:
 
 **5. Enabling accessibility.**
 - On first run, `ya-bro doctor` checks `org.a11y.Status.IsEnabled` and offers to set it, together with `toolkit-accessibility` on GNOME. This needs explicit user consent, because it is a persistent setting.
+- *Amended for GNOME-first (2026-11-20):* Ubuntu 26.04 ships at-spi2-core **2.60.4**, older than the 2.61.0 change where registering a listener flips `IsEnabled`. So on the reference platform, setup must set `org.gnome.desktop.interface toolkit-accessibility true` (persistent, currently `false` on the maintainer's machine) after consent, on the same screen as the extension consent (ADR-0023 §9). `IsEnabled` alone resets at logout. Qt apps also need `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1` or the a11y flag; Chromium/Electron need `--force-renderer-accessibility`. Never set `ScreenReaderEnabled`, so Orca's behaviour is untouched.
 - It also explains per-app flags: the Chromium/Electron `--force-renderer-accessibility` flag and the VS Code `editor.accessibilitySupport` setting.
 - Ya-Bro never edits other apps' launchers silently.
 
@@ -120,7 +121,7 @@ Verification has three outcomes:
 
 ## Validation plan
 - **Spike S2** (= issue #2, extended).
-  - Apps: GIMP 3, Inkscape 1.x, LibreOffice Writer, KDE System Settings, VS Code (with the flag), Firefox on the workbench UI.
+  - Apps: GIMP 3, Inkscape 1.x, LibreOffice Writer, GNOME Settings (GTK4/libadwaita), VS Code (with the flag), Firefox (Snap) on the workbench UI, Ptyxis, plus one Qt6 app. KDE System Settings is added with the KWin port (v0.2).
   - Task: locate 20 named controls per app by role and name.
   - Record found/unique/bounds-correct (through ADR-0004) and lookup latency.
   - **Go** for AT-SPI-first: ≥ 80% found and unique in ≥ 4 of 6 apps, with p95 lookup ≤ 50 ms.

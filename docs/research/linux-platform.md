@@ -16,7 +16,7 @@
 
 **Current releases as of today** (read from tags and announcements):
 - **KDE Plasma:** 6.8.3 (KWin tag 2026-11-10). 6.8.0 was tagged 2026-10-08 and is the first Wayland-only Plasma. 6.7.x is the last series with an X11 session.
-- **GNOME:** 49 (Sept 2025) and 50 (March 2026) are released. 51 was due on the usual six-month cadence (Sept 2026). The wayland-explorer data lists "mutter 51" as of 2026-09-06, but I did not verify the exact 51 release date.
+- **GNOME:** 49 (Sept 2025) and 50 (March 2026) are released. 51 was due on the usual six-month cadence (Sept 2026), and gjs.guide has a GNOME Shell 51 port guide, so it is out. The exact 51 release date is unverified. Ubuntu 26.04 LTS ships GNOME 50.1.
 - **GTK:** 4.25.x on main. The X11 backend has been deprecated since 4.18.
 - **xdg-desktop-portal:** 1.22.0 (2026-06-08). The next release is numbered "23.0".
 
@@ -24,12 +24,12 @@
 
 ## 0. TL;DR for architecture
 
-1. **X11-first is now a legacy target.** Plasma 6.8 (Oct 2026) removed the Plasma X11 session. Mutter dropped its X11 session code in GNOME 50. Make **KWin Wayland the primary target**. Keep X11 only for prototyping and for LTS distros such as Plasma 6.7 or 5.27, AlmaLinux 9 and Ubuntu LTS.
+1. **X11-first is now a legacy target.** Plasma 6.8 (Oct 2026) removed the Plasma X11 session. Mutter dropped its X11 session code in GNOME 50. *(Updated 2026-11-20: the maintainer chose **GNOME 50 Wayland as the primary target**, with KWin Wayland second and X11 for CI only. See ADR-0002 and the GNOME-specific facts in §3.17. This doc originally recommended KWin first.)*
 2. **There are no correct global AT-SPI screen coordinates on Wayland, from any toolkit.** GTK4 returns `(0,0)` for `ATSPI_COORD_TYPE_SCREEN` on **every backend, X11 included**. Always query `ATSPI_COORD_TYPE_WINDOW`, then add the window origin from the compositor. Get that origin from a KWin script, a GNOME Shell extension, `swaymsg`/`hyprctl`, or EWMH plus `_GTK_FRAME_EXTENTS` on X11.
 3. **Overlay mechanism per desktop:**
    - **KWin Wayland:** layer-shell OVERLAY. It sits above fullscreen windows.
    - **Sway, Hyprland:** layer-shell OVERLAY.
-   - **GNOME:** a GNOME Shell extension (preferred), or an XWayland window with `_NET_WM_STATE_ABOVE` that is never maximized.
+   - **GNOME:** a GNOME Shell extension (chosen, ADR-0023). An XWayland window with `_NET_WM_STATE_ABOVE` that is never maximized is possible but rejected (§3.17).
    - **X11:** a GTK4 window plus Xlib EWMH hints and an empty XShape input region.
 4. **Input injection:**
    - **GNOME and KDE:** RemoteDesktop portal with `ConnectToEIS`, behind a consent dialog. Since Plasma 6.8, KWin's `org_kde_kwin_fake_input` is also open to unsandboxed clients.
@@ -476,7 +476,7 @@ See V5.
 
 **What Ya-Bro should do**
 - Ship a minimal, human-written GNOME Shell extension as "Ya-Bro Shell Helper" (overlay drawing plus window geometry plus pointer position, over D-Bus).
-- Fall back to the XWayland overlay when the extension is absent.
+- ~~Fall back to the XWayland overlay when the extension is absent.~~ *Superseded 2026-11-20:* fall back to docked mode. The XWayland overlay is rejected (§3.17, ADR-0006).
 - Keep the extension tiny and hand-written to pass review.
 
 ### 3.9 KWin options (item 9)
@@ -710,6 +710,87 @@ See V16.
 
 **Pick capability backends from probed features, not from desktop names.** Desktop names lie, e.g. `XDG_CURRENT_DESKTOP=ubuntu:GNOME`, or KDE under a custom session.
 
+
+### 3.17 GNOME 50 specifics for a GNOME-first build (added 2026-11-20)
+
+Added after the maintainer chose GNOME first. "Local" means probed on the maintainer's machine: Ubuntu 26.04.1, GNOME Shell 50.1, Wayland, 2026-11-20.
+
+**What a normal (non-extension) client can and cannot do on GNOME 50**
+
+| Capability | Status | Evidence |
+|---|---|---|
+| Window list / geometry via `org.gnome.Shell.Introspect.GetWindows` | **denied**: `AccessDenied: GetWindows is not allowed` | local `gdbus call` |
+| `org.gnome.Shell.Eval` | **off**: returns `(false, '')` without unsafe mode | local |
+| Shell screenshot D-Bus | portal-only since GNOME 41 | §3.6 |
+| Idle time `org.gnome.Mutter.IdleMonitor` (`/org/gnome/Mutter/IdleMonitor/Core`, `GetIdletime`, watches) | **works** | local (`(uint64 53,)`) |
+| Extensions control `org.gnome.Shell.Extensions` | `ListExtensions`, `GetExtensionInfo`, `GetExtensionErrors`, `EnableExtension`, `DisableExtension`, `ReloadExtension`, `ExtensionStateChanged`; `UserExtensionsEnabled = true` | local `gdbus introspect` |
+| Mutter services on the bus | `RemoteDesktop`, `ScreenCast`, `InputCapture`, `DisplayConfig`, `IdleMonitor` | local `busctl --user list`. Direct use of Mutter RemoteDesktop/ScreenCast without the portal: access rules unverified. Use the portals. |
+| Display layout | `layout-mode = 1` (logical); `org.gnome.mutter experimental-features = ['scale-monitor-framebuffer', 'xwayland-native-scaling']` | local `DisplayConfig.GetCurrentState`, `gsettings` |
+
+**GNOME Shell extension as bridge + overlay** (design in ADR-0023)
+- **Format.** ES modules since GNOME 45. `metadata.json` `shell-version` lists major versions only (`"50"`), and the shell refuses unlisted versions unless `disable-extension-version-validation` is set (default false). `session-modes` defaults to `user`: the extension is disabled on lock and re-enabled on unlock. https://gjs.guide/extensions/overview/anatomy.html
+- **Stacking (source-read, `js/ui/layout.js` on `gnome-50`).**
+  - `addChrome()` inserts below `global.top_window_group`.
+  - `addTopChrome()` adds "above all windows, including popups".
+  - `trackFullscreen` defaults to `false`. Only `trackFullscreen: true` actors (the panel) hide over fullscreen.
+  - The screen shield uses `addChrome`, so top chrome could cover the lock screen. This is one more reason for `user`-only session mode.
+- **Input.** The GNOME 50 `layout.js` no longer computes a stage input region. Input follows Clutter picking, so `reactive: false` actors should be click-through (source-read, unverified by test).
+- **Fullscreen direct scanout** may skip painting chrome. `global.compositor.disable_unredirect()` exists (moved from `Meta` in GNOME 48). Whether it is needed on 50 is unverified.
+- **Geometry.** `Meta.Window.get_frame_rect()` (visible edge) and `get_buffer_rect()` (includes client-side shadows), plus `get_pid`, `get_gtk_application_id`, `get_sandboxed_app_id` (Flatpak/Snap), `get_wm_class`, `get_window_type`, `is_fullscreen`, `get_transient_for`, `get_stable_sequence`, and the signals `position-changed`, `size-changed` and `unmanaged`. `protocol_to_stage_rect` converts XWayland protocol coordinates. Monitors come from `Main.layoutManager.monitors`, the pointer from `global.get_pointer()`. https://gnome.pages.gitlab.gnome.org/mutter/meta/class.Window.html
+- **Popups.** Whether `xdg_popup` menus (GTK4 popovers, Qt menus) appear as `Meta.Window` with usable rects is unverified.
+- **D-Bus export** from GJS: `Gio.DBusExportedObject.wrapJSObject(xml, obj).export(Gio.DBus.session, path)` plus `Gio.bus_own_name`. Standard GJS; the exact review stance on extensions owning bus names is unverified (the guidelines do not mention D-Bus).
+- **API churn per release** (gjs.guide port guides):
+  - 48: `Clutter.Image` → `St.ImageContent`; `disable_unredirect` etc. → `global.compositor`; `CursorTracker` via `global.backend`; St `vertical` deprecated.
+  - 49: `Meta.Rectangle` → `Mtk.Rectangle`; `ClickAction`/`TapAction` → `ClickGesture`/`LongPressGesture`; `get_maximized()` removed; X11 off, so `--nested` is gone in favour of `--devkit`.
+  - 50: X11 bits removed (`restart` signals, `RunDialog._restart`), `holdKeyboard`/`releaseKeyboard` removed.
+  - 51: async `disable()` throws; St `vertical` removed; direct `key-press-event` signals deprecated; `pointerWatcher.js` removed; `makeProxyWrapper()` results need `new`.
+- **EGO review** (https://gjs.guide/extensions/review-guidelines/review-guidelines.html):
+  - "Extensions must not be AI-generated". This covers unnecessary code, inconsistent style, imaginary APIs and "comments serving as LLM prompts".
+  - No binaries or libraries. Processes "MUST be spawned carefully". No telemetry.
+  - Everything created in `enable()` is destroyed in `disable()`, and nothing is created in the constructor.
+  - These rules apply to EGO distribution only, not to local installs.
+- **Install and reload.**
+  - A local extension lives in `~/.local/share/gnome-shell/extensions/<uuid>/`, where the directory name must equal the UUID, and is enabled with `gnome-extensions enable <uuid>`.
+  - On Wayland, JS cannot be unloaded and the shell cannot be restarted while logged in. New or changed extension code needs a logout/login, or a nested shell. https://gjs.guide/extensions/development/debugging.html
+  - Ubuntu 26.04 also ships system extensions in `/usr/share/gnome-shell/extensions/` (ubuntu-dock, ding, tiling-assistant, appindicators: local).
+- **Nested dev session.** `dbus-run-session gnome-shell --devkit --wayland` on GNOME ≥ 49 (`--nested` on ≤ 48). The devkit viewer comes from `mutter-dev-bin` ("Mutter Development Kit", Ubuntu universe 50.1, not installed locally). `gnome-shell --help` 50.1 lists `--devkit`, `--headless`, `--virtual-monitor WxH[@R]`, `--wayland`, `--no-x11` and `--debug-control`.
+- **CI.** Schneegans' gnome-shell-pod runs the shell under Xvfb/X11, with images up to GNOME 47, so it does not work for 49+. GitHub's ubuntu-24.04 image has GNOME 46. Plan for `gnome-shell --headless --wayland --virtual-monitor` inside an `ubuntu:26.04` container (invocation unverified). https://github.com/Schneegans/gnome-shell-pod
+
+**Actuation on GNOME 50**
+- Installed locally: xdg-desktop-portal 1.21.1, xdg-desktop-portal-gnome 50.0, libei/libeis 1.5.0.
+- RemoteDesktop portal + `ConnectToEIS`: consent dialog. Persist with `persist_mode` / `restore_token` on `RemoteDesktop.SelectDevices` (not `ScreenCast.SelectSources`). Tokens are single-use; store the new one after `Start`. https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html ; field report https://github.com/agent-sh/computer-use-linux/pull/188
+- Absolute motion needs a linked ScreenCast stream. Virtual-source streams were reported to reject absolute positions with "Invalid position" (https://github.com/flatpak/xdg-desktop-portal/issues/2077).
+- Whether injected absolute motion visibly moves the cursor on GNOME 50 is unverified.
+- AT-SPI actions need no consent and stay the primary path.
+- An extension could inject in-process through a Clutter virtual input device. Ya-Bro does not do this, because it bypasses consent (ADR-0023 §11).
+
+**Screen capture on GNOME 50**
+- Screenshot portal: permission is stored once by the x-d-p frontend (§3.6). The `target` option (window/area) arrived in x-d-p 1.21.2, and Ubuntu 26.04 has **1.21.1**, so we capture full screen and crop locally.
+- ScreenCast portal + PipeWire for continuous capture.
+- The extension never exports capture.
+
+**AT-SPI on GNOME 50 / Ubuntu 26.04**
+- at-spi2-core is **2.60.4**, older than the 2.61.0 change that treats registered listeners as enabling a11y. `org.a11y.Status.IsEnabled` is `false` and `org.gnome.desktop.interface toolkit-accessibility` is `false` (local).
+- First run must set `toolkit-accessibility` (persistent) after consent. `IsEnabled` alone does not survive logout.
+- Never set `ScreenReaderEnabled`, which would change Orca and app behaviour. Orca 50.3 is installed but not running.
+- **Ptyxis 50.1** is the default terminal (`/usr/share/xdg-terminal-exec/ubuntu-xdg-terminals.list` → `org.gnome.Ptyxis.desktop`). It is GTK4 with `libvte-2.91-gtk4`.
+  - Its key `org.gnome.Ptyxis enable-a11y` defaults to `false` upstream ("Currently experimental feature to send accessibility information to screen readers").
+  - Ubuntu sets it to `true` in `10_ptyxis.gschema.override` (local).
+  - GNOME Terminal 3.58 (GTK3 VTE) is also installed.
+- **Firefox 160 and Chromium 158 are Snaps.** Firefox's `desktop-legacy` plug (AT-SPI access) is connected (local `snap connections`). Chromium still needs `--force-renderer-accessibility` (§3.7).
+- GTK4/libadwaita apps expose AT-SPI natively once the bus is up. Qt needs `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1` or `IsEnabled` (§3.7).
+
+**Idle, focus, shortcuts**
+- Idle: `org.gnome.Mutter.IdleMonitor` (works, above).
+- Focus: the extension's `global.display` `notify::focus-window`, or AT-SPI `window:activate`.
+- Global shortcuts:
+  - GlobalShortcuts portal (x-d-p-gnome ≥ 48) with `Activated`/`Deactivated`. Whether `Deactivated` fires on key release on GNOME, as hold-to-talk needs, is unverified.
+  - Extension key bindings (`Main.wm.addKeybinding` with a GSettings schema shipped in the extension) fire on press, with no dialog. Use them for the stop key.
+
+**Docked fallback (extension missing, disabled or erroring)**
+- A normal GTK4 window shows the step text plus a cropped Screenshot-portal capture with the target circled. There is no live ring and no window geometry (Introspect is denied).
+- The XWayland keep-above overlay is not used. It fails when the window is maximized, sits below fullscreen, the scaling mapping under `xwayland-native-scaling` is unverified, and GTK's X11 backend is deprecated.
+
 ---
 
 ## 4. Open questions to test empirically (prototype checklist)
@@ -721,13 +802,19 @@ See V16.
    - Is the layer-shell OVERLAY plus empty input region click-through over a fullscreen video?
    - Can a pipx-installed Python process bind `org_kde_kwin_fake_input` without a `.desktop` file?
 3. **Per-toolkit WINDOW-coordinate offset** vs KWin `clientGeometry`/`bufferGeometry`: GTK3 CSD, GTK4 CSD, Qt6 with SSD, Chromium, Firefox. Run at 100%, 125% and 200% scale.
-4. **RemoteDesktop with EIS on GNOME 50 and Plasma 6.8:**
+4. **RemoteDesktop with EIS on GNOME 50 (first) and Plasma 6.8:**
    - Does absolute motion move the visible cursor?
    - How reliable is restore-token reuse across reboot?
 5. **GTK4 apps on Wayland:** does any legacy AT-SPI keystroke event reach a non-Orca listener?
 6. **Screenshot latency:**
    - portal vs ScreenShot2 vs a kept-alive ScreenCast;
    - an XShm baseline on X11.
+7. **GNOME 50 extension (S1):**
+   - Are `reactive: false` top-chrome actors click-through for Wayland and XWayland clients?
+   - Does the ring stay visible over a fullscreen video, or is `disable_unredirect()` needed?
+   - Are `xdg_popup` menus listed as `Meta.Window`, and with which rect?
+   - Per toolkit: is WINDOW extents relative to `frame` or `buffer`?
+   - Does `gnome-extensions enable` work without re-login for a UUID installed during the session?
 
 ---
 
@@ -805,6 +892,13 @@ See V16.
 - GNOME X11 session removal: https://blogs.gnome.org/alatiera/2025/06/08/the-x11-session-removal/, https://fedoraproject.org/wiki/Changes/WaylandOnlyGNOME
 - GNOME Shell screenshot API restriction: https://gitlab.gnome.org/GNOME/gimp/-/issues/7591, https://gitlab.gnome.org/GNOME/gtk/-/issues/4283
 - GNOME extension review guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
+- GNOME Shell `js/ui/layout.js` (gnome-50): https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/gnome-50/js/ui/layout.js
+- Mutter `Meta.Window` API: https://gnome.pages.gitlab.gnome.org/mutter/meta/class.Window.html
+- gjs.guide anatomy, creating, debugging: https://gjs.guide/extensions/overview/anatomy.html, https://gjs.guide/extensions/development/creating.html, https://gjs.guide/extensions/development/debugging.html
+- gjs.guide port guides 48–51: https://gjs.guide/extensions/upgrading/gnome-shell-48.html (…-49, -50, -51)
+- `mutter-dev-bin` (Ubuntu resolute): https://packages.ubuntu.com/resolute/mutter-dev-bin
+- gnome-shell-pod: https://github.com/Schneegans/gnome-shell-pod
+- Portal absolute-motion issue: https://github.com/flatpak/xdg-desktop-portal/issues/2077
 
 **Layer shell, wlroots, Hyprland**
 - gtk4-layer-shell README, `linking.md`, `examples/simple-example.py`, `include/gtk4-layer-shell.h` (v1.3.0): https://github.com/wmww/gtk4-layer-shell

@@ -6,6 +6,14 @@
 - Depends on: ADR-0002, ADR-0003, ADR-0007, ADR-0014
 - Target release: v0.15 (SPEC), after Show-me mode is proven
 
+> **Amended for GNOME-first (2026-11-20).**
+> - On the reference platform (GNOME 50) the order is: pack-native → **AT-SPI actions (primary)** → **RemoteDesktop portal + `ConnectToEIS`** (x-d-p-gnome 50.0 and libei 1.5.0 are installed on the maintainer's machine).
+> - There is no silent injection path on GNOME. The GNOME Shell extension *could* inject through a Clutter virtual input device, but that is **rejected**: it would bypass GNOME's consent model, and ADR-0023 §11 forbids exporting it.
+> - Persistence: send `persist_mode=2` with the stored `restore_token` on `RemoteDesktop.SelectDevices` (portal v2+), never on `ScreenCast.SelectSources`. Store the new single-use token after every `Start`.
+> - Absolute pointer motion needs a linked ScreenCast stream. Virtual-source streams were reported to reject absolute positions (x-d-p #2077).
+> - Whether injected absolute motion visibly moves the cursor on GNOME 50 is still unverified (S7). The overlay's ghost pointer covers it either way.
+> - KWin fake-input and XTest become v0.2 / CI-only paths.
+
 ## Context
 In Do-it mode the bro performs one step while the user watches. Every action must be paced, narrated, visible and interruptible. Available mechanisms ([linux-platform.md V5, §1](../research/linux-platform.md); [non-ai-tools.md §4](../research/non-ai-tools.md)):
 
@@ -43,12 +51,13 @@ In Do-it mode the bro performs one step while the user watches. Every action mus
    2. **AT-SPI semantic action**: `do_action("click"|"press"|"activate")`, `EditableText` insertion, `Selection.select_child`, `Value.set_current_value`.
    3. **Session injection**:
 
-      | Session | Injector |
-      |---|---|
-      | X11 | XTest via python-xlib |
-      | KWin ≥ 6.8 (unsandboxed) | fake-input |
-      | KWin ≤ 6.7 / GNOME | RemoteDesktop portal + libei |
-      | wlroots | virtual pointer/keyboard |
+      | Order | Session | Injector |
+      |---|---|---|
+      | 1 (v0.15) | GNOME Wayland | RemoteDesktop portal + libei (consent, restore token) |
+      | 2 | KWin ≤ 6.7 | RemoteDesktop portal + libei |
+      | 2 | KWin ≥ 6.8 (unsandboxed) | fake-input |
+      | best-effort | wlroots | virtual pointer/keyboard |
+      | CI only | X11 (Xvfb) | XTest via python-xlib |
 
    4. **uinput is not shipped.** It is documented as an external, opt-in power-user path only.
 2. **Visibility ("watch me").**
@@ -93,12 +102,13 @@ In Do-it mode the bro performs one step while the user watches. Every action mus
 - **Risks:**
   - Apps that ignore AT-SPI actions (they claim to handle them but don't).
   - Portal persistence bugs.
-  - KWin 6.6 vs 6.8 differences.
+  - GNOME portal persistence bugs (restore token refused, dialog every session).
+  - KWin 6.6 vs 6.8 differences (v0.2).
 
 ## Validation plan
 Spike **S7** (v0.15):
-- 30 actions across GIMP, LibreOffice, KDE Settings and Firefox, run via AT-SPI actions, recording success and visible effect.
-- Portal + libei session on KWin 6.6 and GNOME 50:
+- 30 actions across GIMP, LibreOffice, GNOME Settings and Firefox, run via AT-SPI actions, recording success and visible effect.
+- Portal + libei session on GNOME 50 (then KWin 6.6 in v0.2):
   - consent friction (number of dialogs per session);
   - whether absolute motion moves the visible cursor;
   - stop latency (target ≤ 200 ms p95 to last event).
@@ -116,4 +126,6 @@ Spike **S7** (v0.15):
 - RemoteDesktop portal: https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.RemoteDesktop.html
 - libei: https://gitlab.freedesktop.org/libinput/libei
 - KWin MR 6057: https://invent.kde.org/plasma/kwin/-/merge_requests/6057
+- Portal absolute-motion issue: https://github.com/flatpak/xdg-desktop-portal/issues/2077
+- Persistence on `SelectDevices` (field report): https://github.com/agent-sh/computer-use-linux/pull/188
 - AT-SPI Action interface: https://docs.gtk.org/atspi2/iface.Action.html

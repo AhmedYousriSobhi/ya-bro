@@ -3,7 +3,19 @@
 - Status: Proposed
 - Date: 2026-11-20
 - Issue: #13
-- Depends on: ADR-0003, ADR-0005, ADR-0008, ADR-0009, ADR-0010
+- Depends on: ADR-0003, ADR-0005, ADR-0008, ADR-0009, ADR-0010, ADR-0023
+
+> **Amended for GNOME-first (2026-11-20).** The GNOME Shell extension ([ADR-0023](0023-gnome-shell-extension-bridge.md)) runs inside the compositor and exports a session-bus API, which makes it a new trust boundary. Rules (details in ADR-0023 §11):
+> - Calls are accepted only from Ya-Bro's own processes (the current owners of the core, perceiver and actuator names), and signals are unicast to them, so other clients cannot sniff window or focus data.
+> - Residual risk: while Ya-Bro is not running, a same-uid process could squat the core name. Exposure is bounded to geometry, pid, app id and a branded bubble, never pixels or input.
+> - No screenshot, input-injection or eval methods, ever.
+> - Window titles are not listed (content-free).
+> - Bubble text is capped and plain, with a fixed button enum, so a bubble cannot pose as a system or password dialog.
+> - Draw calls are rate-limited.
+> - The extension is disabled on the lock screen.
+> - A dead-man switch hides the overlay when core dies.
+>
+> Screen capture on GNOME stays on the Screenshot portal, whose permission is stored once, or a persisted ScreenCast session. The portal's `target` option (window/area) needs x-d-p ≥ 1.21.2, and Ubuntu 26.04 has 1.21.1, so crops are made locally from full-screen captures.
 
 ## Context
 Ya-Bro reads other apps' UI trees and shell activity, may capture screens, may inject input, and sends context to a cloud LLM. Lessons from comparable tools ([ai-tools.md §3.5](../research/ai-tools.md)):

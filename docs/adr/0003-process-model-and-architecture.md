@@ -5,6 +5,12 @@
 - Issue: #13
 - Depends on: ADR-0001 (Python + GTK4), ADR-0002 (platform targets)
 
+> **Amended for GNOME-first (2026-11-20).**
+> - On the reference platform (GNOME 50) the compositor bridge **and** the always-on-top drawing are one GNOME Shell extension ([ADR-0023](0023-gnome-shell-extension-bridge.md)).
+> - `ya-bro-overlay` (GTK4) still runs on GNOME. It hosts the focusable "ask" window, docked mode and settings. The layer-shell preload applies only to the KWin/wlroots backend (v0.2).
+> - The stop key is also bound inside the extension, so the overlay hides even if core hangs.
+> - The KWin script becomes the second bridge.
+
 ## Context
 SPEC §6 names five components behind interfaces: Perception, Overlay, Actuator, Voice and Brain. Research turned up more things that need a home:
 - a compositor bridge for window geometry, needed because AT-SPI cannot give global coordinates (ADR-0004);
@@ -49,10 +55,10 @@ Several technical facts shape how these split into processes:
             │ D-Bus        │ D-Bus          │ D-Bus          │ Wyoming/TCP   │ D-Bus
    ┌────────┴──────┐ ┌─────┴────────┐ ┌─────┴────────┐ ┌─────┴──────┐ ┌──────┴─────────┐
    │ ya-bro-overlay│ │ ya-bro-      │ │ ya-bro-      │ │ voice svc  │ │ compositor     │
-   │ GTK4 (+layer- │ │ perceiver    │ │ actuator     │ │ (STT, TTS, │ │ bridge: KWin   │
-   │ shell or X11) │ │ AT-SPI, OCR, │ │ AT-SPI Action│ │ VAD, wake) │ │ script / GNOME │
-   │ avatar,bubble │ │ capture      │ │ XTest/libei  │ │ separate   │ │ Shell ext /    │
-   │ ring, pointer │ │              │ │ (on demand)  │ │ processes  │ │ swaymsg        │
+   │ GTK4: ask box,│ │ perceiver    │ │ actuator     │ │ (STT, TTS, │ │ bridge: GNOME  │
+   │ docked; draws │ │ AT-SPI, OCR, │ │ AT-SPI Action│ │ VAD, wake) │ │ Shell ext (+   │
+   │ only on layer-│ │ capture      │ │ portal+libei │ │ separate   │ │ overlay); KWin │
+   │ shell (v0.2)  │ │              │ │ (on demand)  │ │ processes  │ │ script (v0.2)  │
    └───────────────┘ └──────────────┘ └──────────────┘ └────────────┘ └────────────────┘
 ```
 
@@ -64,8 +70,8 @@ Several technical facts shape how these split into processes:
 2. **`ya-bro-overlay`**
    - A GTK4 process that only draws. It accepts declarative draw commands, such as `show_step(target_rect, bubble_text, style)`, `fly_pointer(to)`, `hide()` and `set_interactive_regions(...)`.
    - It emits user events back to core: click on avatar or bubble buttons, text input.
-   - It preloads layer-shell when the session needs it.
-   - On GNOME the overlay is the Shell extension itself, and the Python overlay process is not used (ADR-0006).
+   - On GNOME (reference) the always-on-top drawing is done by the Shell extension. This process keeps the focusable "ask" window, docked mode and settings (ADR-0006, ADR-0023).
+   - On KWin/wlroots (v0.2) it draws everything itself and preloads layer-shell.
 3. **`ya-bro-perceiver`**
    - Hosts the AT-SPI event listener and queries, plus OCR and screen capture.
    - Publishes coalesced, typed events (content-free for struggle detection, ADR-0010) and answers element queries.
@@ -73,14 +79,14 @@ Several technical facts shape how these split into processes:
    - Core restarts it on crash.
 4. **`ya-bro-actuator`**
    - Started only when Do-it mode is enabled (ADR-0009).
-   - Holds the portal/EIS session or XTest connection.
+   - Holds the portal/EIS session (XTest only in X11 CI tests).
    - Receives single, policy-approved actions with a cancellation token. It never accepts free-form commands.
 5. **Voice services**
    - STT, TTS, VAD and wake word run as separate processes speaking the **Wyoming protocol** (MIT) over a local socket (ADR-0011).
    - This isolates GPL engines and native crashes, and lets users point Ya-Bro at existing Wyoming servers.
 6. **Compositor bridge** (ADR-0004)
-   - In-compositor code: a KWin script loaded at runtime through `org.kde.KWin /Scripting`, or a GNOME Shell extension.
-   - Reports window geometry and focus to core over D-Bus.
+   - In-compositor code: first the GNOME Shell extension (MVP, ADR-0023), then a KWin script loaded at runtime through `org.kde.KWin /Scripting` (v0.2).
+   - Reports window geometry and focus to core over D-Bus. On GNOME the same extension also renders the overlay and owns a stop key binding.
 
 **IPC.**
 - **Control plane:** the D-Bus session bus, one well-known name per process under the `io.github.ahmedyousrisobhi.YaBro.*` prefix (the reverse-DNS form is a proposal). Reasons:
@@ -94,7 +100,7 @@ Several technical facts shape how these split into processes:
 
 **Threading rule.** No blocking calls on any GLib main loop. CPU-bound or blocking native work (OCR, image diff) goes to `asyncio.to_thread` inside perceiver, never in overlay or core.
 
-**Stop path (within 500 ms).** The global stop hotkey is registered by core (ADR-0011 hotkeys). Pressing it:
+**Stop path (within 500 ms).** The global stop hotkey is registered by core (ADR-0011 hotkeys). On GNOME it is an extension key binding that hides the overlay locally and emits `UserEvent(stop_key)` to core. Pressing it:
 1. cancels the current asyncio task tree (LLM stream, step loop);
 2. sends `Actuator.Abort` and `Overlay.Hide` as fire-and-forget D-Bus signals;
 3. stops TTS playback.
@@ -123,7 +129,7 @@ The actuator checks its cancellation token before every injected event. The over
   - D-Bus latency per call is about 0.1–1 ms, which is negligible against the budget.
 
 ## Validation plan
-- **Spike within S3 (overlay).**
+- **Spike within S1 (GNOME extension bridge + overlay; the Python side is the ask window and core).**
   - Overlay process at 60 fps pointer flight while perceiver is blocked by a deliberately hung test app; no dropped frames over 50 ms.
   - Stop → overlay hidden in under 150 ms (p95) measured with timestamps.
 - **Chaos test in CI.** Kill perceiver and voice processes during a scripted step loop. Core must recover within 2 s and say so ("lost sight of the app for a second, bro").

@@ -5,6 +5,13 @@
 - Issue: #13
 - Depends on: ADR-0003 and every component ADR
 
+> **Amended for GNOME-first (2026-11-20).**
+> - The headless **GNOME** row becomes the primary compositor integration test.
+> - Sway headless and KWin `--virtual` move to the v0.2 KWin/layer-shell work.
+> - X11/Xvfb stays for cheap AT-SPI and core tests only.
+> - GitHub's ubuntu-24.04 runners ship GNOME 46, so GNOME 50 jobs run in an `ubuntu:26.04` container (Fedora images for 48/49/51 in the version matrix, ADR-0023 §8).
+> - Schneegans' gnome-shell-pod is X11/Xvfb-based and stops at GNOME 47, so it cannot be used.
+
 ## Context
 Ya-Bro is hard to test in four ways:
 - it depends on live desktops (compositors, AT-SPI, portals);
@@ -37,9 +44,10 @@ CLAUDE.md requires tests with every feature, with `pytest` and `ruff` before eac
    | Session | How it runs |
    |---|---|
    | AT-SPI | `dbus-run-session` + `at-spi-bus-launcher` + **fixture apps**: tiny GTK3, GTK4 and Qt6 apps with known widgets, menus and dialogs, kept in `tests/fixtures/apps/` |
-   | X11 | **Xvfb** with a compositor that supports alpha (picom, or the KWin X11 virtual platform) for overlay click-through tests |
-   | Wayland layer-shell | **Sway headless** (`WLR_BACKENDS=headless`). KWin `--virtual` for KWin-specific bridge tests; flags to be checked in spike S3. |
-   | GNOME | nested `gnome-shell --headless` / devkit for extension tests later (exact invocation unverified) |
+   | **GNOME (reference)** | `dbus-run-session gnome-shell --headless --wayland --virtual-monitor 1920x1080` in an `ubuntu:26.04` container with the extension installed and enabled before shell start. D-Bus contract tests from Python. Synthetic clicks via the RemoteDesktop/EIS path or Mutter's virtual input for click-through. Flags present in `gnome-shell --help` 50.1; the full CI invocation is unverified until S1. Pure-JS helpers run under `gjs -m`. |
+   | GNOME dev loop | `dbus-run-session gnome-shell --devkit --wayland` (needs `mutter-dev-bin`) on the maintainer's desktop (ADR-0023 §10) |
+   | X11 (CI only) | **Xvfb** for AT-SPI fixture tests and EWMH bridge fakes. No product overlay tests. |
+   | Wayland layer-shell (v0.2) | **Sway headless** (`WLR_BACKENDS=headless`). KWin `--virtual` for KWin-specific bridge tests; flags to be checked in the KWin port. |
 
    - Overlay assertions use screenshots of the headless output, and synthetic clicks through the virtual backends to prove click-through.
 3. **Record and replay.**
@@ -64,7 +72,7 @@ CLAUDE.md requires tests with every feature, with `pytest` and `ruff` before eac
 5. **Cadence.**
    - On PR: unit tests, headless integration, and replay evals using cassettes.
    - Nightly: live LLM evals on a small budget with a cost cap, posting a trend summary as a CI artefact.
-   - Before release: manual dogfood checklist on KWin Wayland 6.6 and later 6.8, plus GNOME 50 once the extension exists.
+   - Before release: manual dogfood checklist on GNOME 50 Wayland (Ubuntu 26.04) at 100% and 150% scale with two monitors. KWin Wayland 6.6/6.8 is added from v0.2.
 6. **Flake policy.**
    - Retry integration tests at most once.
    - A test that flakes twice in 7 days moves to a quarantine marker with an issue.
@@ -80,7 +88,7 @@ CLAUDE.md requires tests with every feature, with `pytest` and `ruff` before eac
 
 ## Validation plan
 - The first CI milestone (with issue #4): a GTK4 fixture app plus AT-SPI lookup test passing in GitHub Actions under `dbus-run-session`.
-- The second milestone: an overlay click-through test on Sway headless.
+- The second milestone: the extension's D-Bus contract and click-through test in a headless GNOME 50 shell.
 - Track the CI duration budget: PR pipeline ≤ 10 min.
 
 ## Revisit if
@@ -88,6 +96,8 @@ CLAUDE.md requires tests with every feature, with `pytest` and `ruff` before eac
 - Eval costs exceed budget.
 
 ## Sources
+- gjs.guide debugging (devkit/nested): https://gjs.guide/extensions/development/debugging.html
+- gnome-shell-pod (X11, ≤ 47): https://github.com/Schneegans/gnome-shell-pod
 - Sway headless backend (wlroots `WLR_BACKENDS`): https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/master/docs/env_vars.md
 - at-spi2-core (bus launcher): https://gitlab.gnome.org/GNOME/at-spi2-core
 - dogtail (GPL, test-only use per ADR-0020): https://gitlab.com/dogtail/dogtail

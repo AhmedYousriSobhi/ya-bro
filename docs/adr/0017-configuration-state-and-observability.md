@@ -70,7 +70,7 @@ SPEC requires no telemetry by default. Logs must not capture content: "never typ
 6. **`ya-bro doctor`** reports:
    - session and backend selection (ADR-0002);
    - a11y bus status;
-   - layer-shell, KWin script and GNOME extension availability;
+   - GNOME extension state, errors and API version (via `org.gnome.Shell.Extensions`), then layer-shell and KWin script availability (v0.2);
    - portal capabilities;
    - PipeWire AEC;
    - library versions (PyGObject, GTK, at-spi2-core);

@@ -81,8 +81,8 @@ Other STT facts:
    - Every engine is a separate **Wyoming** service over a Unix or localhost socket.
    - This keeps GPL engines out of process, isolates native crashes, and lets users reuse existing Wyoming servers.
 2. **Trigger.**
-   - **Push-to-talk is the default.** The hotkey goes through the `Hotkeys` interface: X11 `XGrabKey`; KDE `kglobalaccel` D-Bus or the GlobalShortcuts portal; GNOME the GlobalShortcuts portal (GNOME ≥ 48).
-   - The same interface owns the global **stop** key.
+   - **Push-to-talk is the default.** The hotkey goes through the `Hotkeys` interface. *Amended for GNOME-first (2026-11-20):* on GNOME (reference) push-to-talk uses the GlobalShortcuts portal (x-d-p-gnome ≥ 48), which has `Activated`/`Deactivated` signals for hold-to-talk; whether x-d-p-gnome emits `Deactivated` on key release is unverified (check in M0). Shell key bindings fire on press only, so they are not used for push-to-talk. KDE (v0.2): `kglobalaccel` D-Bus or the portal. X11 `XGrabKey` only in CI.
+   - The global **stop** key goes through the same interface. On GNOME it is bound inside the Shell extension (`Main.wm.addKeybinding`), so it works with no portal dialog and even when core is hung (ADR-0023).
    - The wake word is **opt-in, v0.3**. Use openWakeWord code with a **self-trained "ya bro" model**, trained on synthetic positives plus recorded Arabic-accented samples, gated by Silero VAD.
    - The pretrained NC models are never shipped.
 3. **VAD.** Silero VAD for end-of-utterance, with a 500–700 ms silence default, tuned per language.
