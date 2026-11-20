@@ -1,4 +1,4 @@
-# Ya-Bro 🧚
+# Ya-Bro
 
 > *"Ya bro!"* — call your companion when an app confuses you.
 
