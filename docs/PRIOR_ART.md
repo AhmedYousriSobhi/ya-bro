@@ -24,6 +24,7 @@ Products split in two camps: *guiders* point but never act; *doers* act but neve
 | Open Interpreter OS mode, OpenAdapt | No | Autonomous / replay | Some | Partial | Yes |
 
 ## Where Ya-Bro differs
+0. **Proactive**: every guider found waits to be asked. Ya-Bro notices struggle and offers help, then backs off. Closest ancestor is Microsoft's Office Assistant "Clippy" (from memory, not surveyed), widely disliked for interrupting and not backing off. Back-off rules are therefore a core requirement, not polish.
 1. **Linux-native**: every guider found is Mac/Windows only.
 2. **Per-step teach-or-do with verification**: show a step, optionally do it, then check the user (or bro) did it before moving on.
 3. **Accessibility tree first (AT-SPI), vision second**: exact bounds and names, cheap, fast; most competitors are vision-only.
@@ -39,7 +40,7 @@ Products split in two camps: *guiders* point but never act; *doers* act but neve
 6. **Voice**: offline whisper.cpp/faster-whisper + Piper is workable; cloud realtime feels better but costs money and has privacy tradeoffs.
 
 ## Recommended wedge (adopted in SPEC.md)
-- **KDE Plasma and X11 first**; GNOME via Shell extension later.
+- ~~KDE Plasma and X11 first; GNOME via Shell extension later.~~ Superseded: **GNOME Wayland first** via a Shell extension, KWin Wayland second, X11 CI-only (ADR-0002, 2026-11-20).
 - **Show-me mode with automatic step verification first**; Do-it mode (portal + libei) next.
 - Text first, push-to-talk whisper.cpp after.
 - Prove on 3–5 accessible apps (GIMP, Inkscape, LibreOffice, system settings, VS Code with accessibility flag). Not Electron/general vision first.

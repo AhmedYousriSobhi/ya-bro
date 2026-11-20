@@ -18,17 +18,27 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 ## Repo map
 - `SPEC.md` — product spec, scope, architecture, roadmap
 - `docs/PRIOR_ART.md` — survey of existing tools and how Ya-Bro differs
-- `docs/adr/` — architecture decision records (one file per decision, numbered)
+- `docs/adr/` — architecture decision records (one file per decision, numbered; index and MVP plan in `docs/adr/README.md`)
+- `docs/research/` — landscape research (AI tools, non-AI tools, Linux platform facts, factsheet)
 - `CHANGELOG.md` — Keep a Changelog format
 - `.github/` — issue and PR templates
+- `packs/` — per-app knowledge packs (created by the pack-format issue)
+- `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - Source code will live in `src/` (created by the first implementation issue)
+
+## Tech stack (ADR-0001)
+Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run tests and `ruff check` before every PR.
 
 ## Architecture rules (summary; details in SPEC.md)
 - Core loop: **perceive → plan → guide/act → confirm → next step**. One step at a time; never dump a wall of instructions.
 - Two modes per step: **Show me** (highlight + narrate, user acts) and **Do it** (bro acts, user watches). User can switch any time; "stop" always halts immediately.
 - Keep these behind interfaces so they can be swapped or ported: `Perception` (UI discovery), `Overlay` (drawing/pointer), `Actuator` (input injection), `Voice` (STT/TTS), `Brain` (LLM/planner).
+- **No app-specific code in the core.** App knowledge lives in per-app packs (`packs/<app>/`); first pack is workbench. See SPEC.md "Global core + app packs".
+- Struggle monitoring is opt-in, local, and records event types/counts only, never typed text or screen content.
 - Prefer the **accessibility tree (AT-SPI)** for finding elements; fall back to screenshots + vision only when needed.
-- Detect and handle both **Wayland and X11**; never assume X11.
+- Reference platform is **GNOME 50 Wayland** (Ubuntu 26.04). KWin Wayland is the second target (v0.2), and X11 is CI-only (ADR-0002). Never assume X11. AT-SPI screen coordinates are unusable on Wayland; use the coordinate pipeline in ADR-0004.
+- On GNOME the CompositorBridge and the overlay are the Ya-Bro **GNOME Shell extension** in `extension/` (GJS, ADR-0023). Keep it a dumb renderer plus geometry bridge: no app logic, no sync D-Bus calls, no screenshot or input-injection methods, and everything undone in `disable()`. Develop it in a nested `gnome-shell --devkit` session, never by reloading the live one.
+- Beyond the five interfaces, ADR-0003 adds CompositorBridge, Capture, IdleSource, Hotkeys, ShellHook, SecretStore and Policy. Every action passes the `Policy` engine (ADR-0014).
 - App knowledge comes from the app itself (UI tree, `--help`, docs, MCP/skills), not hardcoded per-app scripts.
 
 ## Safety rules for the bro
