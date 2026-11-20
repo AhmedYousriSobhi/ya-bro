@@ -8,6 +8,8 @@ Builders who use many apps often can't learn them from written guides or video t
 ## 2. Vision
 A Navi-style sidekick that **hovers on screen**. Ask in voice or text: *"Ya bro, how do I export this as PNG in GIMP?"* The bro shows the **next single step**, pointing at the real control, explaining briefly, and either waits for you to do it or does it itself while you watch. Then the next step. Like pair-programming, but for using apps.
 
+See the [concept sketch](docs/assets/ya-bro-concept.png) for the intended look: proactive nudge, ring on the real UI, step card, ask bar.
+
 ## 3. Users
 Primary: the maintainer — an app builder who struggles with guides/tutorials and learns best by doing with a guide present. Secondary: anyone onboarding to unfamiliar software on Linux.
 
