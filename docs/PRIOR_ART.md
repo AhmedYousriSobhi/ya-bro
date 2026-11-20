@@ -24,6 +24,7 @@ Products split in two camps: *guiders* point but never act; *doers* act but neve
 | Open Interpreter OS mode, OpenAdapt | No | Autonomous / replay | Some | Partial | Yes |
 
 ## Where Ya-Bro differs
+0. **Proactive**: every guider found waits to be asked. Ya-Bro notices struggle and offers help, then backs off. Closest ancestor is Microsoft's Office Assistant "Clippy" (from memory, not surveyed), widely disliked for interrupting and not backing off. Back-off rules are therefore a core requirement, not polish.
 1. **Linux-native**: every guider found is Mac/Windows only.
 2. **Per-step teach-or-do with verification**: show a step, optionally do it, then check the user (or bro) did it before moving on.
 3. **Accessibility tree first (AT-SPI), vision second**: exact bounds and names, cheap, fast; most competitors are vision-only.
