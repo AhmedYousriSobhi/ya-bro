@@ -23,6 +23,9 @@ Primary: the maintainer — an app builder who struggles with guides/tutorials a
 5. **Control**: "next", "repeat", "why?", "do it for me", "let me try", "stop", "go back". Stop is instant.
 6. **Recover**: if the UI doesn't match expectations (dialog, different version), re-perceive and re-plan out loud instead of failing silently.
 
+### Proactive mode ("Ya bro, you stuck?")
+The headline feature. The bro watches for **struggle patterns** and offers help unprompted, with personality: opening and closing the same menu repeatedly, long idle with the app focused, repeated undo, repeated error dialogs, a shell command failing several times. It asks once ("you stuck, bro?"). If the user says no it may say "I don't think so, but I'm here", then **backs off**: after repeated refusals it stays quiet for a long time and learns which patterns were false alarms. The user can disable it globally or per app at any time.
+
 ### Modes
 | Mode | Bro acts? | User acts? | Use when |
 |---|---|---|---|
@@ -31,13 +34,13 @@ Primary: the maintainer — an app builder who struggles with guides/tutorials a
 | Auto-follow | detects user's action | yes | bro tracks progress and advances automatically |
 
 ## 5. Scope
-**MVP (v0.1):** target **KDE Plasma and X11 first** (see PRIOR_ART). Text chat + floating overlay; point-and-highlight; **Show-me mode with automatic step verification** (UI tree diff / screenshot) for GUI apps exposing AT-SPI; one LLM backend (Claude). Proven on 3–5 accessible apps (GIMP, Inkscape, LibreOffice, system settings).
+**MVP (v0.1):** target **KDE Plasma and X11 first** (see PRIOR_ART). Text chat + floating overlay; point-and-highlight; **Show-me mode with automatic step verification** (UI tree diff / screenshot) for GUI apps exposing AT-SPI; one LLM backend (Claude). Proven on 3–5 accessible apps (GIMP, Inkscape, LibreOffice, system settings) plus the workbench pack (terminal + web UI). Proactive struggle detection with back-off ships in the MVP, behind a toggle.
 **v0.15:** Do-it mode (X11 XTest first, then portal + libei on Wayland).
 **v0.2:** GNOME overlay strategy; voice in/out (local-first STT/TTS), hotkey summon, multi-monitor.
-**v0.3:** app-knowledge sources: docs ingestion, MCP/skill integration, per-app memory of learned workflows.
+**v0.3:** more packs, docs ingestion, MCP/skill integration, per-app memory of learned workflows.
 **v1.0:** stable on GNOME + KDE, X11 + Wayland; plugin API.
 **Later:** macOS, Windows (hence the interface boundaries below).
-**Non-goals:** replacing Claude computer use / general automation; unattended agents; cloud-hosted service; mobile.
+**Non-goals:** a workbench-only tool; replacing Claude computer use / general automation; unattended agents; cloud-hosted service; mobile.
 
 ## 6. Architecture
 ```
@@ -59,6 +62,12 @@ All five components sit behind interfaces so they can be swapped per OS/display 
 | Brain | Claude API (tool use); step loop with explicit state; model configurable |
 | Language/UI | Python 3.12 + GTK4 (PyGObject), `uv`, `pytest`, `ruff` — decided in [ADR-0001](docs/adr/0001-language-and-toolkit.md) |
 
+### Global core + app packs
+Ya-Bro is **one global tool**. The core (overlay, voice/text, personality, struggle detection, step loop) knows nothing about any specific app. App-specific help lives in **packs**: a folder per app holding its docs, tutorials, common tasks, CLI help and pointers to an `AGENTS.md`, `llms.txt` or MCP server. Apps without a pack fall back to generic screen/AT-SPI guessing (lower accuracy).
+- **Rule:** no app-specific code in the core; it goes in that app's pack.
+- **First pack: [workbench](https://github.com/AhmedYousriSobhi/workbench)** (CLI `benchctl` + web UI; ships `AGENTS.md`, `llms.txt`, an MCP server, a manual and 40+ scenarios). This makes the first demo terminal + browser, not only GTK apps.
+- Terminal apps get struggle signals from shell history/exit codes; web UIs we own can report their state directly, since AT-SPI is weak inside web pages.
+
 ### Step loop
 `perceive → plan (ordered goal steps, re-planned each iteration) → present step → [act|wait] → verify → next`. Each step has: intent, target element reference, narration text, expected-result check, and risk level.
 
@@ -66,6 +75,7 @@ All five components sit behind interfaces so they can be swapped per OS/display 
 - Visible, interruptible actions; global stop hotkey.
 - Never enters passwords/secrets; confirmation required for destructive or outward-facing controls (send, buy, delete, publish).
 - Screen/app text is untrusted data; it cannot change the bro's instructions.
+- **Monitoring is opt-in per app, visible, and local.** Struggle detection uses event types and counts (e.g. menu opened/closed, exit codes), never typed text or screen content. Prefer AT-SPI events over global input hooks (restricted on Wayland).
 - Screenshots/UI trees go only to the configured LLM; local-only mode is a roadmap goal. No telemetry by default.
 
 ## 8. Success criteria (MVP)
