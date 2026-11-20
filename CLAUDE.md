@@ -23,6 +23,9 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `.github/` — issue and PR templates
 - Source code will live in `src/` (created by the first implementation issue)
 
+## Tech stack (ADR-0001)
+Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run tests and `ruff check` before every PR.
+
 ## Architecture rules (summary; details in SPEC.md)
 - Core loop: **perceive → plan → guide/act → confirm → next step**. One step at a time; never dump a wall of instructions.
 - Two modes per step: **Show me** (highlight + narrate, user acts) and **Do it** (bro acts, user watches). User can switch any time; "stop" always halts immediately.

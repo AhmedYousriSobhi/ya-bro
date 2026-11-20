@@ -57,7 +57,7 @@ All five components sit behind interfaces so they can be swapped per OS/display 
 | Actuator | X11: XTest/`xdotool`. Wayland: RemoteDesktop portal / libei; `ydotool` as last resort |
 | Voice | STT: whisper.cpp (local) with cloud option; TTS: Piper (local) with cloud option |
 | Brain | Claude API (tool use); step loop with explicit state; model configurable |
-| Language/UI | Open decision (ADR-0001). Leading candidate: Python core + GTK4 overlay for MVP speed |
+| Language/UI | Python 3.12 + GTK4 (PyGObject), `uv`, `pytest`, `ruff` — decided in [ADR-0001](docs/adr/0001-language-and-toolkit.md) |
 
 ### Step loop
 `perceive → plan (ordered goal steps, re-planned each iteration) → present step → [act|wait] → verify → next`. Each step has: intent, target element reference, narration text, expected-result check, and risk level.
@@ -74,7 +74,7 @@ All five components sit behind interfaces so they can be swapped per OS/display 
 - User can interrupt within 500 ms of "stop".
 
 ## 9. Open questions
-1. Implementation language/toolkit (ADR-0001).
+1. ~~Implementation language/toolkit~~ — resolved by ADR-0001.
 2. GNOME-on-Wayland overlay strategy (extension vs. fallback).
 3. How well AT-SPI covers Electron, GTK4, Qt, and web content — measure in a spike.
 4. Wake-word vs hotkey-only for v0.2.
