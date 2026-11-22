@@ -160,7 +160,10 @@ class Shell:
         # Stream space is physical pixels: logical * monitor scale. Use the exact scale, and only use
         # the measured value (integer-rounded) as a sanity check.
         scale = self.call(BRIDGE, "GetMonitors")[0][0][5]
-        px = self.pointer()[0]
+        try:
+            px = self.pointer()[0]
+        except GLib.Error:  # GetPointer is refused while no allowed app is focused (#43)
+            px = 0
         if px > 0 and abs(400.0 / px - scale) > 0.05:
             raise RuntimeError(
                 f"pointer calibration disagrees: measured {400.0 / px:.3f}, scale {scale}"
