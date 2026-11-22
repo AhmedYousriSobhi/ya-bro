@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #47 pack-scoped targets (design + apps available)
+Done: `broctl apps available` (app id, name, window class) and ADR-0025 (proposed).
+Not done: targets themselves (`broctl targets ...`), web-origin and CLI-command scoping. Blocked on the open question in ADR-0025 (how the extension learns the active tab's origin), #8 packs and #21 shell hook. Until then workbench can only be covered by allowing a whole app.
+
 ### 2026-11-22: #45 broctl
 Done: `broctl` entry point with `version`, `doctor`, `setup`, `apps list|allow|revoke`; docs and ADRs renamed from `ya-bro <cmd>`; ADR-0024.
 Not done: `config`, `stats`, `sent`, `forget`, `pack` verbs (planned in ADR-0024); the `ya-bro` agent binary does not exist yet.

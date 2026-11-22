@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- `broctl apps available` lists installed apps (id, name, window class) from `.desktop` files (#47). ADR-0025 (proposed): pack-scoped targets so a tool with a web UI and a CLI, like workbench, can be allowed without exposing the whole browser or every shell.
 - `broctl`, a kubectl-style control CLI (`broctl <noun> <verb>`, ADR-0024, #45): `version`, `doctor`, `setup`, `apps list|allow|revoke`. It replaces the `ya-bro` management commands; `ya-bro` stays the product and agent name.
 - Per-app scoping (#43): the Shell extension is default-deny. Only windows of apps in its `allowed-apps` setting are listed, tracked, announced or measured; the title and pointer calls are refused otherwise. `broctl setup` asks which one app to allow (and writes `apps/<id>.toml`), and `broctl doctor` reports the allowlist. The accessibility setting itself stays system-wide (GNOME has no per-app switch).
 - `broctl doctor` (session, accessibility bus, extension state, API key presence) and consent-gated `broctl setup` (accessibility setting, Shell extension install and enable) (#17).

@@ -21,7 +21,7 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## broctl
-`broctl` controls Ya-Bro, like `kubectl` controls a cluster: `broctl <noun> <verb>`. Run it from the repo with `uv run broctl --help`, or install it with `uv tool install --editable .`. Commands: `version`, `doctor`, `setup`, `apps list|allow|revoke <app-id>`. See [ADR-0024](docs/adr/0024-broctl-control-cli.md).
+`broctl` controls Ya-Bro, like `kubectl` controls a cluster: `broctl <noun> <verb>`. Run it from the repo with `uv run broctl --help`, or install it with `uv tool install --editable .`. Commands: `version`, `doctor`, `setup`, `apps list|available|allow|revoke <app-id>`. `broctl apps available` shows the ids you can allow. Tools with a web UI and a CLI (such as workbench) need pack-scoped targets, which are designed in [ADR-0025](docs/adr/0025-pack-scoped-targets.md) but not built yet. See [ADR-0024](docs/adr/0024-broctl-control-cli.md).
 
 ## Doctor and setup
 `broctl doctor` reports what works and how to fix what does not (its output is safe to paste in a bug report). `broctl setup` asks before each persistent change (GNOME accessibility setting, Shell extension install) and needs one logout/login afterwards. Setup asks which one app Ya-Bro may use; the Shell extension reports only that app (default-deny, no app named = nothing reported). Note the GNOME accessibility setting itself is system-wide, and the extension code runs inside the shell, so this is enforced by Ya-Bro, not by the OS. The doctor checks only whether the `ANTHROPIC_API_KEY` environment variable is set, never its value; `.env` loading is not implemented yet.

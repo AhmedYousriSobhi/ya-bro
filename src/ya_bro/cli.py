@@ -18,6 +18,13 @@ def _apps(args: argparse.Namespace) -> int:
             return 1
         print("\n".join(apps) if apps else "no apps allowed: Ya-Bro sees nothing")
         return 0
+    if args.verb == "available":
+        from ya_bro.platform import desktop_apps
+
+        for app in desktop_apps.available():
+            extra = f"  (window class: {app.wm_class})" if app.wm_class else ""
+            print(f"{app.app_id}\t{app.name}{extra}")
+        return 0
     if args.verb == "allow":
         print(ls.allow_app(run, args.app, replace=False))
     else:
@@ -35,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     apps = sub.add_parser("apps", help="manage which apps Ya-Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
     verbs.add_parser("list", help="show allowed apps")
+    verbs.add_parser("available", help="list installed app ids you could allow")
     for verb, text in (("allow", "allow an app id"), ("revoke", "stop allowing an app id")):
         verbs.add_parser(verb, help=text).add_argument("app", help="app id, e.g. org.gimp.GIMP")
     args = parser.parse_args(argv)

@@ -44,6 +44,7 @@ The set 0002–0023 was produced for issue #13 on 2026-11-20. The same day the m
 | [0022](0022-mvp-build-plan.md) | MVP build plan | Proposed | GNOME-first and risk-first: S1 is the GNOME extension bridge + overlay. Then S2 (AT-SPI) and S3 (headless GNOME CI), then milestones M0–M7 mapped to issues with go/no-go gates. KWin port in v0.2. |
 | [0023](0023-gnome-shell-extension-bridge.md) | GNOME Shell extension bridge and overlay | Proposed | A dumb in-compositor renderer + geometry bridge in GJS. Versioned `Bridge1`/`Overlay1` D-Bus API, caller-checked, content-free, with no capture or injection. Dead-man switch, `user` session mode only. Supports GNOME 48–51 where CI is green. |
 | [0024](0024-broctl-control-cli.md) | `broctl` control CLI | Accepted | kubectl-style `broctl <noun> <verb>` manages the agent: `doctor`, `setup`, `apps allow/revoke`; `ya-bro` stays the product and agent name. |
+| [0025](0025-pack-scoped-targets.md) | Pack-scoped targets | Proposed | A target (web origins + CLI command names) is the unit of consent for tools like workbench, so the browser and terminal are never allowed whole. Open: how the extension learns the active tab origin. |
 
 ## MVP build plan
 
