@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- Measured that a locally installed Shell extension cannot be loaded without a Shell restart (ADR-0023 §9).
 - `broctl point` draws the Ya-Bro ring and a bubble on your allowed app's window and follows it (Stop button or Super+Shift+Esc hides it); `broctl scope watch` prints allowed windows entering and leaving scope. Both stand in for core until it exists, run under the system python3 with PyGObject, and were tested in the isolated headless shell only (#53).
 - `broctl setup` shows a searchable list of installed apps (type a word, pick a number) instead of asking for a raw app id; it stores the window class when the app has one (#51).
 - Spike S8 (#47): the Shell extension can scope a window by a secret title token pushed by core (`Bridge1.SetScopeTokens`, core only, memory only; the window leaves scope when its title changes), and windows re-evaluate when `allowed-apps` changes. Verified with a stand-in window and a real browser (Chrome for Testing; `pytest -m gnome_measure`). Findings in `docs/research/spikes/S8-active-tab-scope.md`.

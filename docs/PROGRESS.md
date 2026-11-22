@@ -18,6 +18,9 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: hot-loading the extension
+Measured in the isolated shell: no supported route loads a newly installed extension without a Shell restart (directory, gsettings, `gnome-extensions enable`, `disable-user-extensions` toggle all failed). Open options: one logout (current), a Looking Glass paste (manual, untested), publication, or a no-extension overlay (needs research).
+
 ### 2026-11-22: #53 point and scope watch
 Done: `broctl point` and `broctl scope watch` (stand-in core, `platform/gnome_demo.py`); overlay shown, followed and hidden in the isolated headless shell. Not done: not run on the real desktop yet (the extension has never been loaded in the live session); no voice, no step logic, no text input.
 
