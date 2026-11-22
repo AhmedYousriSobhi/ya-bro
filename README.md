@@ -20,5 +20,8 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [docs/PROGRESS.md](docs/PROGRESS.md) — milestone and issue status
 - [CHANGELOG.md](CHANGELOG.md)
 
+## Configuration
+Settings live in `$XDG_CONFIG_HOME/ya-bro/config.toml` (default `~/.config/ya-bro/`); `apps/<app-id>.toml` overrides it per app. Keys: `humour` (0-3), `[proactive] enabled, sensitivity`, `[capture] allowed`, `[do_it] allowed`. Unknown keys log a warning and are ignored. Logs are written to `$XDG_STATE_HOME/ya-bro/logs/*.jsonl` and never contain typed text or screen content.
+
 ## Platform
 Linux only for now: GNOME on Wayland first (through a small GNOME Shell extension), KDE Plasma Wayland next. X11 is used only in CI. macOS/Windows later.

@@ -1,6 +1,6 @@
 # ADR-0017: Configuration, state storage and observability
 
-- Status: Proposed
+- Status: Accepted (config loader and log API implemented in #36; CLI, SQLite state, debug-content and retention pending)
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0003, ADR-0010, ADR-0014
