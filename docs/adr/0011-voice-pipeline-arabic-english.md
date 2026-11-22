@@ -96,7 +96,7 @@ Other STT facts:
    - **Code-switched sentences** are split by script, with English segments spoken by the English voice or kept inline when the cloud voice handles them.
    - **Persona text for TTS:** the Brain emits a TTS-specific variant. It uses short sentences, and either light diacritics (offline) or plain text (cloud).
 6. **Barge-in.**
-   - `ya-bro doctor` offers to install a PipeWire echo-cancel config snippet. This is consent-gated because it is persistent configuration.
+   - `broctl doctor` offers to install a PipeWire echo-cancel config snippet. This is consent-gated because it is persistent configuration.
    - TTS plays into the AEC sink; VAD reads the AEC source.
    - Detected speech during TTS ducks, then stops playback.
    - "Stop"/"خلاص"/"بس" is recognised by a tiny local command spotter (Vosk grammar or the KWS model) **without waiting for full STT**, to meet the 500 ms stop target.

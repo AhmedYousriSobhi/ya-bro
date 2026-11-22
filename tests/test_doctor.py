@@ -1,3 +1,5 @@
+import ast
+
 from ya_bro import doctor
 from ya_bro.cli import main
 from ya_bro.platform import linux_setup as ls
@@ -92,7 +94,7 @@ def test_cli_doctor_dispatch(monkeypatch, capsys):
 def test_allow_app_writes_allowlist_and_app_config(tmp_path):
     runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
     msg = ls.allow_app(runner, "org.gimp.GIMP", tmp_path / "ext", tmp_path / "cfg")
-    assert "only: org.gimp.GIMP" in msg
+    assert "see: org.gimp.GIMP" in msg
     assert runner.calls[0][-1] == "['org.gimp.GIMP']"
     assert (tmp_path / "cfg" / "apps" / "org.gimp.GIMP.toml").read_text().startswith("[capture]")
 
@@ -112,7 +114,7 @@ def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
     out = []
     answers = iter(["org.gimp.GIMP", "n", "y"])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append)
-    assert any("only: org.gimp.GIMP" in x for x in out)
+    assert any("see: org.gimp.GIMP" in x for x in out)
 
 
 def test_doctor_warns_when_no_app_allowed(tmp_path):
@@ -122,3 +124,35 @@ def test_doctor_warns_when_no_app_allowed(tmp_path):
     assert c.status == "warn" and "no app" in c.detail
     ok = ls.allowed_apps_check(fake({"allowed-apps": (0, "['org.gimp.GIMP']")}), tmp_path)
     assert ok.status == "ok"
+
+
+def stateful(initial):
+    state = {"apps": list(initial)}
+
+    def runner(cmd):
+        if "get" in cmd:
+            return 0, str(state["apps"])
+        state["apps"] = ast.literal_eval(cmd[-1])
+        return 0, ""
+
+    runner.state = state
+    return runner
+
+
+def test_allow_adds_and_revoke_removes(tmp_path):
+    r = stateful(["a.b"])
+    ls.allow_app(r, "c.d", tmp_path, tmp_path, replace=False)
+    ls.allow_app(r, "c.d", tmp_path, tmp_path, replace=False)  # idempotent
+    assert r.state["apps"] == ["a.b", "c.d"]
+    assert ls.revoke_app(r, "a.b", tmp_path, tmp_path) == "revoked a.b"
+    assert r.state["apps"] == ["c.d"]
+    assert (tmp_path / "apps" / "a.b.toml").read_text().endswith("false\n")
+    assert "was not allowed" in ls.revoke_app(r, "zzz", tmp_path, tmp_path)
+
+
+def test_broctl_apps_cli(monkeypatch, capsys):
+    r = stateful([])
+    monkeypatch.setattr(ls, "run", r)
+    assert main(["apps", "list"]) == 0
+    assert "sees nothing" in capsys.readouterr().out
+    assert main(["version"]) == 0

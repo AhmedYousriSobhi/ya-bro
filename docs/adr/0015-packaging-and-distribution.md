@@ -8,7 +8,7 @@
 > **Amended for GNOME-first (2026-11-20).**
 > - The GNOME Shell extension is part of **v0.1**, not v0.2.
 > - A source or `uv tool` install copies `extension/` to `~/.local/share/gnome-shell/extensions/<uuid>/` and compiles its schemas. The later .deb ships it in `/usr/share/gnome-shell/extensions/<uuid>/`.
-> - `ya-bro setup` adds the UUID to `org.gnome.shell enabled-extensions` after consent and asks for **one logout/login**: a running Wayland shell does not pick up a newly installed extension ([ADR-0023](0023-gnome-shell-extension-bridge.md) §9). Extension updates need a re-login too, and doctor flags a version mismatch between core and extension.
+> - `broctl setup` adds the UUID to `org.gnome.shell enabled-extensions` after consent and asks for **one logout/login**: a running Wayland shell does not pick up a newly installed extension ([ADR-0023](0023-gnome-shell-extension-bridge.md) §9). Extension updates need a re-login too, and doctor flags a version mismatch between core and extension.
 > - Ubuntu dependencies gain `gnome-shell` (≥ 48) as a recommendation. `gir1.2-gtk4layershell-1.0` becomes optional (KWin, v0.2).
 > - EGO publication remains out of scope until the code is human-written or human-reviewed.
 
@@ -63,9 +63,9 @@ Facts ([factsheet.md D](../research/factsheet.md); [linux-platform.md §0, §3.1
    - Piper (GPL) through its own package or the Wyoming Piper server, as the user chooses.
 
    Model weights download on first use, with checksums and licence display (ADR-0020).
-5. **GNOME extension** (v0.1): shipped in the repo and in the deb. It is installed per user by `ya-bro setup` (or `gnome-extensions install` on a packed zip), enabled after consent, and activated by one re-login (ADR-0023 §9). Publication on extensions.gnome.org only once a human has reviewed or written the code (their guidelines reject AI-generated code).
+5. **GNOME extension** (v0.1): shipped in the repo and in the deb. It is installed per user by `broctl setup` (or `gnome-extensions install` on a packed zip), enabled after consent, and activated by one re-login (ADR-0023 §9). Publication on extensions.gnome.org only once a human has reviewed or written the code (their guidelines reject AI-generated code).
 6. **Autostart.** Off by default. The settings toggle writes `~/.config/autostart/ya-bro.desktop`; turning it off writes `Hidden=true` or removes the file. Optional systemd `--user` unit later, for restart-on-crash.
-7. **Permissions disclosure.** `ya-bro doctor` lists every capability, its status and how to grant it:
+7. **Permissions disclosure.** `broctl doctor` lists every capability, its status and how to grant it:
    - the a11y bus;
    - the GNOME extension (state, errors, API version);
    - layer-shell and the KWin script (v0.2);
@@ -83,7 +83,7 @@ Facts ([factsheet.md D](../research/factsheet.md); [linux-platform.md §0, §3.1
   `doctor` checks both versions.
 
 ## Validation plan
-- Install test in clean containers or VMs: Ubuntu 26.04 and 24.04, Fedora (current), Debian 13. `ya-bro doctor` must pass on the reference platform after following the README in ≤ 10 minutes.
+- Install test in clean containers or VMs: Ubuntu 26.04 and 24.04, Fedora (current), Debian 13. `broctl doctor` must pass on the reference platform after following the README in ≤ 10 minutes.
 - Track in CI by building the venv against the system site-packages in an Ubuntu 26.04 container (ADR-0016).
 
 ## Revisit if

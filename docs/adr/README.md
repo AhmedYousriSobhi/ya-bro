@@ -36,13 +36,14 @@ The set 0002–0023 was produced for issue #13 on 2026-11-20. The same day the m
 | [0014](0014-privacy-security-trust-model.md) | Privacy, security and trust | Proposed | Threat model. Local `Policy` engine gates every action. Data minimisation and redaction. Per-app consent, visible state indicators, kill switch, short retention. The GNOME extension is a trust boundary: caller check, no capture/injection export. |
 | [0015](0015-packaging-and-distribution.md) | Packaging and distribution | Proposed | `uv tool` / pipx with system site-packages now, .deb later. The GNOME extension ships in v0.1 and is enabled after consent plus one re-login. No Flatpak, Snap or AppImage, because sandboxes block cross-app AT-SPI. |
 | [0016](0016-testing-and-evaluation-strategy.md) | Testing and evaluation | Proposed | Fakes per interface. Headless GNOME 50 shell in an `ubuntu:26.04` container (primary), AT-SPI on Xvfb, Sway headless for v0.2. Record-replay of events and LLM cassettes. Versioned eval sets with gates. Flake quarantine. |
-| [0017](0017-configuration-state-and-observability.md) | Config, state, observability | Proposed | TOML config, SQLite state, content-free JSONL logs with correlation ids, opt-in time-limited content debug, local stats, `ya-bro doctor`. No telemetry. |
+| [0017](0017-configuration-state-and-observability.md) | Config, state, observability | Proposed | TOML config, SQLite state, content-free JSONL logs with correlation ids, opt-in time-limited content debug, local stats, `broctl doctor`. No telemetry. |
 | [0018](0018-extensibility-and-portability.md) | Extensibility and portability | Proposed | Protocol interfaces with entry-point backends and data-only packs. Platform imports are banned from core. A macOS/Windows mapping table. |
 | [0019](0019-internationalization-and-rtl.md) | i18n and RTL | Proposed | gettext for UI strings, Pango bidi with an explicit base direction, Unicode isolates for embedded names and commands, mirrored bubble, Noto Arabic fonts. |
 | [0020](0020-licensing-governance-and-release.md) | Licensing, governance, release | Proposed | MIT OR Apache-2.0. GPL/AGPL only out of process and optional. Model licence register. DCO. SemVer 0.x. dev → main release gates. |
 | [0021](0021-terminal-and-browser-integration.md) | Terminal and browser integration | Proposed | Shell hook writes a content-free spool, plus OSC 133. VTE/Ptyxis adapter first (Konsole with KWin, kitty, WezTerm). Fix-it rules. Browser uses AT-SPI first and a WebExtension in v0.3. No CDP. |
 | [0022](0022-mvp-build-plan.md) | MVP build plan | Proposed | GNOME-first and risk-first: S1 is the GNOME extension bridge + overlay. Then S2 (AT-SPI) and S3 (headless GNOME CI), then milestones M0–M7 mapped to issues with go/no-go gates. KWin port in v0.2. |
 | [0023](0023-gnome-shell-extension-bridge.md) | GNOME Shell extension bridge and overlay | Proposed | A dumb in-compositor renderer + geometry bridge in GJS. Versioned `Bridge1`/`Overlay1` D-Bus API, caller-checked, content-free, with no capture or injection. Dead-man switch, `user` session mode only. Supports GNOME 48–51 where CI is green. |
+| [0024](0024-broctl-control-cli.md) | `broctl` control CLI | Accepted | kubectl-style `broctl <noun> <verb>` manages the agent: `doctor`, `setup`, `apps allow/revoke`; `ya-bro` stays the product and agent name. |
 
 ## MVP build plan
 
@@ -66,7 +67,7 @@ The full table is in [ADR-0022](0022-mvp-build-plan.md). Reference platform: GNO
 **Proposed new issues:**
 1. Spike S1: GNOME Shell extension bridge + overlay.
 2. Project skeleton, interfaces and CI (including a headless GNOME 50 container job).
-3. `ya-bro doctor` and setup (a11y + extension consent, re-login flow).
+3. `broctl doctor` and setup (a11y + extension consent, re-login flow).
 4. GNOME Shell extension: skeleton, `Bridge1`, setup and CI (includes S3 and the nested dev loop; `Overlay1` is built under #3). Replaces "CompositorBridge (KWin script + X11 EWMH)".
 5. Pointing eval harness.
 6. Policy engine + redaction.

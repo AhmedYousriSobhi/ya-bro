@@ -76,7 +76,7 @@ SPEC §7 and CLAUDE.md already require:
   - the last N terminal lines when the user asks for help with a command.
 
   All of it is redacted first.
-- **"What was sent" log:** a local log the user can open (`ya-bro sent`) listing the categories and sizes of every request, and in debug mode the payload itself.
+- **"What was sent" log:** a local log the user can open (`broctl sent`) listing the categories and sizes of every request, and in debug mode the payload itself.
 
 **3. Consent UX**
 - **First run:** a single screen explaining what Ya-Bro reads and what it sends, with toggles. It also offers to enable the a11y bus (a persistent setting) and the shell hook (an rc-file edit).
@@ -101,7 +101,7 @@ SPEC §7 and CLAUDE.md already require:
 - No content is persisted by default.
 - Struggle counts and offer labels: 30 days (configurable). Logs: 7 days.
 - Restore tokens: until the user revokes them.
-- `ya-bro forget` wipes all state.
+- `broctl forget` wipes all state.
 
 **8. Supply chain.** Pinned dependencies with hashes (`uv.lock`), and a licence and model register (ADR-0020). Model weights are downloaded only on demand, from the documented URL, with checksums.
 

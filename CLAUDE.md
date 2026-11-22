@@ -24,6 +24,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
+- `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
 - `src/ya_bro/` — source (interfaces, types, ipc, dirs, cli; OS code only under `platform/`)
 - `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
 - `scripts/dev/headless-shell.sh` — isolated headless gnome-shell for extension tests

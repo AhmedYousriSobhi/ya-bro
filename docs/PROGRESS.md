@@ -18,16 +18,20 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #45 broctl
+Done: `broctl` entry point with `version`, `doctor`, `setup`, `apps list|allow|revoke`; docs and ADRs renamed from `ya-bro <cmd>`; ADR-0024.
+Not done: `config`, `stats`, `sent`, `forget`, `pack` verbs (planned in ADR-0024); the `ya-bro` agent binary does not exist yet.
+
 ### 2026-11-22: #43 per-app scoping
-Done: extension `allowed-apps` (gsettings, default empty), enforced in Bridge1 (`ListWindows`, signals, `GetWindowTitle`, `GetPointer` only while an allowed app is focused); `ya-bro setup` asks for the app id; `doctor` shows the allowlist; contract test checks empty-list denial (passes in the isolated headless shell).
+Done: extension `allowed-apps` (gsettings, default empty), enforced in Bridge1 (`ListWindows`, signals, `GetWindowTitle`, `GetPointer` only while an allowed app is focused); `broctl setup` asks for the app id; `doctor` shows the allowlist; contract test checks empty-list denial (passes in the isolated headless shell).
 Not done: the overlay still draws wherever core says (core only knows allowed windows); an app id that appears after `window-created` is not announced until its first geometry change; the Python perceiver/Policy enforcement (#4, #20) and a real-desktop run; the measurement suite uses fixtures not on the default allowlist (set `YB_ALLOWED`).
 
 ### 2026-11-22: #17 doctor and setup
-Done: `ya-bro doctor` (session type, `toolkit-accessibility`, a11y bus, extension state via `GetExtensionInfo`, API key presence without the value) and `ya-bro setup` (each persistent change asks for an explicit yes: toolkit-accessibility, copy + enable the Shell extension, then one re-login). Probes shell out through an injectable runner in `platform/linux_setup.py`; tests never touch the real session.
+Done: `broctl doctor` (session type, `toolkit-accessibility`, a11y bus, extension state via `GetExtensionInfo`, API key presence without the value) and `broctl setup` (each persistent change asks for an explicit yes: toolkit-accessibility, copy + enable the Shell extension, then one re-login). Probes shell out through an injectable runner in `platform/linux_setup.py`; tests never touch the real session.
 Not done: per-app scoping (#43; setup text now says access is system-wide), `GetExtensionErrors` and API-version match (needs Bridge1 `GetInfo` from #18), PipeWire AEC, portal capabilities, library versions, Arabic font check, `.deb` install path. Not exercised on a real desktop (`setup` has only run against fakes).
 ### 2026-11-22: #36 config loader and log API
 Done: `ya_bro.config` (stdlib dataclasses + `tomllib`, global `config.toml` with per-app `apps/<id>.toml` overrides, unknown keys and bad values warn and fall back to defaults) and `ya_bro.logs` (typed JSONL records, short tokens and numbers only, free text raises `ContentError`, file mode 0600). Tests in `tests/test_config_logs.py`.
-Not done: `ya-bro config get/set/edit` CLI, live reload, `--debug-content`, SQLite state, retention (later issues). Pydantic was not added; dataclasses keep core dependency-free.
+Not done: `broctl config get/set/edit` CLI, live reload, `--debug-content`, SQLite state, retention (later issues). Pydantic was not added; dataclasses keep core dependency-free.
 
 ### 2026-11-22: #16 project skeleton
 Done:
