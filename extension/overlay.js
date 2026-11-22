@@ -73,6 +73,11 @@ export class Overlay {
         this._dbus = null;
     }
 
+    hideIfFollowing(windowId) {
+        if (this._visible && this._follow.window === windowId)
+            this.hide();
+    }
+
     stepMatches(windowId, serial) {
         return this._visible && this._follow.window === windowId && this._follow.serial === serial;
     }

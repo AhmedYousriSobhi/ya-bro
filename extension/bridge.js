@@ -15,6 +15,7 @@ const XML = `<node><interface name="${IFACE}">
   <method name="GetInfo"><arg type="a{sv}" direction="out"/></method>
   <method name="ListWindows"><arg type="aa{sv}" direction="out"/></method>
   <method name="GetWindowTitle"><arg type="t" direction="in"/><arg type="u" direction="in"/><arg type="s" direction="out"/></method>
+  <method name="SetScopeTokens"><arg type="as" direction="in"/></method>
   <method name="GetMonitors"><arg type="a(iiiiidb)" direction="out"/></method>
   <method name="GetPointer"><arg type="(ii)" direction="out"/></method>
   <signal name="WindowsChanged"><arg type="at"/><arg type="at"/></signal>
@@ -52,11 +53,17 @@ export class Bridge {
         this._pendingGeometry = new Map();
         this._idle = 0;
         this._perWindow = new Map();
+        this._tokens = [];               // spike #47: in-memory only, never persisted
+        this._scoped = new Map();        // window -> last reported in-scope state
 
         this._dbus = Gio.DBusExportedObject.wrapJSObject(XML, this);
         this._dbus.export(connection, OBJECT_PATH);
 
         const display = global.display;
+        this._connect(settings, 'changed::allowed-apps', () => {
+            for (const win of this._perWindow.keys())
+                this._reeval(win);
+        });
         this._connect(display, 'notify::focus-window', () => this._onFocus());
         this._connect(display, 'window-created', (_d, w) => this._track(w, true));
         this._connect(Main.layoutManager, 'monitors-changed',
@@ -76,6 +83,8 @@ export class Bridge {
         for (const [win, ids] of this._perWindow)
             ids.forEach(id => win.disconnect(id));
         this._perWindow.clear();
+        this._tokens = [];
+        this._scoped.clear();
         this._dbus.unexport();
         this._dbus = null;
     }
@@ -107,12 +116,15 @@ export class Bridge {
         const geo = () => this._queueGeometry(win);
         ids.push(win.connect('position-changed', geo));
         ids.push(win.connect('size-changed', geo));
+        ids.push(win.connect('notify::title', () => this._reeval(win)));
         ids.push(win.connect('unmanaged', () => {
             this._perWindow.delete(win);
+            this._scoped.delete(win);
             if (this._isAllowed(win))
                 this._peers.emit(IFACE, 'WindowsChanged', V('(atat)', [[], [win.get_id()]]), SIGNAL_PEERS);
         }));
         this._perWindow.set(win, ids);
+        this._scoped.set(win, this._isAllowed(win));
         if (announce && this._isAllowed(win))
             this._peers.emit(IFACE, 'WindowsChanged', V('(atat)', [[win.get_id()], []]), SIGNAL_PEERS);
     }
@@ -146,11 +158,43 @@ export class Bridge {
         return win.get_gtk_application_id() ?? win.get_sandboxed_app_id() ?? win.get_wm_class() ?? '';
     }
 
+    // Token scope (spike #47): a window is also in scope while its title carries a live token that
+    // core pushed. Tokens need a live core, so they die with it without any cleanup message.
+    _hasToken(win) {
+        if (!this._tokens.length || !this._peers.hasCore())
+            return false;
+        const title = win.get_title() ?? '';
+        return this._tokens.some(t => title.includes(t));
+    }
+
     _isAllowed(win) {
         if (!win)
             return false;
         const id = this._appId(win);
-        return id !== '' && this._settings.get_strv('allowed-apps').includes(id);
+        if (id !== '' && this._settings.get_strv('allowed-apps').includes(id))
+            return true;
+        return this._hasToken(win);
+    }
+
+    // Report scope transitions (title change, tokens set or cleared) so core drops a window at once.
+    _reeval(win) {
+        const now = this._isAllowed(win);
+        if (this._scoped.get(win) === now)
+            return;
+        this._scoped.set(win, now);
+        this._peers.emit(IFACE, 'WindowsChanged',
+            V('(atat)', now ? [[win.get_id()], []] : [[], [win.get_id()]]), SIGNAL_PEERS);
+        if (!now)
+            this._overlay.hideIfFollowing(win.get_id());
+    }
+
+    SetScopeTokensAsync([tokens], invocation) {
+        if (!this._peers.allowed(invocation.get_sender(), ['Core']))
+            return deny(invocation);
+        this._tokens = tokens.filter(t => t.length >= 16).slice(0, 8);
+        for (const win of this._perWindow.keys())
+            this._reeval(win);
+        invocation.return_value(null);
     }
 
     _windowDict(win, stack) {

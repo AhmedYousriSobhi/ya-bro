@@ -24,8 +24,9 @@ The per-app allowlist (#43) gives Ya-Bro one or more whole apps. Tools such as w
 5. **Commands.** `broctl targets list|allow|revoke <id>` (follow-up). `broctl apps available` already lists installed app ids.
 
 ## Open questions (must be answered before Accepted)
-- **How the extension learns the active tab's origin.** The extension cannot read a URL. Candidates: (a) the page announces itself to core with a per-run token and core tells the extension which window id to allow (needs core to know which window is the tab); (b) read the URL bar through AT-SPI in the perceiver; (c) a browser extension. Not yet tested; (a) leaks nothing but needs a window-to-tab link.
-- **Window-title matching** is weak (titles are page-controlled, hence untrusted) and is not a safe key.
+- **How the extension learns the active tab's origin.** It cannot read a URL, so it does not try. Spike S8 tested a **secret title token**: core gives a random per-run token only to a request with the allowed `Origin`; the page puts it in `document.title`; core pushes live tokens to the extension (`Bridge1.SetScopeTokens`, core only, memory only); a window is in scope only while its title contains one, and leaves scope on the next title change. In the headless shell the window entered and left scope in about 25 ms and the removal was emitted ([findings](../research/spikes/S8-active-tab-scope.md)). **Not yet verified:** a real browser (the installed ones are snaps and cannot run under the harness), and the `Origin`-gated issuance.
+- **Why a title token is not the weak "match on title" idea.** Matching on page-controlled text is unsafe because any page can write it. A secret that only the allowed origin can obtain cannot be copied by another tab. The accepted leak: anything that reads window titles can see the token while that tab is active.
+- Other candidates (not tested): reading the URL bar over AT-SPI, a browser extension.
 - Browsers expose little content to AT-SPI unless started with accessibility flags (ADR-0021).
 
 ## Consequences
