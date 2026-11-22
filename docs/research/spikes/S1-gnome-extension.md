@@ -5,8 +5,8 @@ Date: 2026-11-22 · Environment: Ubuntu 26.04, GNOME Shell 50.1, Wayland. All me
 Raw numbers: [scale 1](S1-measurements-scale-1.json), [scale 1.5](S1-measurements-scale-1.5.json). Reproduce: `uv run pytest -m gnome_measure -s` (about 5 minutes).
 
 ## Verdict (provisional)
-**Overlay approach: go. Stop key: go with the stage fallback, pending a real-keyboard check. Coordinates: go for GTK on Wayland, open for everything else.**
-Not decided: the S1 go/no-go as a whole, because XWayland, Qt6 and Firefox are unresolved, a real-keyboard stop-key press was not confirmed, and the extension has not been loaded in the live session. #15 stays open.
+**Overlay approach: go. Stop key: go (with the stage fallback; confirmed with a real keyboard in the nested shell). Coordinates: go for GTK on Wayland, open for everything else.**
+Not decided: the S1 go/no-go as a whole, because XWayland, Qt6 and Firefox are unresolved and the extension has not been loaded in the live session (lock screen and fullscreen scanout unchecked). #15 stays open.
 
 ## What was built
 `extension/` (`Bridge1`, `Overlay1`, caller check, per-peer signals, rate limits, dead-man switch, stop key, Bézier pointer flight, `disable_unredirect` while visible) and the test tooling: `scripts/dev/headless-shell.sh`, `tests/fixtures/shell_contract.py` (fast contract test, `pytest -m gnome`), `tests/fixtures/measure.py` + `shellkit.py` + `apps/toolkit_fixture.py` (measurements, `pytest -m gnome_measure`).
@@ -57,11 +57,11 @@ Plus, from the contract test: non-peer callers get `AccessDenied`; draw rate lim
 A nested shell in a `mutter-devkit` window on the real desktop (`YB_DEVKIT=1`; private bus, runtime dir and display; only the nested shell sees the host socket). It ran the same extension on the real GPU.
 - Extension loads, `GetInfo`, frame grabs and injected input work. Stop key: see problem 1 (5/5 after the fix).
 - **Frame rate:** screen-cast frame interval during a 1 s pointer flight: **median 8.4 ms, max 12.8 ms (about 119 fps)** nested, against a median 33 ms (about 30 fps) in the software-rendered headless shell. The 60 fps target is met. This is the shell's repaint cadence as seen through the stream, not a display measurement, and per-frame handler cost (under 1 ms target) was not measured.
-- **A real keyboard was not confirmed:** a 75 s run waiting for manual `Super+Shift+Escape` presses recorded 0. This is inconclusive (the presses may not have been made, or the host may intercept the combo before the nested window sees it).
+- **Real keyboard confirmed:** in a 90 s run the maintainer pressed `Super+Shift+Escape` on their own keyboard in the nested window and the nested shell received **8 stop-key events** (an earlier 75 s run recorded 0 because the window was not in use). The host GNOME does not swallow the combo. The test cannot tell whether the binding or the stage fallback fired, only that the stop path works. No mouse clicks were recorded in that run (not required for this check). Camera device watcher: 0 opens.
 
 ## Not measured
 - Qt6 (no bindings installed) and Firefox.
-- Still outstanding on the real desktop: GPU scanout (`disable_unredirect` effect on a fullscreen video), lock screen, multi-monitor, and real-keyboard stop key. These need the extension installed in the live session (logout/login) or a manual nested run.
+- Still outstanding on the real desktop: GPU scanout (`disable_unredirect` effect on a fullscreen video), lock screen, and multi-monitor. These need the extension installed in the live session (logout/login) or a manual nested run.
 - Actor and signal leak counts after disable (only "still serving, no errors").
 - Popup item-level accuracy; ring across monitors.
 - The portal + libei path (S7).
