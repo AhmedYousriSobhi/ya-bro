@@ -23,7 +23,7 @@ KDE Plasma and X11 desktops are not supported yet.
 git clone https://github.com/AhmedYousriSobhi/ya-bro.git
 cd ya-bro
 uv sync
-uv run broctl --version        # prints: broctl 0.0.1
+uv run broctl --version        # prints: broctl 0.1.0
 ```
 
 Optional: `uv tool install --editable .` puts `broctl` on your PATH so you can drop the `uv run` below.
