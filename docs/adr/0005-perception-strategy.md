@@ -93,7 +93,7 @@ Verification has three outcomes:
 - **unknown after timeout** → ask "did that work?" rather than guessing.
 
 **5. Enabling accessibility.**
-- On first run, `ya-bro doctor` checks `org.a11y.Status.IsEnabled` and offers to set it, together with `toolkit-accessibility` on GNOME. This needs explicit user consent, because it is a persistent setting.
+- On first run, `broctl doctor` checks `org.a11y.Status.IsEnabled` and offers to set it, together with `toolkit-accessibility` on GNOME. This needs explicit user consent, because it is a persistent setting.
 - *Amended for GNOME-first (2026-11-20):* Ubuntu 26.04 ships at-spi2-core **2.60.4**, older than the 2.61.0 change where registering a listener flips `IsEnabled`. So on the reference platform, setup must set `org.gnome.desktop.interface toolkit-accessibility true` (persistent, currently `false` on the maintainer's machine) after consent, on the same screen as the extension consent (ADR-0023 §9). `IsEnabled` alone resets at logout. Qt apps also need `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1` or the a11y flag; Chromium/Electron need `--force-renderer-accessibility`. Never set `ScreenReaderEnabled`, so Orca's behaviour is untouched.
 - It also explains per-app flags: the Chromium/Electron `--force-renderer-accessibility` flag and the VS Code `editor.accessibilitySupport` setting.
 - Ya-Bro never edits other apps' launchers silently.

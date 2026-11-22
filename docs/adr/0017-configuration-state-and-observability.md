@@ -47,7 +47,7 @@ SPEC requires no telemetry by default. Logs must not capture content: "never typ
 2. **Config schema.**
    - Typed with Pydantic (or `msgspec`), validated at load time.
    - Unknown keys produce a warning, not a crash.
-   - `ya-bro config get/set/edit` CLI.
+   - `broctl config get/set/edit` CLI.
    - The settings UI (later) writes the same file.
    - Live reload is driven by a file-monitor signal from core.
    - Per-app files override global keys: `proactive.enabled`, `proactive.sensitivity`, `capture.allowed`, `do_it.allowed`, `humour`.
@@ -60,14 +60,14 @@ SPEC requires no telemetry by default. Logs must not capture content: "never typ
    - `ya-bro --debug` raises the log level.
    - `--debug-content` additionally records prompts, element lists and screenshots to `$XDG_STATE_HOME/ya-bro/debug/<timestamp>/`.
    - Content logging needs an explicit flag each run. It auto-expires after 24 h, shows a visible avatar badge while on, and is never on by default.
-   - `ya-bro sent` shows the "what was sent" log (ADR-0014).
+   - `broctl sent` shows the "what was sent" log (ADR-0014).
 5. **Local metrics.** These are computed from the logs. Nothing is exported.
    - Step latency percentiles.
    - Pointing outcomes per tier, including corrections.
    - Offers, acceptances and per-signal stats.
    - Token use and estimated cost per day.
-   - `ya-bro stats` prints them. They also feed the dogfood metrics in ADR-0010 and ADR-0008.
-6. **`ya-bro doctor`** reports:
+   - `broctl stats` prints them. They also feed the dogfood metrics in ADR-0010 and ADR-0008.
+6. **`broctl doctor`** reports:
    - session and backend selection (ADR-0002);
    - a11y bus status;
    - GNOME extension state, errors and API version (via `org.gnome.Shell.Extensions`), then layer-shell and KWin script availability (v0.2);
@@ -77,7 +77,7 @@ SPEC requires no telemetry by default. Logs must not capture content: "never typ
    - API key presence (never its value).
 
    Its output is safe to paste into a bug report.
-7. **Retention.** Logs are kept 7 days. Struggle state is kept 30 days. `ya-bro forget` deletes everything except config.
+7. **Retention.** Logs are kept 7 days. Struggle state is kept 30 days. `broctl forget` deletes everything except config.
 8. **Telemetry.** None. If ever added, it would need its own ADR, be opt-in, and be aggregate-only.
 
 ## Consequences
@@ -88,7 +88,7 @@ SPEC requires no telemetry by default. Logs must not capture content: "never typ
 ## Validation plan
 - A unit test asserts that log records contain no strings longer than N characters from untrusted sources.
 - A `doctor` snapshot test runs on CI fakes.
-- After one week of dogfooding, the maintainer can answer "why did the bro offer at 14:03?" from `ya-bro stats` and the logs alone.
+- After one week of dogfooding, the maintainer can answer "why did the bro offer at 14:03?" from `broctl stats` and the logs alone.
 
 ## Revisit if
 - Users want sync across machines (it would need an explicit design).

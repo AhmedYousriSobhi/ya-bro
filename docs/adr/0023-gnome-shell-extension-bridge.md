@@ -117,7 +117,7 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - **Core restarts** resync with `GetInfo` + `ListWindows`. The extension holds no step state apart from what is drawn.
 - **No synchronous D-Bus calls and no subprocesses** from the extension. All work is signal handlers plus O(windows) loops. Every handler is wrapped in `try/catch` and logs through `console.error`, so an exception cannot escape into the shell.
 - **Lock screen.** `user` session mode only, so the extension is disabled on lock and re-enabled on unlock. Core treats `NameOwnerChanged` as "overlay gone" and redraws the current step after unlock.
-- **Errors.** `ya-bro doctor` reads `org.gnome.Shell.Extensions.GetExtensionInfo(uuid)` (state) and `GetExtensionErrors(uuid)`.
+- **Errors.** `broctl doctor` reads `org.gnome.Shell.Extensions.GetExtensionInfo(uuid)` (state) and `GetExtensionErrors(uuid)`.
 
 | Failure | Behaviour |
 |---|---|
@@ -134,7 +134,7 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - Track gjs.guide port guides each March and September. Budget about 1 day per GNOME release.
 
 ### 9. Install, enable and first-run consent
-1. `ya-bro setup` explains in plain words what the extension can see (window positions, app ids, pointer) and what it cannot (screen pixels, typing, window contents), then asks.
+1. `broctl setup` explains in plain words what the extension can see (window positions, app ids, pointer) and what it cannot (screen pixels, typing, window contents), then asks.
 2. **Files.** From a source or `uv tool` install: copy `extension/` to `~/.local/share/gnome-shell/extensions/<uuid>/` and compile `schemas/` with `glib-compile-schemas`. From the .deb: shipped in `/usr/share/gnome-shell/extensions/<uuid>/` (ADR-0015).
 3. **Enable.** Append the UUID to `org.gnome.shell enabled-extensions`. On Wayland a running shell does not discover a newly installed extension directory, and GNOME Shell cannot restart while the user is logged in (gjs.guide debugging page), so **one logout/login is required** the first time. `gnome-extensions enable` / `EnableExtension` works without logout only once the shell already knows the UUID (unverified in detail; checked in S1).
 4. After login, doctor confirms state ENABLED and an `api` match. Updates to the extension code also need a re-login.

@@ -1,4 +1,4 @@
-"""Linux/GNOME probes for `ya-bro doctor` and consent-gated `ya-bro setup` (ADR-0005, ADR-0023 §9).
+"""Linux/GNOME probes for `broctl doctor` and consent-gated `broctl setup` (ADR-0005, ADR-0023 §9).
 
 Everything shells out through an injectable `Runner`, so tests never touch the real session
 bus, gsettings or the filesystem outside a temp dir (CLAUDE.md harness rules).
@@ -60,7 +60,7 @@ def a11y_bus(runner: Runner) -> list[Check]:
             "toolkit-accessibility",
             "ok" if toolkit else "warn",
             out or ("gsettings unavailable" if rc else "unknown"),
-            "" if toolkit else "run `ya-bro setup` (asks first)",
+            "" if toolkit else "run `broctl setup` (asks first)",
         )
     ]
     rc, out = runner(
@@ -87,7 +87,7 @@ def extension_state(runner: Runner) -> Check:
     )
     if rc != 0 or "'state'" not in out:
         return Check(
-            "extension", "warn", "not known to the shell", "run `ya-bro setup`, then re-login"
+            "extension", "warn", "not known to the shell", "run `broctl setup`, then re-login"
         )
     states = {1: "ENABLED", 2: "DISABLED", 3: "ERROR", 4: "OUT_OF_DATE", 5: "DOWNLOADING"}
     m = re.search(r"'state': <(?:double )?(\d+)(?:\.0)?>", out)
@@ -167,33 +167,72 @@ def _ext_gsettings(target: Path) -> list[str]:
     return ["gsettings", "--schemadir", str(target / "schemas")]
 
 
-def allow_app(
-    runner: Runner, app_id: str, target: Path | None = None, config_dir: Path | None = None
-) -> str:
-    """Allowlist exactly this app in the extension and mark it allowed in its app config."""
-    if not valid_app_id(app_id):
-        return f"invalid app id {app_id!r}; nothing allowed"
-    target = target or extension_target()
-    rc, _ = runner([*_ext_gsettings(target), "set", SCHEMA_EXT, "allowed-apps", str([app_id])])
+def get_allowed(runner: Runner, target: Path | None = None) -> list[str] | None:
+    """Current allowlist, or None when the extension schema cannot be read."""
+    rc, out = runner(
+        [*_ext_gsettings(target or extension_target()), "get", SCHEMA_EXT, "allowed-apps"]
+    )
     if rc != 0:
-        return "could not write the extension allowlist (install the extension first)"
+        return None
+    try:
+        return list(ast.literal_eval(out.removeprefix("@as "))) if out else []
+    except (ValueError, SyntaxError):
+        return None
+
+
+def set_allowed(runner: Runner, apps: list[str], target: Path | None = None) -> bool:
+    cmd = [*_ext_gsettings(target or extension_target()), "set", SCHEMA_EXT, "allowed-apps"]
+    return runner([*cmd, str(apps)])[0] == 0
+
+
+def _write_app_config(app_id: str, allowed: bool, config_dir: Path | None) -> None:
     root = (config_dir or dirs.config_dir()) / "apps"
     root.mkdir(parents=True, exist_ok=True)
-    (root / f"{app_id}.toml").write_text("[capture]\nallowed = true\n")
-    return f"Ya-Bro may now see only: {app_id}"
+    (root / f"{app_id}.toml").write_text(f"[capture]\nallowed = {str(allowed).lower()}\n")
+
+
+def allow_app(
+    runner: Runner,
+    app_id: str,
+    target: Path | None = None,
+    config_dir: Path | None = None,
+    replace: bool = True,
+) -> str:
+    """Add an app to the extension allowlist (`replace`: make it the only one) and its config."""
+    if not valid_app_id(app_id):
+        return f"invalid app id {app_id!r}; nothing allowed"
+    current = [] if replace else get_allowed(runner, target)
+    if current is None or not set_allowed(runner, [*dict.fromkeys([*current, app_id])], target):
+        return "could not write the extension allowlist (install the extension first)"
+    _write_app_config(app_id, True, config_dir)
+    return f"Ya-Bro may now see: {', '.join(get_allowed(runner, target) or [app_id])}"
+
+
+def revoke_app(
+    runner: Runner, app_id: str, target: Path | None = None, config_dir: Path | None = None
+) -> str:
+    current = get_allowed(runner, target)
+    if current is None:
+        return "could not read the extension allowlist"
+    if app_id not in current:
+        return f"{app_id} was not allowed"
+    if not set_allowed(runner, [a for a in current if a != app_id], target):
+        return "could not write the extension allowlist"
+    _write_app_config(app_id, False, config_dir)
+    return f"revoked {app_id}"
 
 
 def allowed_apps_check(runner: Runner, target: Path | None = None) -> Check:
     target = target or extension_target()
     rc, out = runner([*_ext_gsettings(target), "get", SCHEMA_EXT, "allowed-apps"])
     if rc != 0:
-        return Check("allowed apps", "warn", "extension schema not installed", "run `ya-bro setup`")
+        return Check("allowed apps", "warn", "extension schema not installed", "run `broctl setup`")
     try:
         apps = ast.literal_eval(out.removeprefix("@as ")) if out else []
     except (ValueError, SyntaxError):
         return Check("allowed apps", "warn", "unreadable")
     if not apps:
         return Check(
-            "allowed apps", "warn", "none: Ya-Bro sees no app", "run `ya-bro setup` and name one"
+            "allowed apps", "warn", "none: Ya-Bro sees no app", "run `broctl setup` and name one"
         )
     return Check("allowed apps", "ok", ", ".join(apps))

@@ -51,7 +51,7 @@ The first version of this ADR (same day, PR #14) chose **KWin Wayland (Plasma �
 3. **Second target: KWin Wayland (Plasma ≥ 6.6), in v0.2.** It uses the KWin script bridge (ADR-0004) and the `gtk4-layer-shell` overlay (ADR-0006), driven by the same draw protocol. wlroots/Hyprland are best-effort on the same layer-shell backend.
 4. **X11 is CI-only.** Xvfb stays as the cheapest headless display for AT-SPI and core tests (ADR-0016). There is no X11 product target and no X11 acceptance gate. No feature may depend on an X11-only capability.
 5. **GNOME support window.** Reference 50. Support 48–51 where CI is green (ADR-0023 §8). Older than 48 is out of scope.
-6. **Detect at runtime, pick by capability.** Probe D-Bus names (`org.gnome.Shell`, our extension's name, `org.kde.KWin`) and Wayland globals (`zwlr_layer_shell_v1`) rather than trusting `XDG_CURRENT_DESKTOP` alone (it reads `ubuntu:GNOME` here). `ya-bro doctor` prints the chosen backends (ADR-0017).
+6. **Detect at runtime, pick by capability.** Probe D-Bus names (`org.gnome.Shell`, our extension's name, `org.kde.KWin`) and Wayland globals (`zwlr_layer_shell_v1`) rather than trusting `XDG_CURRENT_DESKTOP` alone (it reads `ubuntu:GNOME` here). `broctl doctor` prints the chosen backends (ADR-0017).
 7. **Development loop:** a nested `gnome-shell --devkit` session for extension work (ADR-0023 §10). Dogfood in the real session.
 
 ## Consequences

@@ -1,4 +1,4 @@
-"""`ya-bro doctor` report and `ya-bro setup` consent flow (ADR-0017 §6, ADR-0014)."""
+"""`broctl doctor` report and `broctl setup` consent flow (ADR-0017 §6, ADR-0014)."""
 
 from __future__ import annotations
 
