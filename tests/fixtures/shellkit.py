@@ -114,7 +114,11 @@ class Shell:
         return self.call(BRIDGE, "GetPointer")[0]
 
     # -- Mutter RemoteDesktop + ScreenCast (test-only injection and frame source)
-    def start_input(self, connector="Meta-0"):
+    def start_input(self, connector=None):
+        if connector is None:  # headless shells use Meta-0; a devkit shell names its own monitor
+            dc = "org.gnome.Mutter.DisplayConfig"
+            state = self.call(dc, "GetCurrentState", None, dc, "/org/gnome/Mutter/DisplayConfig")
+            connector = state[1][0][0][0]
         self.rd = self.call(RD, "CreateSession", None, RD, "/org/gnome/Mutter/RemoteDesktop")[0]
         sid = self.conn.call_sync(
             RD,

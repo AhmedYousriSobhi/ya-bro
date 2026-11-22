@@ -4,7 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13. Implementation is split three ways: the new issue "Spike S1: GNOME Shell extension bridge + overlay" (throwaway measurements); the new issue "GNOME Shell extension: skeleton, Bridge1, setup and CI" (§1–4, 7–10, including S3 and the dev loop); and **#3** (`Overlay1` renderer, ask window, docked fallback; §5–6).
 - Depends on: ADR-0002 (GNOME-first), ADR-0003, ADR-0004, ADR-0006, ADR-0014
-- Implementation status (S1, #15, provisional): prototype in `extension/`, measured in a headless shell. Click-through (0/1000 blocked), focus safety, stacking, ring placement (1.5 px) and GTK-on-Wayland coordinates (0.6 px) pass at 100% and 150%. The stop key binding is unreliable in the headless shell (cause unknown), `layout_mode` cannot be read by the extension, and XWayland, Qt6, Firefox and a real desktop are unverified. See [S1 findings](../research/spikes/S1-gnome-extension.md). Still Proposed.
+- Implementation status (S1, #15, provisional): prototype in `extension/`, measured in a headless shell. Click-through (0/1000 blocked), focus safety, stacking, ring placement (1.5 px) and GTK-on-Wayland coordinates (0.6 px) pass at 100% and 150%. Mutter drops the `addKeybinding` stop key in about half of fresh sessions (cause unknown), so a stage `captured-event` fallback is required (10/10 headless, 5/5 nested after the fix). A nested run on the real GPU measured a median 8.4 ms frame interval. `layout_mode` cannot be read by the extension, and XWayland, Qt6, Firefox, a real-keyboard check and the live session are unverified. See [S1 findings](../research/spikes/S1-gnome-extension.md). Still Proposed.
 - Refines: ADR-0004 §3 (GNOME row), ADR-0006 (`GnomeShellOverlay`)
 
 ## Context
@@ -56,7 +56,7 @@ Source facts that shape the design, read from `js/ui/layout.js` on the `gnome-50
 | Window list and geometry, focus, stacking order, monitors, scale, pointer position | AT-SPI, planning, LLM, persona, policy |
 | Drawing avatar, ring, pointer, bubble and state indicators as St/Clutter actors | Screen capture (stays on the portal, ADR-0005) |
 | Hit-testing on avatar and bubble buttons → events to core | Input injection (stays on AT-SPI actions / portal + libei, ADR-0009) |
-| Stop key binding (works even if core hangs) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
+| Stop key binding plus a stage `captured-event` fallback (works even if core hangs; Mutter alone dropped the binding in about half of test sessions) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
 | Dead-man switch: hide everything if core disappears | Settings UI (no `prefs.js` in v0.1) |
 
 ### 3. D-Bus API (session bus, versioned interfaces)

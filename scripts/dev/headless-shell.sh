@@ -3,7 +3,8 @@
 # Never touches the live session: private session bus, config, data and runtime dirs.
 # Usage: scripts/dev/headless-shell.sh <command> [args...]   (command runs with the shell up)
 # Env: YB_X11=1 enables XWayland; YB_SCALE=<f> enables fractional scaling support; YB_MONITOR=WxH sets the
-# virtual monitor size (default 1280x800); YB_GDK sets GDK_BACKEND for the command (default wayland).
+# virtual monitor size (default 1280x800); YB_DEVKIT=1 runs a nested shell in a mutter-devkit window on the real
+# desktop instead of a headless one (needs mutter-dev-bin); YB_GDK sets GDK_BACKEND for the command (default wayland).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 UUID="ya-bro@ahmedyousrisobhi.github.io"
@@ -11,6 +12,7 @@ UUID="ya-bro@ahmedyousrisobhi.github.io"
 export YB_ROOT="$ROOT" YB_UUID="$UUID"
 exec dbus-run-session -- bash -c '
 set -euo pipefail
+HOST_WL=${WAYLAND_DISPLAY:-}; HOST_RT=${XDG_RUNTIME_DIR:-}
 unset DISPLAY WAYLAND_DISPLAY XAUTHORITY
 T=$(mktemp -d); SHELL_PID=; PW_PID=; WP_PID=; YB_XDISP=
 trap "kill \$SHELL_PID \$WP_PID \$PW_PID 2>/dev/null; sleep 0.5; [ -n \"\${YB_XDISP:-}\" ] && rm -f /tmp/.X11-unix/X\${YB_XDISP#:} /tmp/.X\${YB_XDISP#:}-lock; rm -rf $T" EXIT
@@ -53,7 +55,14 @@ fi
 sleep 1
 gsettings set org.gnome.shell enabled-extensions "[\"$YB_UUID\"]" 2>/dev/null || true
 export GSETTINGS_SCHEMA_DIR=
-gnome-shell --headless --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) --virtual-monitor ${YB_MONITOR:-1280x800} >$T/shell.log 2>&1 &
+if [ "${YB_DEVKIT:-0}" = 1 ]; then
+  # Nested shell shown in a mutter-devkit window on the real desktop. Only this process sees the host
+  # socket (absolute path); everything else stays on the private display.
+  [ -n "$HOST_WL" ] && [ -S "$HOST_RT/$HOST_WL" ] || { echo "devkit mode needs a running Wayland session" >&2; exit 1; }
+  WAYLAND_DISPLAY="$HOST_RT/$HOST_WL" gnome-shell --devkit --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) >$T/shell.log 2>&1 &
+else
+  gnome-shell --headless --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) --virtual-monitor ${YB_MONITOR:-1280x800} >$T/shell.log 2>&1 &
+fi
 SHELL_PID=$!
 for i in $(seq 1 60); do
   gdbus call -e -d org.gnome.Shell -o /org/gnome/Shell -m org.freedesktop.DBus.Peer.Ping >/dev/null 2>&1 && break

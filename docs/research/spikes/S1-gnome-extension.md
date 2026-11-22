@@ -5,8 +5,8 @@ Date: 2026-11-22 · Environment: Ubuntu 26.04, GNOME Shell 50.1, Wayland. All me
 Raw numbers: [scale 1](S1-measurements-scale-1.json), [scale 1.5](S1-measurements-scale-1.5.json). Reproduce: `uv run pytest -m gnome_measure -s` (about 5 minutes).
 
 ## Verdict (provisional)
-**Overlay approach: go. Stop key: hold. Coordinates: go for GTK on Wayland, open for everything else.**
-Not decided: the S1 go/no-go as a whole, because the stop key is unreliable in the headless shell, XWayland, Qt6 and Firefox are not resolved, and nothing was checked on a real desktop. #15 stays open.
+**Overlay approach: go. Stop key: go with the stage fallback, pending a real-keyboard check. Coordinates: go for GTK on Wayland, open for everything else.**
+Not decided: the S1 go/no-go as a whole, because XWayland, Qt6 and Firefox are unresolved, a real-keyboard stop-key press was not confirmed, and the extension has not been loaded in the live session. #15 stays open.
 
 ## What was built
 `extension/` (`Bridge1`, `Overlay1`, caller check, per-peer signals, rate limits, dead-man switch, stop key, Bézier pointer flight, `disable_unredirect` while visible) and the test tooling: `scripts/dev/headless-shell.sh`, `tests/fixtures/shell_contract.py` (fast contract test, `pytest -m gnome`), `tests/fixtures/measure.py` + `shellkit.py` + `apps/toolkit_fixture.py` (measurements, `pytest -m gnome_measure`).
@@ -48,14 +48,20 @@ Median error in px of "origin from the bridge + AT-SPI `WINDOW` extents" against
 Plus, from the contract test: non-peer callers get `AccessDenied`; draw rate limit works (60/s); dead-man hides at 6.4 s; core name loss hides in 0.8 s; 20 disable/enable cycles keep serving with no extension errors.
 
 ## Open problems
-1. **Stop key is unreliable in the headless shell.** `Super+Shift+Escape` fired in 50/50 trials in some sessions (median 7 ms, p95 8.2 ms) and 0/50 in others, with identical setup; across about 15 fresh sessions roughly 40 to 50% worked. Evidence it is the binding, not the harness: injected keys work (a Super tap opens the overview), GNOME's own `Super+A` worked in 5/5 sessions, settle delays do not help, rebinding to `Ctrl+Alt+F11` live did not make it reliable, and re-enabling the extension fixed one failing session but not another. Cause unknown. It must be checked on a real desktop before the stop key is trusted. The committed 100% JSON records a 0/50 run; the 150% JSON records 50/50. `ADR-0011` already lists the GlobalShortcuts portal as an alternative.
+1. **Stop key: Mutter drops the shell-added binding in about half of fresh sessions; fixed with a stage fallback.** With only the `Main.wm.addKeybinding` binding, `Super+Shift+Escape` worked in about 40 to 50% of fresh sessions, in the headless shell and in a nested `--devkit` shell on the real display (2 of 5). Registration was identical in good and bad sessions (valid action id, correct value). Key-event logging showed the difference: in good sessions the Escape key-down never reached the stage (the binding consumed it); in bad ones it reached the stage with the correct modifiers (`state=0x41`, Super+Shift) and keycode, so Mutter simply did not match it. GNOME's own `Super+A` worked in every session, settle delays and a different combo did not help. Fix: `extension.js` also matches the combo from the stage's `captured-event` (if the binding fires the stage never sees the key, so there is no double trigger). After the fix: **10/10 headless sessions and 5/5 nested real-display sessions**, latency median 7 ms, p95 8.2 ms. Limits: the fallback matches the default combo only (a user-customised key uses the binding alone), and the root cause inside Mutter is unknown. `ADR-0011` still lists the GlobalShortcuts portal as an alternative.
 2. **GTK4 `EventControllerMotion` coordinates disagreed with click coordinates** by a constant (17, 5) px in an early probe. They were not used as ground truth; the click path agreed with toolkit bounds exactly. Unexplained.
 3. **`layout_mode` is `unknown`.** The extension cannot read Mutter's layout mode; Mutter reports `layout-mode: 1` (logical) in `org.gnome.Mutter.DisplayConfig.GetCurrentState` at 150%. Core should read it there. Stage coordinates were logical at 150% (rings aligned at 1.5 px).
 4. **`BecomeMonitor` sees unicast signals.** A non-peer match rule received 0 Ya-Bro signals, but a same-user process that calls `BecomeMonitor` saw 6 to 7 (window ids, pids, app ids). This is the residual same-user risk ADR-0023 §11 already accepts; it is now measured.
 
+## Nested real-display run (mutter-devkit, GNOME 50.1)
+A nested shell in a `mutter-devkit` window on the real desktop (`YB_DEVKIT=1`; private bus, runtime dir and display; only the nested shell sees the host socket). It ran the same extension on the real GPU.
+- Extension loads, `GetInfo`, frame grabs and injected input work. Stop key: see problem 1 (5/5 after the fix).
+- **Frame rate:** screen-cast frame interval during a 1 s pointer flight: **median 8.4 ms, max 12.8 ms (about 119 fps)** nested, against a median 33 ms (about 30 fps) in the software-rendered headless shell. The 60 fps target is met. This is the shell's repaint cadence as seen through the stream, not a display measurement, and per-frame handler cost (under 1 ms target) was not measured.
+- **A real keyboard was not confirmed:** a 75 s run waiting for manual `Super+Shift+Escape` presses recorded 0. This is inconclusive (the presses may not have been made, or the host may intercept the combo before the nested window sees it).
+
 ## Not measured
 - Qt6 (no bindings installed) and Firefox.
-- A real desktop: GPU scanout (`disable_unredirect` effect on a fullscreen video), lock screen, real fps (headless is software-rendered, so fps numbers would mean nothing), multi-monitor.
+- Still outstanding on the real desktop: GPU scanout (`disable_unredirect` effect on a fullscreen video), lock screen, multi-monitor, and real-keyboard stop key. These need the extension installed in the live session (logout/login) or a manual nested run.
 - Actor and signal leak counts after disable (only "still serving, no errors").
 - Popup item-level accuracy; ring across monitors.
 - The portal + libei path (S7).
@@ -68,5 +74,6 @@ Plus, from the contract test: non-peer callers get `AccessDenied`; draw rate lim
 ## Corrections to ADR-0023
 - `GetMonitors` signature is `a(iiiiidb)`.
 - `wrapJSObject` methods named `FooAsync` receive `(args, invocation)`; `a{sv}` values arrive as `GLib.Variant`.
+- The stop key needs a stage `captured-event` fallback next to `addKeybinding` (see problem 1).
 - `Overlay1.Visible` is replaced by a gated `GetState()` method (`visible`, `overview`, `unredirect_disabled`), readable by Core and Perceiver only.
 - A headless shell works without `mutter-dev-bin` or sudo, if it gets a private `XDG_RUNTIME_DIR`, PipeWire plus a camera-masked WirePlumber (needed to link screen-cast streams), and its own Xwayland.
