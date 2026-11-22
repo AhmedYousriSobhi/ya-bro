@@ -190,3 +190,7 @@ def test_picker_empty_skips_and_bad_number_searches_again():
 def test_picker_no_match_then_trusts_typed_id():
     app, out = run_picker(["zzzz", "org.example.Known"])
     assert app == "org.example.Known" and any("no installed app" in x for x in out)
+
+
+def test_picker_enter_takes_the_only_match():
+    assert run_picker(["gimp", ""])[0] == "org.gimp.GIMP"

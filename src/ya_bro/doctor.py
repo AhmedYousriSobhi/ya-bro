@@ -64,7 +64,9 @@ def choose_app(
             say(f"  {n:2}. {a.name}  [{a.wm_class or a.app_id}]")
         if len(hits) > len(shown):
             say(f"  ... {len(hits) - len(shown)} more, type more letters to narrow")
-        pick = ask("Number to allow (Enter = search again): ").strip()
+        default = "1" if len(shown) == 1 else ""
+        hint = "Enter = 1" if default else "Enter = search again"
+        pick = ask(f"Number to allow ({hint}): ").strip() or default
         if pick.isdigit() and 1 <= int(pick) <= len(shown):
             a = shown[int(pick) - 1]
             return a.wm_class or a.app_id  # the id the window actually presents
