@@ -272,3 +272,65 @@ async def test_a_pre_done_step_arms_once_it_is_seen_undone():
     assert not task.done()
     perception.texts[DISPLAY] = "7"  # now typed by the user
     assert await asyncio.wait_for(task, 2) is Outcome.DONE
+
+
+SETTLE = Timing(poll=0.01, nudge=30.0, settle=0.05)
+
+
+def build_watch(display, steps):
+    perception = FakePerception(
+        {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: display}
+    )
+    overlay = FakeOverlay()
+    loop = StepLoop(perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE)
+    return perception, overlay, loop, Plan("g", list(steps))
+
+
+async def test_a_wrong_action_is_noticed_and_corrected_without_skipping():
+    perception, overlay, loop, plan = build_watch("", [text_step("7")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    perception.texts[DISPLAY] = "5"  # pressed the wrong key
+    await asyncio.sleep(0.2)
+    last = overlay.calls[-1][2]
+    assert "not what I asked" in last and "“7”" in last and not task.done()
+    perception.texts[DISPLAY] = ""  # undone: the message goes away
+    await asyncio.sleep(0.2)
+    assert overlay.calls[-1][2] == "(1/1) Press 7."
+    perception.texts[DISPLAY] = "7"
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE
+
+
+async def test_a_wrong_action_is_not_flagged_before_it_settles():
+    perception, overlay, loop, plan = build_watch("", [text_step("75")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    perception.texts[DISPLAY] = "7"  # on the way to "75": the first digit is fine
+    await asyncio.sleep(0.02)
+    perception.texts[DISPLAY] = "75"
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE
+    assert not any("not what I asked" in c[2] for c in overlay.calls if c[0] == "show_step")
+
+
+async def test_next_after_a_wrong_action_goes_on_without_a_second_press():
+    perception, overlay, loop, plan = build_watch("", [text_step("7"), text_step("7x")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    perception.texts[DISPLAY] = "5"
+    await asyncio.sleep(0.2)
+    overlay.push("next")
+    await settle()
+    assert overlay.calls[-1][2].startswith("(2/2)")
+    task.cancel()
+
+
+async def test_clearing_an_old_result_is_not_a_wrong_action():
+    perception, overlay, loop, plan = build_watch("7", [text_step("7")])  # already done at start
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    assert "already looks done" in overlay.calls[-1][2]
+    perception.texts[DISPLAY] = ""  # the user clears it, as asked
+    await asyncio.sleep(0.2)
+    assert not any("not what I asked" in c[2] for c in overlay.calls if c[0] == "show_step")
+    perception.texts[DISPLAY] = "7"
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE

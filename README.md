@@ -40,7 +40,7 @@ uv run broctl apps allow org.gnome.Calculator
 gnome-calculator &
 uv run broctl show examples/plans/calculator.toml
 ```
-Press **C** first so the display is empty. The bro points at one key at a time ("multiply 7 by 6"). It reads the display, so when you press the key it moves on by itself. If you press **Next** without doing the step, it says it doesn't see it yet and only skips if you press Next again. **Why?** explains the step, **Repeat** shows it again, **Stop** (or Super+Shift+Esc) ends it. The ring leaves when the last step is done.
+Press **C** first so the display is empty. The bro points at one key at a time ("multiply 7 by 6"). It reads the display, so when you press the key it moves on by itself. If you press **Next** without doing the step, it says it doesn't see it yet and only skips if you press Next again. If you press a different key, it tells you what it expected and waits for you to undo it (or press Next to go on). **Why?** explains the step, **Repeat** shows it again, **Stop** (or Super+Shift+Esc) ends it. The ring leaves when the last step is done.
 
 ![Ya-Bro walking through 7 × 6 in GNOME Calculator: the ring and bubble move key by key, then leave](docs/assets/show-me-calculator.gif)
 

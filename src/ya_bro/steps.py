@@ -27,6 +27,7 @@ class Outcome(StrEnum):
 @dataclass(frozen=True)
 class Timing:
     poll: float = 0.3  # how often to re-check the screen
+    settle: float = 0.6  # a changed screen must hold this long before we call it a wrong action
     nudge: float = 90.0  # after this long, say we are still waiting (never skips on its own)
 
 
@@ -94,6 +95,14 @@ class StepLoop:
         )
         return bool(found) == step.expect.appears
 
+    async def _fingerprint(self, step: Step, app_id: str) -> tuple[str, ...] | None:
+        """What the step's expect element(s) show now; None when there is no text to watch."""
+        e = step.expect
+        if e is None or not e.text or not e.appears:
+            return None
+        refs = await self._perception.find(app_id, e.role, e.name)
+        return tuple([await self._perception.read_text(r) for r in refs])
+
     def _text(self, step: Step, rect: Rect | None, count: str) -> str:
         if step.target is None or rect is not None:
             return f"{count} {step.narration}"
@@ -118,6 +127,9 @@ class StepLoop:
         armed = False
         predone = False
         warned = False
+        baseline: tuple[str, ...] | None = None
+        changed_since: float | None = None
+        mismatch = False
         self._log("step_start", step=index)
         while True:
             if not await self._in_scope():
@@ -133,14 +145,35 @@ class StepLoop:
                     self._log("step_verified", step=index)
                     return "verified"
                 if not done:
+                    if (
+                        predone
+                    ):  # the old result was cleared: what is on screen now is the new start
+                        baseline = None
                     armed, predone = True, False
                 elif not armed and not predone:
                     predone = True
                     self._log("step_predone", step=index)
+                fp = await self._fingerprint(step, app_id)
+                if fp is not None and baseline is None:
+                    baseline = fp
+                if fp is not None and not done and fp != baseline:
+                    # The screen changed, but not to what this step wants: say so once it settles.
+                    changed_since = changed_since if changed_since is not None else loop.time()
+                    if not mismatch and loop.time() - changed_since >= self._timing.settle:
+                        mismatch = True
+                        self._log("step_mismatch", step=index)
+                else:
+                    changed_since, mismatch = None, False
                 rect = await self._locate(step, app_id)
                 text = extra or self._text(step, rect, count)
                 if predone and not extra:
                     text = f"{count} This already looks done. Press Next to continue."
+                if mismatch and not extra:
+                    want = step.expect.text if step.expect else ""
+                    text = (
+                        f"{count} That's not what I asked for. I expected “{want}” on screen. "
+                        "Undo it, or press Next to go on."
+                    )
                 if (rect, text) != shown:
                     await self._overlay.show_step(rect, text, BUTTONS)
                     shown = (rect, text)
@@ -154,7 +187,7 @@ class StepLoop:
             if event == "stop":
                 return "stop"
             if event == "next":
-                if step.expect is None or predone or warned:
+                if step.expect is None or predone or warned or mismatch:
                     return "next"
                 # Next on a step the screen does not show done: ask once, skip on the second press.
                 warned = True

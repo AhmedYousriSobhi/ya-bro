@@ -32,6 +32,9 @@ class FakePerception:
     async def locate(self, ref: ElementRef) -> Rect | None:
         return self.elements.get(ref)
 
+    async def read_text(self, ref: ElementRef) -> str:
+        return self.texts.get(ref, "")
+
 
 class FakeCompositorBridge:
     def __init__(self, windows: list[WindowInfo] | None = None) -> None:

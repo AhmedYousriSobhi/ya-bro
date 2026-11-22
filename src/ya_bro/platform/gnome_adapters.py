@@ -196,7 +196,8 @@ class AtspiPerception:
             walk(app, [], app.get_process_id(), 0)
         return found
 
-    def _locate(self, ref: ElementRef) -> Rect | None:
+    def _resolve(self, ref: ElementRef):
+        """(app, node, window) for a ref, or None when it moved, vanished or left scope."""
         try:
             pid_s, trail = ref.path.split(":", 1)
             pid = int(pid_s)
@@ -212,21 +213,30 @@ class AtspiPerception:
                 node = _child(node, i)
                 if node is None:
                     return None
-            if not _matches(node, ref.role, ref.name):
-                return None
-            ext = node.get_extents(Atspi.CoordType.WINDOW)
-            if ext.width <= 0 or ext.height <= 0:
-                return None
-            try:
-                toolkit = (app.get_toolkit_version() or "").split(".")[0]
-                name = (app.get_toolkit_name() or "").lower()
-            except GLib.Error:
-                toolkit, name = "", ""
-            # S1 measured: GTK4 and libadwaita extents start at the frame, GTK3 at the buffer.
-            origin = win["buffer"] if name == "gtk" and toolkit == "3" else win["frame"]
-            dx, dy = self._offset
-            return Rect(origin[0] + ext.x + dx, origin[1] + ext.y + dy, ext.width, ext.height)
+            return (app, node, win) if _matches(node, ref.role, ref.name) else None
         return None
+
+    def _read_text(self, ref: ElementRef) -> str:
+        found = self._resolve(ref)
+        return _text_of(found[1]) if found else ""
+
+    def _locate(self, ref: ElementRef) -> Rect | None:
+        found = self._resolve(ref)
+        if found is None:
+            return None
+        app, node, win = found
+        ext = node.get_extents(Atspi.CoordType.WINDOW)
+        if ext.width <= 0 or ext.height <= 0:
+            return None
+        try:
+            toolkit = (app.get_toolkit_version() or "").split(".")[0]
+            name = (app.get_toolkit_name() or "").lower()
+        except GLib.Error:
+            toolkit, name = "", ""
+        # S1 measured: GTK4 and libadwaita extents start at the frame, GTK3 at the buffer.
+        origin = win["buffer"] if name == "gtk" and toolkit == "3" else win["frame"]
+        dx, dy = self._offset
+        return Rect(origin[0] + ext.x + dx, origin[1] + ext.y + dy, ext.width, ext.height)
 
     async def find(
         self, app_id: str, role: str, name: str = "", text: str = ""
@@ -235,3 +245,6 @@ class AtspiPerception:
 
     async def locate(self, ref: ElementRef) -> Rect | None:
         return await asyncio.to_thread(self._locate, ref)
+
+    async def read_text(self, ref: ElementRef) -> str:
+        return await asyncio.to_thread(self._read_text, ref)

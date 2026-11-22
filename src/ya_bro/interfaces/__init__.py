@@ -22,6 +22,9 @@ class Perception(Protocol):
         ...
 
     async def locate(self, ref: ElementRef) -> Rect | None: ...
+    async def read_text(self, ref: ElementRef) -> str:
+        """The element's text now, empty when it has none or left scope."""
+        ...
 
 
 @runtime_checkable
