@@ -24,10 +24,13 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
-- Source code will live in `src/` (created by the first implementation issue)
+- `src/ya_bro/` — source (interfaces, types, ipc, dirs, cli; OS code only under `platform/`)
+- `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
+- `scripts/check.sh` — full validation; run after every edit and before every PR
+- `docs/PROGRESS.md` — status sheet, update in every PR; `docs/DEVELOPMENT.md` — setup and layout
 
 ## Tech stack (ADR-0001)
-Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run tests and `ruff check` before every PR.
+Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run `scripts/check.sh` before every PR. Core code must not import `gi`, `dbus` or `Xlib` (only `src/ya_bro/platform/**` may; ruff enforces it).
 
 ## Architecture rules (summary; details in SPEC.md)
 - Core loop: **perceive → plan → guide/act → confirm → next step**. One step at a time; never dump a wall of instructions.

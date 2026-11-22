@@ -21,3 +21,6 @@ node_modules/
 
 # local Claude Code state
 .claude/settings.local.json
+.pytest_cache/
+.ruff_cache/
+*.egg-info/

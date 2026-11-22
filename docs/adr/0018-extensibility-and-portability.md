@@ -4,6 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0001, ADR-0003, ADR-0004, ADR-0012
+- Implementation status (#16): Protocols in `src/ya_bro/interfaces/` (provisional surfaces, no entry-point registry yet); the `gi`/`dbus`/`Xlib` import ban is enforced by ruff `TID251` with a test; `dirs` helper and `IpcAdapter` Protocol exist. Not yet built: `ya_bro.backends` entry points and `probe()`.
 
 ## Context
 Ya-Bro is Linux-only for now, with macOS and Windows planned "later". CLAUDE.md requires OS-specific code to sit behind interfaces. SPEC v1.0 also promises a plugin API.

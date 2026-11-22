@@ -8,7 +8,7 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 
 *Concept sketch (source: `docs/assets/ya-bro-concept.svg`), not a final design.*
 
-**Status:** pre-alpha, spec phase. See [SPEC.md](SPEC.md).
+**Status:** pre-alpha. Project skeleton in place (interfaces, fakes, CI); no user-facing features yet. Progress: [docs/PROGRESS.md](docs/PROGRESS.md). See [SPEC.md](SPEC.md).
 
 ## Docs
 - [SPEC.md](SPEC.md) — what we're building and why
@@ -16,6 +16,8 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [docs/adr/](docs/adr/README.md) — architecture decisions, risks and MVP build plan
 - [docs/research/](docs/research/) — how other AI and non-AI tools work, and Linux platform facts
 - [CLAUDE.md](CLAUDE.md) — contributor/agent workflow (issues → PR to `dev` → release to `main`)
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — setup, validation script, layout
+- [docs/PROGRESS.md](docs/PROGRESS.md) — milestone and issue status
 - [CHANGELOG.md](CHANGELOG.md)
 
 ## Platform
