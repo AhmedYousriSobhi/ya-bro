@@ -7,8 +7,8 @@ Legend: done · in progress · todo
 ## Milestones
 | Milestone | Status | Issues |
 |---|---|---|
-| M0 Foundations | in progress | #16 skeleton (PR open), #17 doctor and setup (todo) |
-| M1 Spikes S1, S2, S3 | in progress | #15 (S1 partial, see log), #2, #18 |
+| M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (todo), #36 config and log API (todo) |
+| M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | todo | #4, #18 |
 | M3 Overlay | todo | #3 |
 | M4 Step loop | todo | #5, #19, #20 |
