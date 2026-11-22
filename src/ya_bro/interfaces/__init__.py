@@ -15,7 +15,12 @@ from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Step, Win
 
 @runtime_checkable
 class Perception(Protocol):
-    async def find(self, app_id: str, role: str, name: str) -> list[ElementRef]: ...
+    async def find(
+        self, app_id: str, role: str, name: str = "", text: str = ""
+    ) -> list[ElementRef]:
+        """Elements of the app with this role; name and text filter when given (text: contains)."""
+        ...
+
     async def locate(self, ref: ElementRef) -> Rect | None: ...
 
 

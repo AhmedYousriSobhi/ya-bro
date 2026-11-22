@@ -9,6 +9,7 @@ keywords = ["create", "job"]
 narration = "Click Create."
 target = {role = "button", name = "Create"}
 expect = {role = "button", name = "Confirm"}          # appears by default; appears = false for gone
+# or on text: expect = {role = "text", text = "42"}   (the element's text contains it)
 why = "Creating starts the wizard."
 risk = 0
 """
@@ -60,8 +61,13 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
             target = ElementRef(app, role, name)
         expect = None
         if "expect" in s:
-            role, name = _element(s["expect"], f"{where} expect")
-            expect = Expect(role, name, bool(s["expect"].get("appears", True)))
+            e = s["expect"]
+            if not isinstance(e, dict) or not isinstance(e.get("role"), str):
+                raise PlanError(f"{where} expect: needs a role")
+            name, text = e.get("name", ""), e.get("text", "")
+            if not isinstance(name, str) or not isinstance(text, str) or not (name or text):
+                raise PlanError(f"{where} expect: needs a name or a text")
+            expect = Expect(e["role"], name, bool(e.get("appears", True)), text)
         try:
             risk = Risk(int(s.get("risk", 0)))
         except ValueError as e:

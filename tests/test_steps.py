@@ -190,3 +190,85 @@ async def test_logging_uses_the_cli_signature_and_can_never_kill_the_loop():
         overlay.push("next")
         assert await asyncio.wait_for(task, 2) is Outcome.DONE
     assert ("step_event", {"step": 0, "kind": "next"}) in seen
+
+
+DISPLAY = ElementRef(APP, "text", "")
+
+
+def text_step(shown, **kw):
+    return Step(
+        intent="x",
+        narration="Press 7.",
+        target=CREATE,
+        expect=Expect("text", text=shown),
+        **kw,
+    )
+
+
+def build_text(display, steps):
+    perception = FakePerception(
+        {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: display}
+    )
+    overlay = FakeOverlay()
+    loop = StepLoop(perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), FAST)
+    return perception, overlay, loop, Plan("g", list(steps))
+
+
+async def test_a_step_verifies_from_element_text_and_advances_by_itself():
+    perception, overlay, loop, plan = build_text("", [text_step("7")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    assert not task.done()
+    perception.texts[DISPLAY] = "7"  # the user pressed the key: the display shows it
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE
+
+
+async def test_next_on_an_undone_step_asks_once_then_skips_on_the_second_press():
+    _, overlay, loop, plan = build_text("", [text_step("7"), text_step("7x")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    overlay.push("next")
+    await settle()
+    assert "don't see that yet" in overlay.calls[-1][2] and overlay.calls[-1][2].startswith("(1/2)")
+    assert not task.done()
+    overlay.push("next")
+    await settle()
+    assert overlay.calls[-1][2].startswith("(2/2)")  # the second Next skipped to step 2
+    task.cancel()
+
+
+async def test_repeat_forgets_the_warning():
+    _, overlay, loop, plan = build_text("", [text_step("7"), text_step("7x")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    overlay.push("next")
+    await settle()
+    overlay.push("repeat")
+    await settle()
+    overlay.push("next")
+    await settle()
+    assert overlay.calls[-1][2].startswith("(1/2)") and "don't see" in overlay.calls[-1][2]
+    task.cancel()
+
+
+async def test_a_step_that_is_already_done_waits_instead_of_advancing_by_itself():
+    perception, overlay, loop, plan = build_text("7", [text_step("7"), text_step("7x")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    assert "already looks done" in overlay.calls[-1][2] and overlay.calls[-1][2].startswith("(1/2)")
+    assert not task.done()
+    overlay.push("next")  # no warning: the screen does show it
+    await settle()
+    assert overlay.calls[-1][2].startswith("(2/2)")
+    task.cancel()
+
+
+async def test_a_pre_done_step_arms_once_it_is_seen_undone():
+    perception, overlay, loop, plan = build_text("7", [text_step("7")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    perception.texts[DISPLAY] = ""  # cleared
+    await settle()
+    assert not task.done()
+    perception.texts[DISPLAY] = "7"  # now typed by the user
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE

@@ -11,4 +11,4 @@ why = "Create opens the confirmation."
 [[step]]
 narration = "Now click Confirm."
 target = {role = "button", name = "Confirm"}
-expect = {role = "label", name = "Done"}
+expect = {role = "label", text = "Done"}        # verified from the label's text

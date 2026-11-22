@@ -50,8 +50,9 @@ class Expect:
     """What the screen should show once the user did the step (verified through Perception)."""
 
     role: str
-    name: str
+    name: str = ""  # empty: any name
     appears: bool = True  # False: the element is gone when the step is done
+    text: str = ""  # the element's text must contain this (e.g. a calculator display)
 
 
 @dataclass(frozen=True, slots=True)

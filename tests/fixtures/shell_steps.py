@@ -99,6 +99,17 @@ async def main():
     check("ring shown on step 1", await until(lambda: overlay.last_target is not None))
     t1 = overlay.last_target
     check("overlay visible", sh.state()["visible"] is True)
+    # Next before doing the step: the bro asks instead of skipping.
+    px = find_pixels(sh.grab(), BUTTON_BG, 6)
+    left = min(p[0] for p in px)
+    ys = [p[1] for p in px if p[0] < left + 6]
+    sh.click((left + 20) / sh.ratio, sum(ys) / len(ys) / sh.ratio)
+    check(
+        "Next on an undone step asks first",
+        await until(lambda: any("don't see that yet" in t for t in texts)),
+        str(texts[-1:]),
+    )
+    check("it stayed on step 1", not any(t.startswith("(2/2)") for t in texts))
     sh.click(*t1.center)  # the user follows the ring
     # Confirm sits where Create was, so the proof of advance is the narration, not the rectangle.
     check(
