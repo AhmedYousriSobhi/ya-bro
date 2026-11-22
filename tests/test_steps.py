@@ -168,3 +168,25 @@ async def test_r3_step_is_still_only_shown_never_acted():
     await settle()
     assert overlay.calls[0][0] == "show_step"  # show-me mode: the user does the click
     task.cancel()
+
+
+async def test_logging_uses_the_cli_signature_and_can_never_kill_the_loop():
+    seen = []
+
+    def cli_log(event, **fields):  # the shape broctl show uses: the first parameter is called event
+        seen.append((event, fields))
+
+    def broken_log(event, **fields):
+        raise RuntimeError("sink exploded")
+
+    for sink in (cli_log, broken_log):
+        perception = FakePerception({CREATE: Rect(1, 1, 2, 2)})
+        overlay = FakeOverlay()
+        loop = StepLoop(
+            perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), FAST, log=sink
+        )
+        task = asyncio.create_task(loop.run(Plan("g", [step()]), APP))
+        await settle()
+        overlay.push("next")
+        assert await asyncio.wait_for(task, 2) is Outcome.DONE
+    assert ("step_event", {"step": 0, "kind": "next"}) in seen

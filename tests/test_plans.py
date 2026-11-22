@@ -34,6 +34,19 @@ def test_load_builds_steps(tmp_path):
     assert plan.steps[1].target is None
 
 
+def test_extents_offset_is_read_validated_and_survives_rebind(tmp_path):
+    plan, _, _ = plans.load(
+        write(tmp_path, GOOD.replace("app = ", "extents_offset = [-12, -12]\napp = "))
+    )
+    assert plan.extents_offset == (-12, -12)
+    assert plans.rebind(plan, "x.App").extents_offset == (-12, -12)
+    assert plans.load(write(tmp_path, GOOD, "d.toml"))[0].extents_offset == (0, 0)
+    for bad in ("[1]", "[1, 2, 3]", '["a", 1]', "[500, 0]"):
+        text = GOOD.replace("app = ", f"extents_offset = {bad}\napp = ")
+        with pytest.raises(plans.PlanError):
+            plans.load(write(tmp_path, text, "b.toml"))
+
+
 def test_app_override_wins(tmp_path):
     plan, app, _ = plans.load(write(tmp_path, GOOD), "other.App")
     assert app == "other.App" and plan.steps[0].target.app_id == "other.App"

@@ -141,8 +141,9 @@ def _child(node, index: int):
 
 
 class AtspiPerception:
-    def __init__(self, bridge: GnomeBridge) -> None:
+    def __init__(self, bridge: GnomeBridge, offset: tuple[int, int] = (0, 0)) -> None:
         self._bridge = bridge
+        self._offset = offset
 
     def _pids(self, app_id: str) -> dict[int, dict]:
         """Allowed windows of this app by pid. Nothing else is ever walked."""
@@ -214,7 +215,8 @@ class AtspiPerception:
                 toolkit, name = "", ""
             # S1 measured: GTK4 and libadwaita extents start at the frame, GTK3 at the buffer.
             origin = win["buffer"] if name == "gtk" and toolkit == "3" else win["frame"]
-            return Rect(origin[0] + ext.x, origin[1] + ext.y, ext.width, ext.height)
+            dx, dy = self._offset
+            return Rect(origin[0] + ext.x + dx, origin[1] + ext.y + dy, ext.width, ext.height)
         return None
 
     async def find(self, app_id: str, role: str, name: str) -> list[ElementRef]:

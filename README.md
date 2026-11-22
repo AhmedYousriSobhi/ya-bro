@@ -34,6 +34,18 @@ uv run broctl scope watch      # prints when the allowed window appears and disa
 ```
 Both need the system `python3` with PyGObject (`sudo apt install python3-gi`) and stop if a real core is running.
 
+### Show-me: walk through a task
+```bash
+uv run broctl apps allow org.gnome.Calculator
+gnome-calculator &
+uv run broctl show examples/plans/calculator.toml
+```
+The bro points at one key at a time ("multiply 7 by 6"); do the step, then press **Next** in the bubble (steps with an `expect` advance by themselves when the screen shows the result). **Why?** explains the step, **Repeat** shows it again, **Stop** (or Super+Shift+Esc) ends it. The ring leaves when the last step is done.
+
+![Ya-Bro walking through 7 × 6 in GNOME Calculator: the ring and bubble move key by key, then leave](docs/assets/show-me-calculator.gif)
+
+*Recorded in the isolated headless shell with the real Calculator and the real step loop (`scripts/dev/record_demo.py`). Plan format: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#show-me-plans-broctl-show).*
+
 ## Doctor and setup
 `broctl doctor` reports what works and how to fix what does not (its output is safe to paste in a bug report). `broctl setup` asks before each persistent change (GNOME accessibility setting, Shell extension install) and needs one logout/login afterwards. Setup lets you search installed apps by name and pick one (or type an app id); the Shell extension reports only that app (default-deny, no app named = nothing reported). Note the GNOME accessibility setting itself is system-wide, and the extension code runs inside the shell, so this is enforced by Ya-Bro, not by the OS. The doctor checks only whether the `ANTHROPIC_API_KEY` environment variable is set, never its value; `.env` loading is not implemented yet.
 

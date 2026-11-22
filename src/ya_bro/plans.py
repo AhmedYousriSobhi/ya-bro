@@ -3,6 +3,7 @@
 [plan]
 goal = "create a job"
 app = "org.example.App"      # optional; broctl show --app overrides
+extents_offset = [0, 0]      # optional pixel correction for an app whose AT-SPI extents are off
 keywords = ["create", "job"]
 [[step]]
 narration = "Click Create."
@@ -77,7 +78,14 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
             )
         )
     keywords = [k.lower() for k in head.get("keywords", []) if isinstance(k, str)]
-    return Plan(goal=goal, steps=steps), app, keywords
+    offset = head.get("extents_offset", [0, 0])
+    if not (
+        isinstance(offset, list)
+        and len(offset) == 2
+        and all(isinstance(v, int) and abs(v) <= 100 for v in offset)
+    ):
+        raise PlanError("plan.extents_offset must be [dx, dy], whole pixels within 100")
+    return Plan(goal=goal, steps=steps, extents_offset=(offset[0], offset[1])), app, keywords
 
 
 class ScriptedBrain:
@@ -106,4 +114,4 @@ def rebind(plan: Plan, app_id: str) -> Plan:
     steps = [
         replace(s, target=replace(s.target, app_id=app_id)) if s.target else s for s in plan.steps
     ]
-    return Plan(plan.goal, steps)
+    return Plan(plan.goal, steps, plan.extents_offset)

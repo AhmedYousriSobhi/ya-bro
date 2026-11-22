@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #68 live trial of Show-me (GNOME Calculator)
+Done: ran `broctl show examples/plans/calculator.toml` on the real desktop; the maintainer followed the ring through 7 × 6 = 42 and it left when the plan ended. Two bugs found and fixed: a logging crash on the first button press, and Calculator's extents 12 px off (S9, `extents_offset`). Reference GIF recorded.
+Not done: the 12 px cause is unknown and only Calculator is corrected (Text Editor and Files exposed no buttons to the probe); the bubble can hang off the bottom or right edge of the screen (no flipping yet); steps in the example advance only on Next because the display text cannot be an `expect` yet.
+
 ### 2026-11-22: #66 Show-me step loop
 Done: `StepLoop` (core, interfaces only), TOML plans + `ScriptedBrain`, `ShowMePolicy`, GNOME adapters (`GnomeBridge`, `GnomeOverlay` with user events and 2 s keepalive, `AtspiPerception` enforcing scope itself), `broctl show`. Overlay interface gained buttons and an event stream. 11 unit tests with fakes; headless-shell end to end (15 checks, 3 runs in a row): scope, ring on the right button (the click at its centre advances the plan), the bubble's Stop button, hidden at the end.
 Not done: the Claude brain (#5 stays open), Do-it, voice; non-GTK apps and browsers are unmeasured (browsers need the page to report its state, #31, or a11y flags); multi-window apps pick the focused window; popups and menus; not run on the live desktop yet.
