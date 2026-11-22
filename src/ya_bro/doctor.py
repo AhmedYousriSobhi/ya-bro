@@ -10,13 +10,16 @@ MARK = {"ok": "ok  ", "warn": "WARN", "fail": "FAIL", "info": "info"}
 
 SETUP_STEPS: list[tuple[str, str, Callable[[ls.Runner], str]]] = [
     (
-        "Turn on GNOME toolkit accessibility (persistent setting) so Ya-Bro can read app UIs.",
+        "Turn on GNOME toolkit accessibility. This is a persistent, SYSTEM-WIDE setting: every "
+        "app will expose its UI tree. Per-app limits are not enforced yet (tracked in the "
+        "per-app scoping issue), so only continue if you accept that.",
         "enable accessibility",
         ls.enable_a11y,
     ),
     (
-        "Install the Ya-Bro Shell extension. It sees window positions, app ids and the pointer; "
-        "it cannot see screen pixels, typing or window contents.",
+        "Install the Ya-Bro Shell extension. It can see the position and app id of ALL windows "
+        "(not one app) and the pointer; it cannot see screen pixels, typing or window contents. "
+        "Limiting it to allowed apps is not enforced yet.",
         "install extension",
         ls.install_extension,
     ),
