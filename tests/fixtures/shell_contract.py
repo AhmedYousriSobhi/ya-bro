@@ -157,6 +157,74 @@ if win:
     wins = call(core, BRIDGE, "ListWindows").unpack()[0]
     check("allowed app listed again", any(w["pid"] == fixture.pid for w in wins))
 
+# 3c. Token scope (spike #47): a window whose app is NOT allowed enters scope only while its title
+# carries a token that core pushed, and leaves the moment the title changes.
+TOKEN = "yb-" + "a1b2c3d4e5f6a7b8"
+changes = []
+core.signal_subscribe(
+    None,
+    BRIDGE,
+    "WindowsChanged",
+    PATH,
+    None,
+    Gio.DBusSignalFlags.NONE,
+    lambda *a: changes.append((time.monotonic(), a[5].unpack())),
+)
+tab = subprocess.Popen(
+    ["/usr/bin/python3", os.path.join(HERE, "apps", "title_fixture.py")],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+    text=True,
+)
+
+
+def listed():
+    wins = call(core, BRIDGE, "ListWindows").unpack()[0]
+    return next((w for w in wins if w["pid"] == tab.pid), None)
+
+
+def wait_for(pred, limit=5.0):
+    start = time.monotonic()
+    while time.monotonic() - start < limit:
+        pump(0.01)
+        if pred():
+            return time.monotonic() - start
+    return None
+
+
+def set_title(text):
+    tab.stdin.write(text + "\n")
+    tab.stdin.flush()
+
+
+pump(2.0)
+check("token scope: unlisted without token", listed() is None)
+err = error_of(lambda: call(other, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", ([TOKEN],))))
+check("token scope: non-core cannot set tokens", err is not None and "AccessDenied" in err)
+call(core, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", (["short", TOKEN],)))
+set_title("page " + TOKEN)
+t_in = wait_for(lambda: listed() is not None)
+check("token scope: listed once title has the token", t_in is not None, f"{t_in}s")
+n = len(changes)
+t0 = time.monotonic()
+set_title("other tab")
+t_out = wait_for(lambda: listed() is None)
+check("token scope: dropped after title changes", t_out is not None, f"{t_out}s")
+pump(0.3)
+sig_out = next((t - t0 for t, v in changes[n:] if v[1]), None)
+check("token scope: WindowsChanged removal emitted", sig_out is not None, f"{sig_out}s")
+set_title("again " + TOKEN)
+wait_for(lambda: listed() is not None)
+call(core, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", ([],)))
+check("token scope: cleared tokens drop it", listed() is None)
+call(core, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", (["short"],)))
+set_title("page short")
+pump(0.3)
+check("token scope: short token ignored", listed() is None)
+tab.stdin.close()
+tab.wait(timeout=5)
+
 mons = call(core, BRIDGE, "GetMonitors").unpack()[0]
 check("monitors", len(mons) == 1 and mons[0][3:5] == (1280, 800) and mons[0][6], str(mons))
 
