@@ -23,6 +23,8 @@ export GSETTINGS_BACKEND=keyfile
 mkdir -p $XDG_DATA_HOME/gnome-shell/extensions $XDG_CONFIG_HOME $XDG_CACHE_HOME
 glib-compile-schemas "$YB_ROOT/extension/schemas"
 ln -s "$YB_ROOT/extension" "$XDG_DATA_HOME/gnome-shell/extensions/$YB_UUID"
+# Per-app scoping (#43) is default-deny: allow only the test fixtures unless YB_ALLOWED overrides it.
+gsettings --schemadir "$YB_ROOT/extension/schemas" set org.gnome.shell.extensions.ya-bro allowed-apps "${YB_ALLOWED:-[\"io.github.ahmedyousrisobhi.YaBroFixture\", \"io.github.ahmedyousrisobhi.YaBroToolkit\"]}"
 gsettings set org.gnome.shell disable-user-extensions false 2>/dev/null || true
 gsettings set org.gnome.desktop.interface toolkit-accessibility true 2>/dev/null || true
 if [ "${YB_SCALE:-1}" != "1" ]; then gsettings set org.gnome.mutter experimental-features "[\"scale-monitor-framebuffer\"]" 2>/dev/null || true; fi

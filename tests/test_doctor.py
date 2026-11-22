@@ -23,6 +23,7 @@ HEALTHY = {
     "get org.gnome.desktop.interface": (0, "true"),
     "org.a11y.Status": (0, "(<true>,)"),
     "GetExtensionInfo": (0, "({'uuid': <'x'>, 'state': <1.0>},)"),
+    "allowed-apps": (0, "['org.gimp.GIMP']"),
 }
 
 
@@ -53,7 +54,7 @@ def test_setup_requires_explicit_yes(tmp_path):
 
 def test_setup_enables_a11y_on_yes():
     runner = fake({"set org.gnome.desktop.interface": (0, "")})
-    answers = iter(["y", "n"])
+    answers = iter(["", "y", "n"])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=lambda _: None)
     assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
 
@@ -86,3 +87,38 @@ def test_cli_doctor_dispatch(monkeypatch, capsys):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     assert main(["doctor"]) == 0
     assert "session" in capsys.readouterr().out
+
+
+def test_allow_app_writes_allowlist_and_app_config(tmp_path):
+    runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
+    msg = ls.allow_app(runner, "org.gimp.GIMP", tmp_path / "ext", tmp_path / "cfg")
+    assert "only: org.gimp.GIMP" in msg
+    assert runner.calls[0][-1] == "['org.gimp.GIMP']"
+    assert (tmp_path / "cfg" / "apps" / "org.gimp.GIMP.toml").read_text().startswith("[capture]")
+
+
+def test_allow_app_rejects_bad_ids(tmp_path):
+    runner = fake({})
+    for bad in ["", "../x", "a b", ".hidden", "x" * 200]:
+        assert "invalid" in ls.allow_app(runner, bad, tmp_path, tmp_path)
+    assert runner.calls == []
+
+
+def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
+    monkeypatch.setattr(ls, "extension_target", lambda: tmp_path / "ext")
+    monkeypatch.setattr(ls, "extension_source", lambda: None)
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
+    runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
+    out = []
+    answers = iter(["org.gimp.GIMP", "n", "y"])
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append)
+    assert any("only: org.gimp.GIMP" in x for x in out)
+
+
+def test_doctor_warns_when_no_app_allowed(tmp_path):
+    c = ls.allowed_apps_check(
+        fake({"get org.gnome.shell.extensions.ya-bro": (0, "@as []")}), tmp_path
+    )
+    assert c.status == "warn" and "no app" in c.detail
+    ok = ls.allowed_apps_check(fake({"allowed-apps": (0, "['org.gimp.GIMP']")}), tmp_path)
+    assert ok.status == "ok"

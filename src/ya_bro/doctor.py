@@ -11,15 +11,15 @@ MARK = {"ok": "ok  ", "warn": "WARN", "fail": "FAIL", "info": "info"}
 SETUP_STEPS: list[tuple[str, str, Callable[[ls.Runner], str]]] = [
     (
         "Turn on GNOME toolkit accessibility. This is a persistent, SYSTEM-WIDE setting: every "
-        "app will expose its UI tree. Per-app limits are not enforced yet (tracked in the "
-        "per-app scoping issue), so only continue if you accept that.",
+        "app exposes its UI tree on the accessibility bus to any program that asks. GNOME has no "
+        "per-app switch. Ya-Bro itself will read only the app you named.",
         "enable accessibility",
         ls.enable_a11y,
     ),
     (
-        "Install the Ya-Bro Shell extension. It can see the position and app id of ALL windows "
-        "(not one app) and the pointer; it cannot see screen pixels, typing or window contents. "
-        "Limiting it to allowed apps is not enforced yet.",
+        "Install the Ya-Bro Shell extension. It runs inside GNOME Shell, so it can technically "
+        "see every window; by design it reports only the app you named (default-deny: no app "
+        "named means nothing is reported). It never sees screen pixels, typing or contents.",
         "install extension",
         ls.install_extension,
     ),
@@ -47,10 +47,16 @@ def setup(
 ) -> int:
     """Each step needs its own explicit yes; anything else skips it."""
     runner = runner or ls.run
+    say("Ya-Bro only works with the one app you name; every other app stays invisible to it.")
+    app = ask("App id to allow (e.g. org.gimp.GIMP; empty = none yet): ").strip()
+    if not app:
+        say("no app chosen: Ya-Bro will see nothing until you run setup again")
     for blurb, name, action in SETUP_STEPS:
         say(blurb)
         if ask(f"Do this ({name})? [y/N] ").strip().lower() in ("y", "yes"):
             say(action(runner))
+            if app and action is ls.install_extension:
+                say(ls.allow_app(runner, app))
         else:
             say(f"skipped: {name}")
     return 0

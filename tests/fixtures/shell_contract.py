@@ -127,6 +127,36 @@ if win:
     title = call(core, BRIDGE, "GetWindowTitle", GLib.Variant("(tu)", (win["id"], 0))).unpack()[0]
     check("GetWindowTitle returns a string (focus gating not yet asserted)", isinstance(title, str))
 
+
+# 3b. Per-app scoping (#43): default-deny. With an empty allowlist nothing is listed or readable.
+def set_allowed(value):
+    subprocess.run(
+        [
+            "gsettings",
+            "--schemadir",
+            os.path.join(HERE, "..", "..", "extension", "schemas"),
+            "set",
+            "org.gnome.shell.extensions.ya-bro",
+            "allowed-apps",
+            value,
+        ],
+        check=True,
+    )
+    pump(0.5)
+
+
+if win:
+    set_allowed("[]")
+    wins = call(core, BRIDGE, "ListWindows").unpack()[0]
+    check("empty allowlist: no windows listed", not any(w["pid"] == fixture.pid for w in wins))
+    title = call(core, BRIDGE, "GetWindowTitle", GLib.Variant("(tu)", (win["id"], 0))).unpack()[0]
+    check("empty allowlist: title refused", title == "")
+    err = error_of(lambda: call(core, BRIDGE, "GetPointer"))
+    check("empty allowlist: pointer refused", err is not None)
+    set_allowed('["io.github.ahmedyousrisobhi.YaBroFixture"]')
+    wins = call(core, BRIDGE, "ListWindows").unpack()[0]
+    check("allowed app listed again", any(w["pid"] == fixture.pid for w in wins))
+
 mons = call(core, BRIDGE, "GetMonitors").unpack()[0]
 check("monitors", len(mons) == 1 and mons[0][3:5] == (1280, 800) and mons[0][6], str(mons))
 

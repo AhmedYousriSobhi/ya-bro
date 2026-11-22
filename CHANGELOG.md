@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- Per-app scoping (#43): the Shell extension is default-deny. Only windows of apps in its `allowed-apps` setting are listed, tracked, announced or measured; the title and pointer calls are refused otherwise. `ya-bro setup` asks which one app to allow (and writes `apps/<id>.toml`), and `ya-bro doctor` reports the allowlist. The accessibility setting itself stays system-wide (GNOME has no per-app switch).
 - `ya-bro doctor` (session, accessibility bus, extension state, API key presence) and consent-gated `ya-bro setup` (accessibility setting, Shell extension install and enable) (#17).
 - Config loader (`ya_bro.config`, `config.toml` plus per-app overrides, warns on unknown keys) and content-free typed JSONL log API (`ya_bro.logs`) per ADR-0017 (#36).
 - Working rules for agents and contributors in CLAUDE.md (watch background jobs, harness safety).
