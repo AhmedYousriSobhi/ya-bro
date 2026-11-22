@@ -7,7 +7,7 @@ Legend: done · in progress · todo
 ## Milestones
 | Milestone | Status | Issues |
 |---|---|---|
-| M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (todo), #36 config and log API (todo) |
+| M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (todo), #36 config and log API (done, PR open) |
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | todo | #4, #18 |
 | M3 Overlay | todo | #3 |
@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #36 config loader and log API
+Done: `ya_bro.config` (stdlib dataclasses + `tomllib`, global `config.toml` with per-app `apps/<id>.toml` overrides, unknown keys and bad values warn and fall back to defaults) and `ya_bro.logs` (typed JSONL records, short tokens and numbers only, free text raises `ContentError`, file mode 0600). Tests in `tests/test_config_logs.py`.
+Not done: `ya-bro config get/set/edit` CLI, live reload, `--debug-content`, SQLite state, retention (later issues). Pydantic was not added; dataclasses keep core dependency-free.
+
 ### 2026-11-22: #16 project skeleton
 Done:
 - `src/` layout, `pyproject.toml` (uv, Python 3.12, ruff, pytest).
@@ -30,7 +34,7 @@ Done:
 
 Not done (deliberately deferred, no silent drops):
 - No real D-Bus adapter (Gio) yet: needs the first process that uses it.
-- No `config.toml` loader or typed log API (ADR-0017): tracked in #36.
+- ~~No `config.toml` loader or typed log API~~ (done in #36).
 - GTK3 and Qt6 fixture apps (ADR-0016): only GTK4 exists.
 - Policy, Brain and the rest are fakes only; no real implementations.
 
