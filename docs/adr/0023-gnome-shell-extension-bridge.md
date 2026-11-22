@@ -86,7 +86,7 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 | `SetIndicators(as)` | | `watching`, `capturing`, `acting` badges (ADR-0014 visible state) |
 | `Hide()` | | Idempotent. Also triggered locally by the stop key and the dead-man switch. |
 | `Ping(u)` | `→ u` | Heartbeat from core every 2 s |
-| `GetState()` | `→ a{sv}` | `visible`, `overview`, `unredirect_disabled`. Core and Perceiver only (added in S1; replaces an ungated property). |
+| `GetState()` | `→ a{sv}` | `visible`, `overview`, `unredirect_disabled`, `bubble` (`(iiii)`, the placed bubble rectangle in stage coordinates, zeros when hidden; #69). Core and Perceiver only (added in S1; replaces an ungated property). |
 | `UserEvent` | signal `(s kind, s id, u serial)` | `avatar_click`, `button:<enum>`, `stop_key` |
 
 There is no method that takes code, file paths, shell strings, images or arbitrary markup. Text is set with `St.Label.text` (Pango plain text), never markup.
@@ -107,6 +107,8 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - **Self-exclusion from capture.** Core asks for `Hide()` for one frame before a portal screenshot, or masks known rects (ADR-0006 §7).
 
 ### 6. Pointer, ring, bubble rendering
+
+Bubble placement (#69): below the target, above it when there is no room below, and always clamped inside the monitor with 8 px to spare and 40 px on the left for the avatar. An explicit `bubble_at` is clamped the same way. Checked for all four corners, an edge and the middle (`tests/fixtures/shell_bubble.py`).
 - Ring: rounded rectangle with a soft glow, drawn with CSS `border` + `box-shadow` in `stylesheet.css`. `dashed` style for Medium confidence. No ring for Low.
 - Pointer: an `St.Icon` that animates with `actor.ease()` along core-computed Bezier keyframes. 60 fps is the target (S1 criterion).
 - Bubble: `St.BoxLayout` with an `St.Label` (wrapping, max width 360 logical px) plus buttons. Core does placement (Floating-UI-style flip/shift, ADR-0006 §3) and sends the final position, so the extension stays dumb. RTL: core sends `dir`. The label uses Pango auto-direction with `Clutter.TextDirection` set from `dir` (unverified detail, ADR-0019).
