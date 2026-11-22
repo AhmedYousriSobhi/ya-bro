@@ -79,7 +79,7 @@ async def main():
     await press("5")  # the wrong key
     check(
         "a wrong key is noticed",
-        await until(lambda: any("not what I asked" in t for t in texts)),
+        await until(lambda: any("I warned you" in t for t in texts)),
         str(texts[-1:]),
     )
     check("and it did not advance", not any(t.startswith("(2/4)") for t in texts))

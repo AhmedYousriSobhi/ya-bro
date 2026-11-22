@@ -9,6 +9,7 @@ from tests.fakes import (
     FakePolicy,
 )
 from ya_bro.steps import Outcome, StepLoop, Timing
+from ya_bro.tone import Tone
 from ya_bro.types import ElementRef, Expect, Plan, Rect, Risk, Step, WindowInfo
 
 APP = "org.example.App"
@@ -32,6 +33,7 @@ def build(elements, steps, windows=(WIN,), policy=None, timing=FAST):
         FakeCompositorBridge(list(windows)),
         policy or FakePolicy(),
         timing,
+        tone=Tone(0),
     )
     return perception, overlay, loop, Plan("g", list(steps))
 
@@ -210,7 +212,9 @@ def build_text(display, steps):
         {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: display}
     )
     overlay = FakeOverlay()
-    loop = StepLoop(perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), FAST)
+    loop = StepLoop(
+        perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), FAST, tone=Tone(0)
+    )
     return perception, overlay, loop, Plan("g", list(steps))
 
 
@@ -282,7 +286,9 @@ def build_watch(display, steps):
         {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: display}
     )
     overlay = FakeOverlay()
-    loop = StepLoop(perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE)
+    loop = StepLoop(
+        perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE, tone=Tone(0)
+    )
     return perception, overlay, loop, Plan("g", list(steps))
 
 
@@ -334,3 +340,56 @@ async def test_clearing_an_old_result_is_not_a_wrong_action():
     assert not any("not what I asked" in c[2] for c in overlay.calls if c[0] == "show_step")
     perception.texts[DISPLAY] = "7"
     assert await asyncio.wait_for(task, 2) is Outcome.DONE
+
+
+async def test_why_after_a_wrong_key_explains_the_mistake_and_clears_when_undone():
+    perception, overlay, loop, plan = build_watch(
+        "", [text_step("7", why="7 is the first number.")]
+    )
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    perception.texts[DISPLAY] = "5"
+    await asyncio.sleep(0.2)
+    overlay.push("why")
+    await asyncio.sleep(0.1)
+    why = overlay.calls[-1][2]
+    assert "“5”" in why and "“7”" in why and "7 is the first number." in why and "Undo" in why
+    perception.texts[DISPLAY] = ""  # undone: the mistake explanation must not linger
+    await asyncio.sleep(0.2)
+    assert overlay.calls[-1][2] == "(1/1) Press 7."
+    task.cancel()
+
+
+async def test_playful_tone_by_default_and_plain_at_zero():
+    perception = FakePerception(
+        {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: ""}
+    )
+    for humour, marker in ((1, "I warned you"), (0, "That's not what I asked for")):
+        overlay = FakeOverlay()
+        loop = StepLoop(
+            perception,
+            overlay,
+            FakeCompositorBridge([WIN]),
+            FakePolicy(),
+            SETTLE,
+            tone=Tone(humour),
+        )
+        perception.texts[DISPLAY] = ""
+        task = asyncio.create_task(loop.run(Plan("g", [text_step("7")]), APP))
+        await settle()
+        perception.texts[DISPLAY] = "5"
+        await asyncio.sleep(0.2)
+        assert marker in overlay.calls[-1][2]
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+
+
+def test_tone_lines_cap_screen_text_and_rotate():
+    tone = Tone(1)
+    long = "9" * 200
+    line = tone.mismatch("7", long)
+    assert long not in line and "…" in line
+    seen = {tone.mismatch("7", "5") for _ in range(3)}
+    assert len(seen) == 3  # three different lines in a row
+    assert "warned" not in Tone(0).mismatch("7", "5")
+    assert Tone(0).why_mismatch("7", "", "").startswith("The screen shows something else")
