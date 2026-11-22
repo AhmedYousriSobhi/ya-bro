@@ -15,7 +15,7 @@ set -euo pipefail
 HOST_WL=${WAYLAND_DISPLAY:-}; HOST_RT=${XDG_RUNTIME_DIR:-}
 unset DISPLAY WAYLAND_DISPLAY XAUTHORITY
 T=$(mktemp -d); SHELL_PID=; PW_PID=; WP_PID=; YB_XDISP=
-trap "kill \$SHELL_PID \$WP_PID \$PW_PID 2>/dev/null; sleep 0.5; [ -n \"\${YB_XDISP:-}\" ] && rm -f /tmp/.X11-unix/X\${YB_XDISP#:} /tmp/.X\${YB_XDISP#:}-lock; rm -rf $T" EXIT
+trap "kill \$SHELL_PID \$WP_PID \$PW_PID 2>/dev/null; sleep 0.5; [ -n \"\${YB_XDISP:-}\" ] && for n in \$(( \${YB_XDISP#:} )) \$(( \${YB_XDISP#:} + 1 )); do [ \$n -ge 2 ] \&\& rm -f /tmp/.X11-unix/X\$n /tmp/.X\$n-lock; done; rm -rf $T" EXIT
 mkdir -p $T/run && chmod 700 $T/run
 export XDG_RUNTIME_DIR=$T/run
 export XDG_DATA_HOME=$T/data XDG_CONFIG_HOME=$T/config XDG_CACHE_HOME=$T/cache
