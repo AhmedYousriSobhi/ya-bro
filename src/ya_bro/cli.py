@@ -32,6 +32,23 @@ def _apps(args: argparse.Namespace) -> int:
     return 0
 
 
+def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        print("needs the system python3 with PyGObject (sudo apt install python3-gi)")
+        return 1
+    script = Path(__file__).parent / "platform" / "gnome_demo.py"
+    args = [py, str(script), cmd, str(seconds)] + ([text] if text else [])
+    try:
+        return subprocess.run(args, check=False).returncode
+    except KeyboardInterrupt:
+        return 130
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="broctl", description="Control the Ya-Bro sidekick")
     parser.add_argument("--version", action="version", version=f"broctl {__version__}")
@@ -39,6 +56,13 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("version", help="print the version")
     sub.add_parser("doctor", help="check this machine (safe to paste in a bug report)")
     sub.add_parser("setup", help="first-run setup; asks before each persistent change")
+    point = sub.add_parser("point", help="draw the Ya-Bro ring on your allowed app's window")
+    point.add_argument("--seconds", type=int, default=30)
+    point.add_argument("--text", default="Ya bro is here. Press Stop or Super+Shift+Esc.")
+    scope = sub.add_parser("scope", help="inspect what Ya-Bro can see")
+    scope.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
+        "watch", help="print allowed windows entering and leaving scope"
+    ).add_argument("--seconds", type=int, default=60)
     apps = sub.add_parser("apps", help="manage which apps Ya-Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
     verbs.add_parser("list", help="show allowed apps")
@@ -60,6 +84,10 @@ def main(argv: list[str] | None = None) -> int:
         from ya_bro import doctor
 
         return doctor.setup()
+    if args.noun == "point":
+        return _gnome_demo("point", args.seconds, args.text)
+    if args.noun == "scope":
+        return _gnome_demo("watch", args.seconds)
     if args.noun == "apps":
         return _apps(args)
     parser.print_help()
