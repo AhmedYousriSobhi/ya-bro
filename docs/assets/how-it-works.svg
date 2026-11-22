@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" font-family="Cantarell, 'DejaVu Sans', Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">How Ya-Bro works</title>
+  <desc id="d">Four steps in a loop: you ask, a plan is made, the bro points at the real control, the screen is checked, then the next step.</desc>
+  <rect width="1200" height="420" rx="20" fill="#14161f"/>
+  <text x="600" y="52" text-anchor="middle" font-size="26" font-weight="700" fill="#f2f3f8">One step at a time, on the real app</text>
+  <text x="600" y="82" text-anchor="middle" font-size="16" fill="#9aa0b8">Ya-Bro only sees the app you allow. Stop is always one key away: Super+Shift+Esc.</text>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#f5a524"/></marker></defs>
+  <g font-size="18" fill="#f2f3f8">
+    <rect x="40" y="130" width="250" height="200" rx="16" fill="#1e2130" stroke="#2c3047"/>
+    <circle cx="82" cy="170" r="18" fill="#f5a524"/><text x="82" y="177" text-anchor="middle" font-weight="700" fill="#14161f">1</text>
+    <text x="112" y="177" font-weight="700">Ask</text>
+    <text x="62" y="222" fill="#c9cde0">“How do I multiply</text><text x="62" y="248" fill="#c9cde0">7 by 6?”</text>
+    <text x="62" y="296" font-size="14" fill="#8b91ab">a plan of small steps</text>
+
+    <rect x="330" y="130" width="250" height="200" rx="16" fill="#1e2130" stroke="#2c3047"/>
+    <circle cx="372" cy="170" r="18" fill="#f5a524"/><text x="372" y="177" text-anchor="middle" font-weight="700" fill="#14161f">2</text>
+    <text x="402" y="177" font-weight="700">Point</text>
+    <rect x="360" y="206" width="70" height="46" rx="8" fill="#3a3d52"/>
+    <text x="395" y="236" text-anchor="middle" font-size="22">7</text>
+    <rect x="352" y="198" width="86" height="62" rx="12" fill="none" stroke="#f5a524" stroke-width="4"/>
+    <rect x="450" y="206" width="110" height="46" rx="10" fill="#2a2d42"/><text x="505" y="234" text-anchor="middle" font-size="14" fill="#f2f3f8">Press 7.</text>
+    <text x="352" y="296" font-size="14" fill="#8b91ab">ring + bubble on the control</text>
+
+    <rect x="620" y="130" width="250" height="200" rx="16" fill="#1e2130" stroke="#2c3047"/>
+    <circle cx="662" cy="170" r="18" fill="#f5a524"/><text x="662" y="177" text-anchor="middle" font-weight="700" fill="#14161f">3</text>
+    <text x="692" y="177" font-weight="700">You act</text>
+    <text x="642" y="222" fill="#c9cde0">You press the key.</text>
+    <text x="642" y="248" fill="#c9cde0">Or Next, Why?, Stop.</text>
+    <text x="642" y="296" font-size="14" fill="#8b91ab">Show-me: you stay in control</text>
+
+    <rect x="910" y="130" width="250" height="200" rx="16" fill="#1e2130" stroke="#2c3047"/>
+    <circle cx="952" cy="170" r="18" fill="#f5a524"/><text x="952" y="177" text-anchor="middle" font-weight="700" fill="#14161f">4</text>
+    <text x="982" y="177" font-weight="700">Check</text>
+    <text x="932" y="222" fill="#c9cde0">Reads the screen:</text>
+    <text x="932" y="248" fill="#c9cde0">right → next step,</text>
+    <text x="932" y="274" fill="#c9cde0">wrong → says why.</text>
+  </g>
+  <g fill="none" stroke="#f5a524" stroke-width="3" marker-end="url(#a)">
+    <path d="M292 230 H326"/><path d="M582 230 H616"/><path d="M872 230 H906"/>
+    <path d="M1035 336 V380 H165 V338" stroke-dasharray="8 7"/>
+  </g>
+  <text x="600" y="404" text-anchor="middle" font-size="14" fill="#8b91ab">repeat until the last step</text>
+</svg>

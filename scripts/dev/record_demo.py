@@ -66,7 +66,7 @@ async def main():
     else:
         raise SystemExit("calculator never took focus")
     plan, _app, _ = plans.load(os.path.join(ROOT, "examples", "plans", "calculator.toml"), APP)
-    overlay = GnomeOverlay(sh.conn, bridge)
+    overlay = GnomeOverlay(sh.conn, bridge, avatar=False)  # the bro has no shape yet
     loop = StepLoop(
         AtspiPerception(bridge, plan.extents_offset),
         overlay,
