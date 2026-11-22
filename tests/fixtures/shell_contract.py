@@ -52,18 +52,7 @@ def call(conn, iface, method, params=None, sig=None, timeout=5000):
 
 
 def get_prop(conn, name):
-    r = conn.call_sync(
-        DEST,
-        PATH,
-        "org.freedesktop.DBus.Properties",
-        "Get",
-        GLib.Variant("(ss)", (OVERLAY, name)),
-        None,
-        Gio.DBusCallFlags.NONE,
-        5000,
-        None,
-    )
-    return r.unpack()[0]
+    return call(conn, OVERLAY, "GetState").unpack()[0][name]
 
 
 def error_of(fn):
@@ -142,7 +131,7 @@ mons = call(core, BRIDGE, "GetMonitors").unpack()[0]
 check("monitors", len(mons) == 1 and mons[0][3:5] == (1280, 800) and mons[0][6], str(mons))
 
 # 4. Overlay lifecycle.
-check("overlay hidden initially", get_prop(core, "Visible") is False)
+check("overlay hidden initially", get_prop(core, "visible") is False)
 target = tuple(win["frame"]) if win else (100, 100, 200, 100)
 args = {
     "target": GLib.Variant("(iiii)", target),
@@ -152,11 +141,11 @@ args = {
     "dir": GLib.Variant("s", "ltr"),
 }
 serial = call(core, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", (args,))).unpack()[0]
-check("ShowStep returns serial and shows", serial >= 1 and get_prop(core, "Visible") is True)
+check("ShowStep returns serial and shows", serial >= 1 and get_prop(core, "visible") is True)
 call(core, OVERLAY, "Hide")
 check(
     "Hide hides, idempotent",
-    get_prop(core, "Visible") is False and call(core, OVERLAY, "Hide") is not None,
+    get_prop(core, "visible") is False and call(core, OVERLAY, "Hide") is not None,
 )
 
 # 5. Rate limit: > 60 draw calls in one second get LimitsExceeded.
@@ -172,14 +161,14 @@ call(core, OVERLAY, "Hide")
 
 # 6. Dead-man: no Ping for > 6 s hides the overlay.
 call(core, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", ({"text": GLib.Variant("s", "hi")},)))
-check("shown before dead-man wait", get_prop(core, "Visible") is True)
+check("shown before dead-man wait", get_prop(core, "visible") is True)
 t0 = time.time()
-while get_prop(core, "Visible") and time.time() - t0 < 12:
+while get_prop(core, "visible") and time.time() - t0 < 12:
     pump(0.2)
 elapsed = time.time() - t0
 check(
     "dead-man hides within 8 s",
-    get_prop(core, "Visible") is False and elapsed <= 8,
+    get_prop(core, "visible") is False and elapsed <= 8,
     f"{elapsed:.1f}s",
 )
 
@@ -188,7 +177,7 @@ call(core, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", ({"text": GLib.Variant("
 for _ in range(5):
     pump(2.0)
     call(core, OVERLAY, "Ping", GLib.Variant("(u)", (1,)))
-check("Ping keeps overlay visible (10 s)", get_prop(core, "Visible") is True)
+check("Ping keeps overlay visible (10 s)", get_prop(core, "visible") is True)
 
 # 7b. Disable/enable cycles: extension must keep working and report no errors.
 EXT = "org.gnome.Shell.Extensions"
@@ -231,22 +220,14 @@ probe = Gio.DBusConnection.new_for_address_sync(
     None,
     None,
 )
+Gio.bus_own_name_on_connection(probe, f"{PREFIX}.Perceiver", Gio.BusNameOwnerFlags.NONE, None, None)
+pump(0.5)
+check("non-peer cannot GetState", error_of(lambda: call(other, OVERLAY, "GetState")) is not None)
 t0 = time.time()
 vis = True
 while time.time() - t0 < 6:
     pump(0.2)
-    r = probe.call_sync(
-        DEST,
-        PATH,
-        "org.freedesktop.DBus.Properties",
-        "Get",
-        GLib.Variant("(ss)", (OVERLAY, "Visible")),
-        None,
-        Gio.DBusCallFlags.NONE,
-        5000,
-        None,
-    )
-    vis = r.unpack()[0]
+    vis = get_prop(probe, "visible")
     if not vis:
         break
 check("core killed -> overlay hidden", vis is False, f"{time.time() - t0:.1f}s")

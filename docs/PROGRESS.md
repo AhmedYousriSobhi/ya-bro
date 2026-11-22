@@ -39,7 +39,9 @@ Verification:
 - **CI is not active.** The push of `.github/workflows/ci.yml` was rejected (token lacks `workflow` scope). To enable: `mkdir -p .github/workflows && cp docs/ci/ci.yml .github/workflows/ci.yml`, push with a token that has `workflow` scope (or add the file in the GitHub UI), then confirm the first run is green. The workflow has never run. Trigger: push to `main` only (maintainer decision), so PRs into `dev` get no CI; run `scripts/check.sh` before opening them.
 - Wiki: `Home` and `Development` pages published (mirrors of `docs/`; `docs/` stays the source of truth).
 
-### 2026-11-22: #15 spike S1 (partial)
-Done: extension prototype (`Bridge1`, `Overlay1`, caller check, unicast signals, rate limits, dead-man, stop key), isolated headless-shell harness, 16 contract checks plus 20 enable/disable cycles, all passing. Details: [S1 findings](research/spikes/S1-gnome-extension.md).
+### 2026-11-22: #15 spike S1 (measured, go/no-go open)
+Done: extension prototype and an isolated headless-shell harness, plus measurements at 100% and 150% ([findings](research/spikes/S1-gnome-extension.md)). Passing: click-through 0/1000 blocked, focus safety, ring placement 1.5 px, ring above popover/maximized/fullscreen and hidden in the overview, GTK4/libadwaita (frame origin) and GTK3 Wayland (buffer origin) coordinates within 0.6 px, caller checks, dead-man switch.
 
-Not done: coordinate accuracy per toolkit, click-through via libei, stacking/fullscreen/overview visuals, 60 fps, stop-key latency, 150% scale. **S1 go/no-go is undecided**, and the extension has not been loaded in the live session.
+Open (S1 stays open): the stop key binding is unreliable in the headless shell (about half of sessions, cause unknown); XWayland GTK3 (needs frame + (0, 37)) and fractional-scale X11; Qt6 and Firefox not covered; `layout_mode` unknown to the extension; nothing verified on a real desktop (fps, scanout, lock screen); the portal + libei path (S7) not exercised. The extension has never been loaded in the live session.
+
+Incidents (disclosed in the findings): token printed once (rotate it), a test window probably reached the real display, and a harness WirePlumber probably lit the webcam LED. Fixed in the harness with a private display, a private Xwayland, and a camera-masked WirePlumber.

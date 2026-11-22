@@ -25,7 +25,7 @@ const XML = `<node><interface name="${IFACE}">
   <method name="SetAvatar"><arg type="a{sv}" direction="in"/></method>
   <method name="SetIndicators"><arg type="as" direction="in"/></method>
   <method name="Hide"/>
-  <property name="Visible" type="b" access="read"/>
+  <method name="GetState"><arg type="a{sv}" direction="out"/></method>
   <method name="Ping"><arg type="u" direction="in"/><arg type="u" direction="out"/></method>
   <signal name="UserEvent"><arg type="s"/><arg type="s"/><arg type="u"/></signal>
 </interface></node>`;
@@ -39,6 +39,8 @@ export class Overlay {
         this._lastPing = GLib.get_monotonic_time();
         this._draws = [];
         this._visible = false;
+        this._overviewHidden = false;
+        this._unredirectOff = false;
         this._signals = [];
 
         this._dbus = Gio.DBusExportedObject.wrapJSObject(XML, this);
@@ -71,10 +73,6 @@ export class Overlay {
         this._dbus = null;
     }
 
-    get Visible() {
-        return this._visible;
-    }
-
     stepMatches(windowId, serial) {
         return this._visible && this._follow.window === windowId && this._follow.serial === serial;
     }
@@ -82,7 +80,10 @@ export class Overlay {
     // Local hide, also used by the stop key. Idempotent.
     hide() {
         this._visible = false;
+        this._setUnredirect(false);
         for (const c of this._containers) {
+            c.flight?.stop();
+            c.flight = null;
             c.ring.hide();
             c.bubble.hide();
             c.pointer.hide();
@@ -91,7 +92,20 @@ export class Overlay {
         this._follow = {window: 0, serial: 0};
     }
 
+    // Direct scanout of a fullscreen window can skip painting the stage; keep compositing while visible.
+    _setUnredirect(off) {
+        if (off === this._unredirectOff)
+            return;
+        const name = off ? 'disable_unredirect' : 'enable_unredirect';
+        const target = [global.compositor, global.display].find(o => o && typeof o[name] === 'function');
+        if (!target)
+            return;
+        target[name]();
+        this._unredirectOff = off;
+    }
+
     _setHidden(hidden) {
+        this._overviewHidden = hidden;
         for (const c of this._containers)
             c.root.visible = !hidden;
     }
@@ -202,6 +216,7 @@ export class Overlay {
             c.avatar.show();
             this._follow = {window: args.follow_window ?? 0, serial};
             this._visible = true;
+            this._setUnredirect(true);
             return new GLib.Variant('(u)', [serial]);
         });
     }
@@ -215,14 +230,33 @@ export class Overlay {
                 if (!c.pointer.visible)
                     c.pointer.set_position(c.monitor.width / 2, c.monitor.height / 2);
                 c.pointer.show();
-                c.pointer.ease({
-                    x: x - c.monitor.x, y: y - c.monitor.y, duration: Math.min(Math.max(ms, 100), 1500),
-                    mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-                });
+                this._flyBezier(c, x - c.monitor.x, y - c.monitor.y, Math.min(Math.max(ms, 100), 1500));
                 this._visible = true;
+                this._setUnredirect(true);
             }
             return new GLib.Variant('(u)', [serial]);
         });
+    }
+
+    // Quadratic Bezier with ease-out; the control point bows 20% of the distance sideways (ADR-0006 §3).
+    _flyBezier(c, tx, ty, ms) {
+        const p = c.pointer;
+        const [sx, sy] = [p.x, p.y];
+        const [dx, dy] = [tx - sx, ty - sy];
+        const [cx, cy] = [sx + dx / 2 - dy * 0.2, sy + dy / 2 + dx * 0.2];
+        c.flight?.stop();
+        const tl = new Clutter.Timeline({actor: p, duration: ms, progress_mode: Clutter.AnimationMode.EASE_OUT_QUAD});
+        tl.connect('new-frame', () => {
+            const t = tl.get_progress();
+            const u = 1 - t;
+            p.set_position(u * u * sx + 2 * u * t * cx + t * t * tx, u * u * sy + 2 * u * t * cy + t * t * ty);
+        });
+        tl.connect('completed', () => {
+            p.set_position(tx, ty);
+            c.flight = null;
+        });
+        c.flight = tl;
+        tl.start();
     }
 
     SetAvatarAsync(_p, invocation) {
@@ -231,6 +265,16 @@ export class Overlay {
 
     SetIndicatorsAsync(_p, invocation) {
         this._guard(invocation, () => null);
+    }
+
+    GetStateAsync(_p, invocation) {
+        if (!this._peers.allowed(invocation.get_sender(), ['Core', 'Perceiver']))
+            return deny(invocation);
+        invocation.return_value(new GLib.Variant('(a{sv})', [{
+            visible: new GLib.Variant('b', this._visible),
+            overview: new GLib.Variant('b', this._overviewHidden),
+            unredirect_disabled: new GLib.Variant('b', this._unredirectOff),
+        }]));
     }
 
     HideAsync(_p, invocation) {

@@ -13,7 +13,7 @@ scripts/check.sh --fast   # skip the integration test
 ```
 
 ## GNOME extension
-`scripts/dev/headless-shell.sh <cmd>` runs `<cmd>` inside an isolated headless `gnome-shell` with the extension enabled (private bus, config, data and runtime dirs). `pytest -m gnome` uses it. Do not reload the extension in your live session; the ADR-0023 nested `--devkit` loop (needs `mutter-dev-bin`) is for visual checks.
+`scripts/dev/headless-shell.sh <cmd>` runs `<cmd>` inside an isolated headless `gnome-shell` with the extension enabled: private bus, config, data and runtime dirs, its own PipeWire, WirePlumber and (with `YB_X11=1`) Xwayland. It never uses your `DISPLAY`. WirePlumber runs with video, audio and Bluetooth off inside a `bwrap` namespace that masks `/dev/video*` and `/dev/media*`, so the harness cannot touch the camera; it refuses to start without `bwrap`. Env: `YB_X11`, `YB_SCALE`, `YB_MONITOR`, `YB_GDK`, `YB_DEBUG`. `pytest -m gnome` runs the fast contract test; `pytest -m gnome_measure` runs the S1 measurements (about 5 minutes, writes `docs/research/spikes/S1-measurements-scale-*.json`; not part of `scripts/check.sh`). Do not reload the extension in your live session; the ADR-0023 nested `--devkit` loop (needs `mutter-dev-bin`) is for visual checks.
 
 ## CI
 The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so PRs into `dev` are validated locally with `scripts/check.sh`); it is not active until copied to `.github/workflows/` (needs a token with `workflow` scope). See docs/PROGRESS.md.

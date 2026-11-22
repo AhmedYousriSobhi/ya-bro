@@ -24,6 +24,19 @@ const XML = `<node><interface name="${IFACE}">
   <signal name="OverviewChanged"><arg type="b"/></signal>
 </interface></node>`;
 
+// 'unknown' when Mutter does not expose it; core then infers from stage size vs monitor sizes.
+function layoutMode() {
+    try {
+        const mm = global.backend.get_monitor_manager();
+        const v = mm.layout_mode ?? mm.get_layout_mode?.();
+        if (v === undefined)
+            return 'unknown';
+        return v === 1 ? 'logical' : v === 2 ? 'physical' : 'unknown';
+    } catch (_e) {
+        return 'unknown';
+    }
+}
+
 const rect = r => [r.x, r.y, r.width, r.height];
 const V = (sig, val) => new GLib.Variant(sig, val);
 
@@ -157,7 +170,7 @@ export class Bridge {
             api: V('u', API),
             shell_version: V('s', this._shellVersion),
             extension_version: V('s', this._extVersion),
-            layout_mode: V('s', Meta.is_stage_views_scaled?.() ? 'logical' : 'physical'),
+            layout_mode: V('s', layoutMode()),
             capabilities: V('as', ['windows', 'geometry', 'focus', 'monitors', 'pointer']),
         }]));
     }
