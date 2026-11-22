@@ -26,9 +26,23 @@ Stand-in: `tests/fixtures/apps/title_fixture.py`, an app whose id is not allowed
 
 Timings are bounded by the 10 ms polling loop and a D-Bus round trip, so read them as "under about 30 ms", not precise latencies.
 
+## Real browser (Chrome for Testing 159, not a snap)
+The system Chromium and Firefox are snaps, which run against the real user session and are not used (CLAUDE.md harness rules). Instead the test uses Playwright's Chrome for Testing from `~/.cache/ms-playwright` with a throwaway profile, `--ozone-platform=wayland --disable-gpu --no-sandbox` (the sandbox is off only because it fails under user-namespace limits; the browser loads only pages the test serves on loopback), in the isolated headless shell (`tests/fixtures/shell_browser.py`, `pytest -m gnome_measure`).
+
+| Check | Result |
+|---|---|
+| Page A fetches the token (same origin, `X-YaBro: 1` header) | issued |
+| Tab A (token in title) in scope after core pushes it | 0.024 to 0.025 s |
+| Switch to tab B (other origin): window out of scope | 0.021 s |
+| Tab B's attempt to read the token | blocked (CORS preflight refused, title "other site (blocked)") |
+| Switch back to tab A: in scope again | 0.022 s |
+| Tokens cleared: out of scope | pass |
+
+Observations: the browser's first page load took about 25 s in this software-rendered session (cause not investigated), so the test waits for it. The window's `app_id` came back as `com.anthropic.Claude` for this Chrome build, unexplained, which is one more reason not to key on app ids for browsers. The first check ("invisible without a token") passes with zero windows listed and does not by itself prove the browser window was mapped at that point; the later in-scope check does.
+
 ## NOT verified
-- **A real browser.** Chromium and Firefox on this machine are snaps. A snap launcher runs `snap-confine` against the real user runtime dir and session, which the harness rules (CLAUDE.md) forbid for tests, so no browser was started. The whole claim "a tab switch changes the window title and the window drops out of scope" is therefore **untested on a browser**. Chromium shows `<title> - Chromium`; Firefox `<title> - Mozilla Firefox`; both are expected to work but unconfirmed. A non-snap browser build (or a distro package) in the private session would settle it.
-- Step 1 (token issue by `Origin`) and the workbench page change (it must write the token into its title; tracked with #31). The spike used a stand-in, not workbench.
+- Firefox and the snap Chromium (title format `<title> - Mozilla Firefox` / `- Chromium` is expected to work, unconfirmed).
+- Core-side token issuance is only simulated by the test server (the real `Origin`/CORS behaviour was exercised in Chrome, but core does not exist yet). The workbench page change (it must write the token into its title; tracked with #31). The spike used a stand-in, not workbench.
 - Pages that never set a title, or pages whose title another script overwrites.
 - Multiple windows of the same browser, private windows, and tab-title truncation in long titles.
 
@@ -40,4 +54,4 @@ The token sits in the window title, so anything that reads titles can see it whi
 - A browser extension: one more thing to install and trust.
 
 ## Verdict
-Mechanism works in the compositor (listed and dropped in about 25 ms, revocation emitted, tokens memory-only). ADR-0025 stays **Proposed** until a real browser passes and the `Origin`-gated token issuance is built.
+Works with a real browser: in scope when the active tab carries the token, out of scope about 20 ms after a tab switch, and another origin cannot obtain the token. ADR-0025 can move to Accepted once core issues tokens for real and workbench writes one into its title (#31); until then it stays **Proposed**.
