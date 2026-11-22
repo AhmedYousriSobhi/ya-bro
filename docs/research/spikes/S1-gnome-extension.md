@@ -29,7 +29,7 @@ Median error in px of "origin from the bridge + AT-SPI `WINDOW` extents" against
 
 - **The ADR's starting hypothesis was backwards for GTK4:** GTK4 and libadwaita use the **frame** origin; GTK3 uses the **buffer** origin. The table must be per toolkit, as ADR-0004 said.
 - AT-SPI `WINDOW` extents matched each toolkit's own widget bounds exactly (0 px). AT-SPI `SCREEN` extents are `(0,0)` for GTK4 on Wayland, as ADR-0004 states. GTK3 returned non-zero values; unexplained.
-- XWayland: the true client origin was exactly `(frame.x, frame.y + 37)`, which is consistent with a server-side title bar inside `frame`. Proposed fix, **untested**: add the client-area rect to `Bridge1`. At 150% the XWayland samples were unusable (7 clicks, errors above 300 px), so X11 under fractional scale is unresolved.
+- XWayland: the true client origin was exactly `(frame.x, frame.y + 37)`, which is consistent with a server-side title bar inside `frame`. The obvious fix was tested and **falsified**: `Meta.Window.get_client_area_rect()` returns the same rect as the frame for this window, so exposing it does not help (change reverted). The cause of the 37 px is unknown; the next step would be to scan for the button's real on-screen rect with clicks instead of relying on the window-level click coordinate, which may mean something different for X11 windows. At 150% the XWayland samples were unusable (7 clicks, errors above 300 px), so X11 under fractional scale is unresolved.
 - Popups: a GTK4 popover appears in `ListWindows` as its own window (type 9, `DROPDOWN_MENU`) with a frame rect. Item-level accuracy inside popups was **not** measured.
 
 ## Overlay

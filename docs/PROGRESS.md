@@ -44,6 +44,6 @@ Done: extension prototype and an isolated headless-shell harness, plus measureme
 
 Update (nested real-display run with `mutter-dev-bin`): same extension on the real GPU, frame interval median 8.4 ms (about 119 fps). The stop key binding failed in about half of fresh sessions (headless and nested); a stage `captured-event` fallback fixed it (10/10 headless, 5/5 nested). A real-keyboard check by the maintainer in the nested shell recorded 8 stop-key events (confirmed).
 
-Open (S1 stays open): XWayland GTK3 (needs frame + (0, 37)) and fractional-scale X11; Qt6 and Firefox not covered; `layout_mode` unknown to the extension; nothing verified on a real desktop (fps, scanout, lock screen); the portal + libei path (S7) not exercised. The extension has never been loaded in the live session.
+Open (S1 stays open): XWayland GTK3 (a client-area rect was tried and does not explain the offset) (needs frame + (0, 37)) and fractional-scale X11; Qt6 and Firefox not covered; `layout_mode` unknown to the extension; nothing verified on a real desktop (fps, scanout, lock screen); the portal + libei path (S7) not exercised. The extension has never been loaded in the live session.
 
 Incidents (disclosed in the findings): token printed once (rotate it), a test window probably reached the real display, and a harness WirePlumber probably lit the webcam LED. Fixed in the harness with a private display, a private Xwayland, and a camera-masked WirePlumber.
