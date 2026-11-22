@@ -2,6 +2,7 @@ import ast
 
 from ya_bro import doctor
 from ya_bro.cli import main
+from ya_bro.platform import desktop_apps
 from ya_bro.platform import linux_setup as ls
 
 GNOME = {"XDG_SESSION_TYPE": "wayland", "XDG_CURRENT_DESKTOP": "ubuntu:GNOME"}
@@ -49,7 +50,7 @@ def test_extension_error_state():
 def test_setup_requires_explicit_yes(tmp_path):
     runner = fake({})
     out = []
-    doctor.setup(ask=lambda _: "", runner=runner, say=out.append)
+    doctor.setup(ask=lambda _: "", runner=runner, say=out.append, apps=[])
     assert runner.calls == []
     assert sum(x.startswith("skipped") for x in out) == 2
 
@@ -57,7 +58,7 @@ def test_setup_requires_explicit_yes(tmp_path):
 def test_setup_enables_a11y_on_yes():
     runner = fake({"set org.gnome.desktop.interface": (0, "")})
     answers = iter(["", "y", "n"])
-    doctor.setup(ask=lambda _: next(answers), runner=runner, say=lambda _: None)
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=lambda _: None, apps=[])
     assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
 
 
@@ -112,8 +113,9 @@ def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
     runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
     out = []
-    answers = iter(["org.gimp.GIMP", "n", "y"])
-    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append)
+    gimp = desktop_apps.DesktopApp("org.gimp.GIMP", "GIMP", "")
+    answers = iter(["gimp", "1", "n", "y"])
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[gimp])
     assert any("see: org.gimp.GIMP" in x for x in out)
 
 
@@ -156,3 +158,35 @@ def test_broctl_apps_cli(monkeypatch, capsys):
     assert main(["apps", "list"]) == 0
     assert "sees nothing" in capsys.readouterr().out
     assert main(["version"]) == 0
+
+
+APPS = [
+    desktop_apps.DesktopApp("org.gimp.GIMP", "GIMP"),
+    desktop_apps.DesktopApp("chromium_chromium", "Chromium", "chromium-browser"),
+    desktop_apps.DesktopApp("org.gnome.Calculator", "Calculator"),
+]
+
+
+def run_picker(answers, apps=APPS):
+    it, out = iter(answers), []
+    return doctor.choose_app(lambda _: next(it), out.append, apps), out
+
+
+def test_picker_search_and_pick_by_number():
+    app, out = run_picker(["gimp", "1"])
+    assert app == "org.gimp.GIMP" and any("GIMP" in x for x in out)
+
+
+def test_picker_uses_window_class_when_present():
+    assert run_picker(["chrom", "1"])[0] == "chromium-browser"
+
+
+def test_picker_empty_skips_and_bad_number_searches_again():
+    assert run_picker([""])[0] == ""
+    app, _ = run_picker(["calc", "9", "calc", "1"])
+    assert app == "org.gnome.Calculator"
+
+
+def test_picker_no_match_then_trusts_typed_id():
+    app, out = run_picker(["zzzz", "org.example.Known"])
+    assert app == "org.example.Known" and any("no installed app" in x for x in out)

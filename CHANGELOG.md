@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- `broctl setup` shows a searchable list of installed apps (type a word, pick a number) instead of asking for a raw app id; it stores the window class when the app has one (#51).
 - Spike S8 (#47): the Shell extension can scope a window by a secret title token pushed by core (`Bridge1.SetScopeTokens`, core only, memory only; the window leaves scope when its title changes), and windows re-evaluate when `allowed-apps` changes. Verified with a stand-in window and a real browser (Chrome for Testing; `pytest -m gnome_measure`). Findings in `docs/research/spikes/S8-active-tab-scope.md`.
 - `broctl apps available` lists installed apps (id, name, window class) from `.desktop` files (#47). ADR-0025 (proposed): pack-scoped targets so a tool with a web UI and a CLI, like workbench, can be allowed without exposing the whole browser or every shell.
 - `broctl`, a kubectl-style control CLI (`broctl <noun> <verb>`, ADR-0024, #45): `version`, `doctor`, `setup`, `apps list|allow|revoke`. It replaces the `ya-bro` management commands; `ya-bro` stays the product and agent name.
