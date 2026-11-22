@@ -20,5 +20,8 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [docs/PROGRESS.md](docs/PROGRESS.md) — milestone and issue status
 - [CHANGELOG.md](CHANGELOG.md)
 
+## Doctor and setup
+`ya-bro doctor` reports what works and how to fix what does not (its output is safe to paste in a bug report). `ya-bro setup` asks before each persistent change (GNOME accessibility setting, Shell extension install) and needs one logout/login afterwards. The doctor checks only whether the `ANTHROPIC_API_KEY` environment variable is set, never its value; `.env` loading is not implemented yet.
+
 ## Platform
 Linux only for now: GNOME on Wayland first (through a small GNOME Shell extension), KDE Plasma Wayland next. X11 is used only in CI. macOS/Windows later.

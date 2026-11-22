@@ -7,7 +7,7 @@ Legend: done · in progress · todo
 ## Milestones
 | Milestone | Status | Issues |
 |---|---|---|
-| M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (todo), #36 config and log API (todo) |
+| M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (done, PR open), #36 config and log API (todo) |
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | todo | #4, #18 |
 | M3 Overlay | todo | #3 |
@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #17 doctor and setup
+Done: `ya-bro doctor` (session type, `toolkit-accessibility`, a11y bus, extension state via `GetExtensionInfo`, API key presence without the value) and `ya-bro setup` (each persistent change asks for an explicit yes: toolkit-accessibility, copy + enable the Shell extension, then one re-login). Probes shell out through an injectable runner in `platform/linux_setup.py`; tests never touch the real session.
+Not done: `GetExtensionErrors` and API-version match (needs Bridge1 `GetInfo` from #18), PipeWire AEC, portal capabilities, library versions, Arabic font check, `.deb` install path. Not exercised on a real desktop (`setup` has only run against fakes).
+
 ### 2026-11-22: #16 project skeleton
 Done:
 - `src/` layout, `pyproject.toml` (uv, Python 3.12, ruff, pytest).
