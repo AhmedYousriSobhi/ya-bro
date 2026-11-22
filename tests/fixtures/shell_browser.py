@@ -141,13 +141,10 @@ def cdp(path):
         return raw.decode()  # /json/activate answers with plain text
 
 
-print(
-    urllib.request.urlopen(f"http://127.0.0.1:{port_a}/", timeout=5).status,
-    log,
-    flush=True,
-)
 profile = tempfile.mkdtemp(prefix="yb-chrome-")
-dbg = 9300 + secrets.randbelow(500)
+with __import__("socket").socket() as _s:
+    _s.bind(("127.0.0.1", 0))
+    dbg = _s.getsockname()[1]  # a free port, not a guess that may hit another service
 env = {k: v for k, v in os.environ.items() if k != "DISPLAY"}
 proc = subprocess.Popen(
     [
@@ -184,7 +181,7 @@ try:
         os.path.basename(os.path.dirname(chrome)),
     )
     # Tokens are not pushed yet: the browser must be invisible even though its window exists.
-    print("DEBUG waited-for-page", wait_for(lambda: log["pages"] > 1, 90), flush=True)
+    wait_for_page = wait_for(lambda: log["pages"] > 1, 90)
     pump(3.0)
     check(
         "browser window exists but is invisible without a token",
