@@ -41,7 +41,8 @@ const rect = r => [r.x, r.y, r.width, r.height];
 const V = (sig, val) => new GLib.Variant(sig, val);
 
 export class Bridge {
-    constructor(connection, peers, overlay, shellVersion, extVersion) {
+    constructor(connection, peers, overlay, settings, shellVersion, extVersion) {
+        this._settings = settings;
         this._peers = peers;
         this._overlay = overlay;
         this._shellVersion = shellVersion;
@@ -95,7 +96,8 @@ export class Bridge {
 
     _onFocus() {
         const w = global.display.focus_window;
-        this._peers.emit(IFACE, 'FocusChanged', V('(t)', [w ? w.get_id() : 0]), SIGNAL_PEERS);
+        this._peers.emit(IFACE, 'FocusChanged',
+            V('(t)', [this._isAllowed(w) ? w.get_id() : 0]), SIGNAL_PEERS);
     }
 
     _track(win, announce) {
@@ -107,10 +109,11 @@ export class Bridge {
         ids.push(win.connect('size-changed', geo));
         ids.push(win.connect('unmanaged', () => {
             this._perWindow.delete(win);
-            this._peers.emit(IFACE, 'WindowsChanged', V('(atat)', [[], [win.get_id()]]), SIGNAL_PEERS);
+            if (this._isAllowed(win))
+                this._peers.emit(IFACE, 'WindowsChanged', V('(atat)', [[], [win.get_id()]]), SIGNAL_PEERS);
         }));
         this._perWindow.set(win, ids);
-        if (announce)
+        if (announce && this._isAllowed(win))
             this._peers.emit(IFACE, 'WindowsChanged', V('(atat)', [[win.get_id()], []]), SIGNAL_PEERS);
     }
 
@@ -122,6 +125,8 @@ export class Bridge {
         this._idle = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
             this._idle = 0;
             for (const w of this._pendingGeometry.keys()) {
+                if (!this._isAllowed(w))
+                    continue;
                 try {
                     this._peers.emit(IFACE, 'GeometryChanged',
                         V('(t(iiii)(iiii))', [w.get_id(), rect(w.get_frame_rect()), rect(w.get_buffer_rect())]),
@@ -135,8 +140,21 @@ export class Bridge {
         });
     }
 
+    // Default-deny scoping: only windows of apps in `allowed-apps` are ever reported. A window whose
+    // app id is not set yet (it can arrive after window-created) counts as not allowed.
+    _appId(win) {
+        return win.get_gtk_application_id() ?? win.get_sandboxed_app_id() ?? win.get_wm_class() ?? '';
+    }
+
+    _isAllowed(win) {
+        if (!win)
+            return false;
+        const id = this._appId(win);
+        return id !== '' && this._settings.get_strv('allowed-apps').includes(id);
+    }
+
     _windowDict(win, stack) {
-        const appId = win.get_gtk_application_id() ?? win.get_sandboxed_app_id() ?? win.get_wm_class() ?? '';
+        const appId = this._appId(win);
         return {
             id: V('t', win.get_id()),
             seq: V('u', win.get_stable_sequence()),
@@ -179,14 +197,14 @@ export class Bridge {
         this._guard(invocation, () => {
             const ordered = global.display.sort_windows_by_stacking(
                 global.get_window_actors().map(a => a.meta_window));
-            return V('(aa{sv})', [ordered.map((w, i) => this._windowDict(w, i))]);
+            return V('(aa{sv})', [ordered.flatMap((w, i) => this._isAllowed(w) ? [this._windowDict(w, i)] : [])]);
         });
     }
 
     GetWindowTitleAsync([id, serial], invocation) {
         this._guard(invocation, () => {
             const win = global.get_window_actors().map(a => a.meta_window).find(w => w.get_id() === id);
-            const ok = win && (win.has_focus() || this._overlay.stepMatches(id, serial));
+            const ok = win && this._isAllowed(win) && (win.has_focus() || this._overlay.stepMatches(id, serial));
             return V('(s)', [ok ? win.get_title() ?? '' : '']);
         });
     }
@@ -201,6 +219,9 @@ export class Bridge {
 
     GetPointerAsync(_p, invocation) {
         this._guard(invocation, () => {
+            // Pointer position elsewhere on the desktop is out of scope: only while an allowed app is focused.
+            if (!this._isAllowed(global.display.focus_window))
+                throw new Error('no allowed app focused');
             const now = GLib.get_monotonic_time();
             this._pointerTimes = this._pointerTimes.filter(t => now - t < 1e6);
             if (this._pointerTimes.length >= 30)

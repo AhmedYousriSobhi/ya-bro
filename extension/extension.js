@@ -18,7 +18,7 @@ export default class YaBroExtension extends Extension {
         this._peers = new Peers(connection);
         this._overlay = new Overlay(connection, this._peers);
         this._bridge = new Bridge(connection, this._peers, this._overlay,
-            PACKAGE_VERSION, this.metadata['version-name'] ?? '');
+            this._settings, PACKAGE_VERSION, this.metadata['version-name'] ?? '');
         this._ownName = Gio.bus_own_name_on_connection(connection,
             'io.github.ahmedyousrisobhi.YaBro.Shell', Gio.BusNameOwnerFlags.NONE, null, null);
         // Works even when core is hung: hide locally first, then tell core.

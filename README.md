@@ -20,6 +20,9 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 - [docs/PROGRESS.md](docs/PROGRESS.md) — milestone and issue status
 - [CHANGELOG.md](CHANGELOG.md)
 
+## Doctor and setup
+`ya-bro doctor` reports what works and how to fix what does not (its output is safe to paste in a bug report). `ya-bro setup` asks before each persistent change (GNOME accessibility setting, Shell extension install) and needs one logout/login afterwards. Setup asks which one app Ya-Bro may use; the Shell extension reports only that app (default-deny, no app named = nothing reported). Note the GNOME accessibility setting itself is system-wide, and the extension code runs inside the shell, so this is enforced by Ya-Bro, not by the OS. The doctor checks only whether the `ANTHROPIC_API_KEY` environment variable is set, never its value; `.env` loading is not implemented yet.
+
 ## Configuration
 Settings live in `$XDG_CONFIG_HOME/ya-bro/config.toml` (default `~/.config/ya-bro/`); `apps/<app-id>.toml` overrides it per app. Keys: `humour` (0-3), `[proactive] enabled, sensitivity`, `[capture] allowed`, `[do_it] allowed`. Unknown keys log a warning and are ignored. Logs are written to `$XDG_STATE_HOME/ya-bro/logs/*.jsonl` and never contain typed text or screen content.
 
