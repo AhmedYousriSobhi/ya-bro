@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- Fixed the ring tinting the window interior (its glow filled the box; now a plain 4 px border, pixel-tested) and `broctl point` now draws only on a focused allowed window and tells you which window to click otherwise (#59).
 - `broctl load`: loads the Ya-Bro extension into the running Shell without logging out. It copies a one-line snippet to the clipboard and walks through Alt+F2, `lg`, paste; verified in the isolated headless shell with injected keys (#57).
 - Measured that a locally installed Shell extension cannot be loaded without a Shell restart (ADR-0023 §9).
 - `broctl point` draws the Ya-Bro ring and a bubble on your allowed app's window and follows it (Stop button or Super+Shift+Esc hides it); `broctl scope watch` prints allowed windows entering and leaving scope. Both stand in for core until it exists, run under the system python3 with PyGObject, and were tested in the isolated headless shell only (#53).

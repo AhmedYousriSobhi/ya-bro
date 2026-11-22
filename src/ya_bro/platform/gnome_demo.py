@@ -26,6 +26,7 @@ class Demo:
         self.followed = None
         self.shown = None
         self.done = False
+        self.hinted = False
 
     def call(self, iface, method, params=None):
         return self.bus.call_sync(
@@ -107,11 +108,16 @@ class Demo:
             if self.done:
                 return False
             wins = self.windows()
-            win = next((w for w in wins if w["focused"]), wins[0] if wins else None)
+            # Only the focused allowed window: a ring on a window you cannot see (maximised behind
+            # another one) would cover the whole screen for no reason.
+            win = next((w for w in wins if w["focused"]), None)
             if win is None:
                 if self.shown is not None:
                     self.call(OVERLAY, "Hide")
                     self.shown = None
+                if wins and not self.hinted:
+                    print(f"click the {wins[0]['app_id']} window to see the ring", flush=True)
+                    self.hinted = True
                 return True
             key = (win["id"], tuple(win["frame"]))
             if key != self.shown:
