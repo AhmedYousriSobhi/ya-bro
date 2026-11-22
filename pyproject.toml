@@ -1,0 +1,49 @@
+[project]
+name = "ya-bro"
+version = "0.0.1"
+description = "Voice + text sidekick that walks you through real apps on Linux, one step at a time."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT OR Apache-2.0"
+dependencies = []
+
+[project.optional-dependencies]
+# PyGObject needs system dev headers (girepository, cairo); keep it out of core.
+gi = ["PyGObject>=3.50"]
+
+[project.scripts]
+ya-bro = "ya_bro.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ya_bro"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["atspi: needs system PyGObject, AT-SPI and dbus-run-session"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "TID"]
+
+# ADR-0018 §5: only ya_bro/platform/** may import platform packages.
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"gi".msg = "Platform import: allowed only under src/ya_bro/platform/** (ADR-0018)."
+"dbus".msg = "Platform import: allowed only under src/ya_bro/platform/** (ADR-0018)."
+"Xlib".msg = "Platform import: allowed only under src/ya_bro/platform/** (ADR-0018)."
+
+[tool.ruff.lint.per-file-ignores]
+"src/ya_bro/platform/**" = ["TID251"]
+"tests/fixtures/**" = ["TID251"]

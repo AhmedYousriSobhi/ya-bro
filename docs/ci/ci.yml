@@ -1,0 +1,29 @@
+name: CI
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  lint-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -m "not atspi" -q
+
+  atspi-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: System deps (headless GTK4 + AT-SPI)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb dbus at-spi2-core python3-gi gir1.2-gtk-4.0 gir1.2-atspi-2.0
+      - run: uv sync
+      - run: xvfb-run -a uv run pytest -m atspi -q -rs

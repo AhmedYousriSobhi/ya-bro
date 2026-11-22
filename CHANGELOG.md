@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- Project skeleton (#16): `src/` layout, uv/ruff/pytest config, 12 provisional interface Protocols with in-memory fakes, IPC name helper, XDG `dirs`, `ya-bro --version`, GTK4 AT-SPI fixture test, `scripts/check.sh`, CI workflow drafted at `docs/ci/ci.yml` (not active: the maintainer's token lacks `workflow` scope, so it must be copied to `.github/workflows/` by hand; never run), `docs/PROGRESS.md`, `docs/DEVELOPMENT.md`.
 - Concept sketch (`docs/assets/ya-bro-concept.png` and SVG source).
 - Architecture ADR set (0002–0023), ADR index with ranked risks and MVP build plan, and research docs on AI tools, non-AI tools and the Linux platform.
 - Platform re-plan: GNOME 50 Wayland is the reference platform (maintainer decision), KWin Wayland moves to v0.2, X11 becomes CI-only. ADR-0023 designs the GNOME Shell extension bridge + overlay, and ADR-0022 re-orders the spikes so that extension is S1.
