@@ -3,7 +3,7 @@
 # Never touches the live session: private session bus, config, data and runtime dirs.
 # Usage: scripts/dev/headless-shell.sh <command> [args...]   (command runs with the shell up)
 # Env: YB_X11=1 enables XWayland; YB_SCALE=<f> enables fractional scaling support; YB_MONITOR=WxH sets the
-# virtual monitor size (default 1280x800); YB_DEVKIT=1 runs a nested shell in a mutter-devkit window on the real
+# YB_LATE_EXT=1 starts the shell without the extension (late-install tests); virtual monitor size (default 1280x800); YB_DEVKIT=1 runs a nested shell in a mutter-devkit window on the real
 # desktop instead of a headless one (needs mutter-dev-bin); YB_GDK sets GDK_BACKEND for the command (default wayland).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -22,7 +22,8 @@ export XDG_DATA_HOME=$T/data XDG_CONFIG_HOME=$T/config XDG_CACHE_HOME=$T/cache
 export GSETTINGS_BACKEND=keyfile
 mkdir -p $XDG_DATA_HOME/gnome-shell/extensions $XDG_CONFIG_HOME $XDG_CACHE_HOME
 glib-compile-schemas "$YB_ROOT/extension/schemas"
-ln -s "$YB_ROOT/extension" "$XDG_DATA_HOME/gnome-shell/extensions/$YB_UUID"
+# YB_LATE_EXT=1: do not install the extension before the shell starts (the test installs it late).
+[ "${YB_LATE_EXT:-0}" = 1 ] || ln -s "$YB_ROOT/extension" "$XDG_DATA_HOME/gnome-shell/extensions/$YB_UUID"
 # Per-app scoping (#43) is default-deny: allow only the test fixtures unless YB_ALLOWED overrides it.
 gsettings --schemadir "$YB_ROOT/extension/schemas" set org.gnome.shell.extensions.ya-bro allowed-apps "${YB_ALLOWED:-[\"io.github.ahmedyousrisobhi.YaBroFixture\", \"io.github.ahmedyousrisobhi.YaBroToolkit\"]}"
 gsettings set org.gnome.shell disable-user-extensions false 2>/dev/null || true
@@ -55,7 +56,7 @@ if [ -n "$WP_PID" ] && ls -l /proc/$WP_PID/fd /proc/$(pgrep -P $WP_PID | head -1
   echo "WirePlumber holds a video/media device; aborting" >&2; exit 1
 fi
 sleep 1
-gsettings set org.gnome.shell enabled-extensions "[\"$YB_UUID\"]" 2>/dev/null || true
+[ "${YB_LATE_EXT:-0}" = 1 ] || gsettings set org.gnome.shell enabled-extensions "[\"$YB_UUID\"]" 2>/dev/null || true
 export GSETTINGS_SCHEMA_DIR=
 if [ "${YB_DEVKIT:-0}" = 1 ]; then
   # Nested shell shown in a mutter-devkit window on the real desktop. Only this process sees the host

@@ -23,6 +23,9 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 ## broctl
 `broctl` controls Ya-Bro, like `kubectl` controls a cluster: `broctl <noun> <verb>`. Run it from the repo with `uv run broctl --help`, or install it with `uv tool install --editable .`. Commands: `version`, `doctor`, `setup`, `apps list|available|allow|revoke <app-id>`. `broctl apps available` shows the ids you can allow. Tools with a web UI and a CLI (such as workbench) need pack-scoped targets, which are designed in [ADR-0025](docs/adr/0025-pack-scoped-targets.md) but not built yet. See [ADR-0024](docs/adr/0024-broctl-control-cli.md).
 
+## No logout needed
+GNOME only finds new extensions at login. To load the extension right away instead, run `uv run broctl load` and follow the three steps (Alt+F2, `lg`, paste). It lasts until your next login, which then loads it normally. Needs `wl-copy` (`wl-clipboard`) for the clipboard; without it the command prints the line to paste.
+
 ## See it work
 After `broctl setup` and one logout/login, open the app you allowed, then:
 ```bash

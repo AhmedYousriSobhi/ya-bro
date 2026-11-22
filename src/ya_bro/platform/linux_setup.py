@@ -236,3 +236,30 @@ def allowed_apps_check(runner: Runner, target: Path | None = None) -> Check:
             "allowed apps", "warn", "none: Ya-Bro sees no app", "run `broctl setup` and name one"
         )
     return Check("allowed apps", "ok", ", ".join(apps))
+
+
+# --- hot-load through Looking Glass (#57): no re-login ------------------------------------
+
+# One line, typed or pasted into Looking Glass (Alt+F2, `lg`). Type 2 = per-user extension.
+HOTLOAD_SNIPPET = (
+    "const m=Main.extensionManager;"
+    "const f=Gio.File.new_for_path(GLib.get_home_dir()"
+    f"+'/.local/share/gnome-shell/extensions/{EXT_UUID}');"
+    f"m.loadExtension(m.createExtensionObject('{EXT_UUID}',f,2))"
+)
+
+
+def extension_loaded(runner: Runner) -> bool:
+    return extension_state(runner).detail == "ENABLED"
+
+
+def copy_to_clipboard(runner: Runner, text: str) -> bool:
+    import shutil
+
+    if not shutil.which("wl-copy"):
+        return False
+    try:
+        subprocess.run(["wl-copy"], input=text, text=True, timeout=5, check=True)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return True

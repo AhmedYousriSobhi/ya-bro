@@ -194,3 +194,14 @@ def test_picker_no_match_then_trusts_typed_id():
 
 def test_picker_enter_takes_the_only_match():
     assert run_picker(["gimp", ""])[0] == "org.gimp.GIMP"
+
+
+def test_hotload_snippet_is_one_line_and_names_the_extension():
+    assert "\n" not in ls.HOTLOAD_SNIPPET and ls.EXT_UUID in ls.HOTLOAD_SNIPPET
+    assert "loadExtension" in ls.HOTLOAD_SNIPPET
+
+
+def test_broctl_load_is_noop_when_loaded(monkeypatch, capsys):
+    monkeypatch.setattr(ls, "run", fake({"GetExtensionInfo": (0, "({'state': <1.0>},)")}))
+    assert main(["load"]) == 0
+    assert "already loaded" in capsys.readouterr().out

@@ -49,6 +49,34 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
         return 130
 
 
+def _load(wait_seconds: int = 120) -> int:
+    import time
+
+    from ya_bro.platform import linux_setup as ls
+
+    if ls.extension_loaded(ls.run):
+        print("the Ya-Bro extension is already loaded")
+        return 0
+    copied = ls.copy_to_clipboard(ls.run, ls.HOTLOAD_SNIPPET)
+    print("GNOME only finds new extensions at login. To load it now, in 3 steps:")
+    print("  1. Press Alt+F2, type  lg  and press Enter (Looking Glass opens).")
+    if copied:
+        print("  2. Paste (Ctrl+V) at the bottom line and press Enter (it is in your clipboard).")
+    else:
+        print("  2. Paste this line at the bottom and press Enter:")
+        print(f"     {ls.HOTLOAD_SNIPPET}")
+    print("  3. Press Esc to close Looking Glass.")
+    print(f"Waiting up to {wait_seconds} s for the extension to load...", flush=True)
+    end = time.monotonic() + wait_seconds
+    while time.monotonic() < end:
+        if ls.extension_loaded(ls.run):
+            print("loaded. Try: broctl point")
+            return 0
+        time.sleep(1)
+    print("not loaded yet; run broctl doctor to see why")
+    return 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="broctl", description="Control the Ya-Bro sidekick")
     parser.add_argument("--version", action="version", version=f"broctl {__version__}")
@@ -63,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     scope.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
         "watch", help="print allowed windows entering and leaving scope"
     ).add_argument("--seconds", type=int, default=60)
+    sub.add_parser("load", help="load the extension now, without logging out")
     apps = sub.add_parser("apps", help="manage which apps Ya-Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
     verbs.add_parser("list", help="show allowed apps")
@@ -84,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
         from ya_bro import doctor
 
         return doctor.setup()
+    if args.noun == "load":
+        return _load()
     if args.noun == "point":
         return _gnome_demo("point", args.seconds, args.text)
     if args.noun == "scope":
