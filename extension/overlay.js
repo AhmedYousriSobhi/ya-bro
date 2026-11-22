@@ -13,6 +13,8 @@ const CORE_ONLY = ['Core'];
 const EVENT_PEERS = ['Core', 'Actuator'];
 const DEAD_MAN_SECONDS = 6;
 const MAX_TEXT = 280;
+const EDGE = 8;           // keep the bubble this far inside the monitor
+const AVATAR_GAP = 40;    // the avatar sits this far left of the bubble
 // Labels come from the extension, never from the caller (anti-spoofing, ADR-0023 §11.6).
 const BUTTONS = {
     next: 'Next', repeat: 'Repeat', why: 'Why?', do_it: 'Do it', stop: 'Stop',
@@ -39,6 +41,7 @@ export class Overlay {
         this._lastPing = GLib.get_monotonic_time();
         this._draws = [];
         this._visible = false;
+        this._bubbleRect = [0, 0, 0, 0];
         this._overviewHidden = false;
         this._unredirectOff = false;
         this._signals = [];
@@ -95,6 +98,7 @@ export class Overlay {
             c.avatar.hide();
         }
         this._follow = {window: 0, serial: 0};
+        this._bubbleRect = [0, 0, 0, 0];
     }
 
     // Direct scanout of a fullscreen window can skip painting the stage; keep compositing while visible.
@@ -214,16 +218,33 @@ export class Overlay {
             }
             // RTL: only the direction is set here; full ADR-0019 handling is deferred.
             c.bubble.set_text_direction(args.dir === 'rtl' ? Clutter.TextDirection.RTL : Clutter.TextDirection.LTR);
-            const at = args.bubble_at ?? (target ? [target[0], target[1] + target[3] + 12] : [c.monitor.x + 40, c.monitor.y + 40]);
-            c.bubble.set_position(at[0] - c.monitor.x, at[1] - c.monitor.y);
             c.bubble.show();
-            c.avatar.set_position(at[0] - c.monitor.x - 40, at[1] - c.monitor.y);
+            const [bx, by, bw, bh] = this._placeBubble(c, target, args.bubble_at);
+            c.bubble.set_position(bx - c.monitor.x, by - c.monitor.y);
+            c.avatar.set_position(bx - c.monitor.x - AVATAR_GAP, by - c.monitor.y);
             c.avatar.show();
+            this._bubbleRect = [bx, by, bw, bh];
             this._follow = {window: args.follow_window ?? 0, serial};
             this._visible = true;
             this._setUnredirect(true);
             return new GLib.Variant('(u)', [serial]);
         });
+    }
+
+    // Below the target when it fits, else above, always inside the monitor (with the avatar's gap on the left).
+    _placeBubble(c, target, explicit) {
+        const m = c.monitor;
+        const [, bw] = c.bubble.get_preferred_width(-1);
+        const [, bh] = c.bubble.get_preferred_height(bw);
+        let [x, y] = explicit ?? [m.x + 40, m.y + 40];
+        if (!explicit && target) {
+            [x, y] = [target[0], target[1] + target[3] + 12];
+            if (y + bh > m.y + m.height - EDGE)
+                y = target[1] - bh - 12;
+        }
+        x = Math.min(Math.max(x, m.x + EDGE + AVATAR_GAP), m.x + m.width - bw - EDGE);
+        y = Math.min(Math.max(y, m.y + EDGE), m.y + m.height - bh - EDGE);
+        return [Math.round(x), Math.round(y), Math.round(bw), Math.round(bh)];
     }
 
     FlyPointerAsync([[x, y], ms], invocation) {
@@ -279,6 +300,7 @@ export class Overlay {
             visible: new GLib.Variant('b', this._visible),
             overview: new GLib.Variant('b', this._overviewHidden),
             unredirect_disabled: new GLib.Variant('b', this._unredirectOff),
+            bubble: new GLib.Variant('(iiii)', this._bubbleRect),
         }]));
     }
 
