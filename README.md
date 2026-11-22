@@ -8,7 +8,7 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 
 *Concept sketch (source: `docs/assets/ya-bro-concept.svg`), not a final design.*
 
-**Status:** pre-alpha. Project skeleton in place (interfaces, fakes, CI); no user-facing features yet. Progress: [docs/PROGRESS.md](docs/PROGRESS.md). See [SPEC.md](SPEC.md).
+**Status:** pre-alpha. You can already set Ya-Bro up for one app, load the extension without logging out, and run a scripted Show-me walkthrough that points at real buttons, checks the screen and teases you when you press the wrong one (see the GIF below). There is no LLM brain, voice or Do-it mode yet, so plans are written by hand. Progress: [docs/PROGRESS.md](docs/PROGRESS.md). See [SPEC.md](SPEC.md).
 
 ## Docs
 - [SPEC.md](SPEC.md) — what we're building and why
@@ -27,7 +27,7 @@ Ya-Bro is a Linux desktop sidekick that hovers on your screen. It notices when y
 GNOME only finds new extensions at login. To load the extension right away instead, run `uv run broctl load` and follow the three steps (Alt+F2, `lg`, paste). It lasts until your next login, which then loads it normally. Needs `wl-copy` (`wl-clipboard`) for the clipboard; without it the command prints the line to paste.
 
 ## See it work
-After `broctl setup` and one logout/login, open the app you allowed, then:
+After `broctl setup` and `broctl load` (or one logout/login), open the app you allowed, then:
 ```bash
 uv run broctl point            # ring + bubble on that window for 30 s; Super+Shift+Esc or Stop hides it
 uv run broctl scope watch      # prints when the allowed window appears and disappears
@@ -50,7 +50,7 @@ Press **C** first so the display is empty. The bro points at one key at a time (
 `broctl doctor` reports what works and how to fix what does not (its output is safe to paste in a bug report). `broctl setup` asks before each persistent change (GNOME accessibility setting, Shell extension install) and needs one logout/login afterwards. Setup lets you search installed apps by name and pick one (or type an app id); the Shell extension reports only that app (default-deny, no app named = nothing reported). Note the GNOME accessibility setting itself is system-wide, and the extension code runs inside the shell, so this is enforced by Ya-Bro, not by the OS. The doctor checks only whether the `ANTHROPIC_API_KEY` environment variable is set, never its value; `.env` loading is not implemented yet.
 
 ## Configuration
-Settings live in `$XDG_CONFIG_HOME/ya-bro/config.toml` (default `~/.config/ya-bro/`); `apps/<app-id>.toml` overrides it per app. Keys: `humour` (0-3), `[proactive] enabled, sensitivity`, `[capture] allowed`, `[do_it] allowed`. Unknown keys log a warning and are ignored. Logs are written to `$XDG_STATE_HOME/ya-bro/logs/*.jsonl` and never contain typed text or screen content.
+Settings live in `$XDG_CONFIG_HOME/ya-bro/config.toml` (default `~/.config/ya-bro/`); `apps/<app-id>.toml` overrides it per app. Keys: `humour` (0 = plain lines, 1-3 = playful; default 1), `[proactive] enabled, sensitivity`, `[capture] allowed`, `[do_it] allowed`. Unknown keys log a warning and are ignored. Logs are written to `$XDG_STATE_HOME/ya-bro/logs/*.jsonl` and never contain typed text or screen content.
 
 ## Platform
 Linux only for now: GNOME on Wayland first (through a small GNOME Shell extension), KDE Plasma Wayland next. X11 is used only in CI. macOS/Windows later.

@@ -9,15 +9,19 @@ Legend: done · in progress · todo
 |---|---|---|
 | M0 Foundations | in progress | #16 skeleton (done, #37), #17 doctor and setup (done, PR #42), #36 config and log API (done, #41) |
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
-| M2 Perception + bridge | todo | #4, #18 |
-| M3 Overlay | todo | #3 |
-| M4 Step loop | todo | #5, #19, #20 |
+| M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
+| M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
+| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 |
 | M5 Packs + terminal | todo | #8, #21, #22, #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #78 documentation audit
+Done: ADR-0026 (step loop), README status and logout wording, ADR-0024 commands, SPEC as-built paragraph, milestone table, CLAUDE.md repo map, config docs for `humour`.
+Not done: a user guide beyond the README and DEVELOPMENT (no `docs/guides/` yet); the SPEC roadmap sections are unchanged.
+
 ### 2026-11-22: #76 tone and Why? after a mistake
 Done: `tone.py` (plain at humour 0, playful from 1, three rotating mismatch lines), wired to `config.humour`; Why? after a wrong key names what is on screen versus what was needed and clears when undone; screen text echoed back is capped at 24 characters. Unit tests and the headless runs updated. Found in the live trial.
 Not done: English only (no Arabic lines, ADR-0019); humour 2 and 3 are the same as 1; lines are fixed templates (the LLM brain will write more); not re-run on the live desktop.

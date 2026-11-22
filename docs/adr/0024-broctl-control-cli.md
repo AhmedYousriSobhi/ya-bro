@@ -11,7 +11,7 @@ Management commands started as `ya-bro doctor` and `ya-bro setup`. The same name
 ## Decision
 1. **`broctl` controls the agent**, as `kubectl` controls a cluster. `ya-bro` stays the product name and the name of the agent process (a later issue); it carries no management subcommands.
 2. **Grammar: `broctl <noun> <verb> [args]`**, with `--help` at every level and exit code 0 for success, 1 for a failed check or error.
-3. **Commands today:** `version`, `doctor`, `setup`, `apps list|allow|revoke <app-id>`.
+3. **Commands today:** `version`, `doctor`, `setup`, `load`, `apps list|available|allow|revoke <app-id>`, `targets list|allow|revoke <id>` (ADR-0025), `point`, `scope watch`, `show <plan.toml>` (ADR-0026).
 4. **Planned (same grammar):** `config get|set|edit` and `stats`, `sent`, `forget` (ADR-0017, ADR-0014), `pack list|doctor` (ADR-0012).
 5. **Safety:** commands that change persistent state ask first (`setup`) or are explicit about their effect (`apps allow|revoke`). There is no `--yes` flag for `setup`. `broctl` never prints secrets.
 6. **Per-app scope:** `broctl apps` manages the default-deny allowlist (#43). An empty list means Ya-Bro sees no app.

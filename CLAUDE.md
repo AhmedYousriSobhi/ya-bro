@@ -25,7 +25,9 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
-- `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop), plans, policy, ipc, dirs, cli; OS code only under `platform/`)
+- `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop, ADR-0026), plans (TOML plans), tone (the bro's lines), policy, config, logs, targets, token_server, ipc, dirs, cli; OS code only under `platform/`)
+- `examples/plans/` — runnable Show-me plans (`broctl show examples/plans/calculator.toml`)
+- `docs/assets/` — images and the Show-me reference GIF (regenerate with `scripts/dev/record_demo.py`)
 - `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
 - `scripts/dev/headless-shell.sh` — isolated headless gnome-shell for extension tests
 - `scripts/check.sh` — full validation; run after every edit and before every PR
