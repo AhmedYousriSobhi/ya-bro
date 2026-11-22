@@ -4,6 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13. Implementation is split three ways: the new issue "Spike S1: GNOME Shell extension bridge + overlay" (throwaway measurements); the new issue "GNOME Shell extension: skeleton, Bridge1, setup and CI" (§1–4, 7–10, including S3 and the dev loop); and **#3** (`Overlay1` renderer, ask window, docked fallback; §5–6).
 - Depends on: ADR-0002 (GNOME-first), ADR-0003, ADR-0004, ADR-0006, ADR-0014
+- Implementation status (S1, #15, provisional): prototype in `extension/`, measured in a headless shell. Click-through (0/1000 blocked), focus safety, stacking, ring placement (1.5 px) and GTK-on-Wayland coordinates (0.6 px) pass at 100% and 150%. Mutter drops the `addKeybinding` stop key in about half of fresh sessions (cause unknown), so a stage `captured-event` fallback is required (10/10 headless, 5/5 nested after the fix). A nested run on the real GPU measured a median 8.4 ms frame interval. `layout_mode` cannot be read by the extension, and a real keyboard confirmed the stop path in the nested shell (8 presses); XWayland, Qt6, Firefox and the live session are unverified. See [S1 findings](../research/spikes/S1-gnome-extension.md). Still Proposed.
 - Refines: ADR-0004 §3 (GNOME row), ADR-0006 (`GnomeShellOverlay`)
 
 ## Context
@@ -55,7 +56,7 @@ Source facts that shape the design, read from `js/ui/layout.js` on the `gnome-50
 | Window list and geometry, focus, stacking order, monitors, scale, pointer position | AT-SPI, planning, LLM, persona, policy |
 | Drawing avatar, ring, pointer, bubble and state indicators as St/Clutter actors | Screen capture (stays on the portal, ADR-0005) |
 | Hit-testing on avatar and bubble buttons → events to core | Input injection (stays on AT-SPI actions / portal + libei, ADR-0009) |
-| Stop key binding (works even if core hangs) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
+| Stop key binding plus a stage `captured-event` fallback (works even if core hangs; Mutter alone dropped the binding in about half of test sessions) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
 | Dead-man switch: hide everything if core disappears | Settings UI (no `prefs.js` in v0.1) |
 
 ### 3. D-Bus API (session bus, versioned interfaces)
@@ -65,10 +66,10 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 
 | Member | Signature | Notes |
 |---|---|---|
-| `GetInfo()` | `→ a{sv}` | `api` (u), `shell_version`, `extension_version`, `layout_mode` (logical/physical), `capabilities` (as) |
+| `GetInfo()` | `→ a{sv}` | `api` (u), `shell_version`, `extension_version`, `layout_mode` (`logical`/`physical`/`unknown`; the extension cannot read Mutter's mode, so core reads `layout-mode` from `org.gnome.Mutter.DisplayConfig`), `capabilities` (as) |
 | `ListWindows()` | `→ aa{sv}` | Per window: `id` (t, `get_id`), `seq` (`get_stable_sequence`), `pid` (`get_pid`), `app_id` (`get_gtk_application_id` / `get_sandboxed_app_id` / `get_wm_class`), `type` (`get_window_type`), `client` (wayland/x11), `frame` and `buffer` rects, `monitor`, `fullscreen`, `focused`, `transient_for`, `stack` index. **No titles.** |
 | `GetWindowTitle(t id, u step_serial)` | `→ s` | Only for the focused window, or the window of the active guided step identified by `step_serial` from `ShowStep`. Used for AT-SPI frame matching (ADR-0004 §4). |
-| `GetMonitors()` | `→ a(iiiidb)` | index, x, y, w, h, scale, primary |
+| `GetMonitors()` | `→ a(iiiiidb)` | index, x, y, w, h, scale, primary (signature corrected in S1) |
 | `GetPointer()` | `→ (ii)` | `global.get_pointer()`. Rate-limited to 30/s. |
 | `WindowsChanged` | signal `(at added, at removed)` | All signals are **unicast** to allowed peers (§11) |
 | `GeometryChanged` | signal `(t id, (iiii) frame, (iiii) buffer)` | From `position-changed` / `size-changed`, coalesced to at most one per window per frame |
@@ -85,6 +86,7 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 | `SetIndicators(as)` | | `watching`, `capturing`, `acting` badges (ADR-0014 visible state) |
 | `Hide()` | | Idempotent. Also triggered locally by the stop key and the dead-man switch. |
 | `Ping(u)` | `→ u` | Heartbeat from core every 2 s |
+| `GetState()` | `→ a{sv}` | `visible`, `overview`, `unredirect_disabled`. Core and Perceiver only (added in S1; replaces an ungated property). |
 | `UserEvent` | signal `(s kind, s id, u serial)` | `avatar_click`, `button:<enum>`, `stop_key` |
 
 There is no method that takes code, file paths, shell strings, images or arbitrary markup. Text is set with `St.Label.text` (Pango plain text), never markup.

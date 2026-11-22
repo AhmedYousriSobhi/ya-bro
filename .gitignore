@@ -24,3 +24,4 @@ node_modules/
 .pytest_cache/
 .ruff_cache/
 *.egg-info/
+extension/schemas/gschemas.compiled

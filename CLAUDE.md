@@ -26,6 +26,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - `src/ya_bro/` — source (interfaces, types, ipc, dirs, cli; OS code only under `platform/`)
 - `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
+- `scripts/dev/headless-shell.sh` — isolated headless gnome-shell for extension tests
 - `scripts/check.sh` — full validation; run after every edit and before every PR
 - `docs/PROGRESS.md` — status sheet, update in every PR; `docs/DEVELOPMENT.md` — setup and layout
 

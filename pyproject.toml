@@ -28,7 +28,11 @@ packages = ["src/ya_bro"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-markers = ["atspi: needs system PyGObject, AT-SPI and dbus-run-session"]
+markers = [
+  "atspi: needs system PyGObject, AT-SPI and dbus-run-session",
+  "gnome: needs gnome-shell 50 (runs an isolated headless shell, ~1 min)",
+  "gnome_measure: S1 measurements, slow (minutes), excluded from scripts/check.sh",
+]
 
 [tool.ruff]
 line-length = 100
@@ -46,4 +50,5 @@ select = ["E", "F", "I", "UP", "B", "TID"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/ya_bro/platform/**" = ["TID251"]
-"tests/fixtures/**" = ["TID251"]
+"tests/fixtures/**" = ["TID251", "E501"]
+"tests/test_gnome_measurements.py" = ["E501"]
