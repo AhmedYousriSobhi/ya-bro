@@ -8,7 +8,7 @@ Builders who use many apps often can't learn them from written guides or video t
 ## 2. Vision
 A Navi-style sidekick that **hovers on screen**. Ask in voice or text: *"Ya bro, how do I export this as PNG in GIMP?"* The bro shows the **next single step**, pointing at the real control, explaining briefly, and either waits for you to do it or does it itself while you watch. Then the next step. Like pair-programming, but for using apps.
 
-See the [concept sketch](docs/assets/ya-bro-concept.png) for the intended look: proactive nudge, ring on the real UI, step card, ask bar.
+See [how it works](docs/assets/how-it-works.svg) for the loop and the [Show-me demo](docs/assets/show-me-calculator.gif) for what runs today. The bro's own look (avatar, shape) is not decided yet, so no artwork shows one; the earlier concept sketch with a mascot was removed for that reason.
 
 ## 3. Users
 Primary: the maintainer — an app builder who struggles with guides/tutorials and learns best by doing with a guide present. Secondary: anyone onboarding to unfamiliar software on Linux.
@@ -22,6 +22,7 @@ Primary: the maintainer — an app builder who struggles with guides/tutorials a
    - says one short sentence about what and why,
    - waits (**Show me** mode) or acts (**Do it** mode),
    - verifies the screen changed as expected, then moves on.
+   *As built (ADR-0026, scripted plans, GNOME):* the bro reads the real element's text through AT-SPI, so a step advances by itself once the screen shows the result; Next on a step that is not done asks first; a wrong action is named and **Why?** explains the mistake; the tone is playful unless `humour = 0`.
 5. **Control**: "next", "repeat", "why?", "do it for me", "let me try", "stop", "go back". Stop is instant.
 6. **Recover**: if the UI doesn't match expectations (dialog, different version), re-perceive and re-plan out loud instead of failing silently.
 
@@ -37,6 +38,8 @@ The headline feature. The bro watches for **struggle patterns** and offers help 
 
 ## 5. Scope
 **MVP (v0.1):** target **GNOME 50 on Wayland** (Ubuntu 26.04 LTS), through a Ya-Bro GNOME Shell extension that supplies window geometry and draws the overlay ([ADR-0002](docs/adr/0002-platform-targets-and-session-strategy.md), [ADR-0023](docs/adr/0023-gnome-shell-extension-bridge.md)). Without the extension, docked mode (no live ring). X11 is CI-only: GNOME 50 and Plasma 6.8 have no X11 session. Text chat + floating overlay; point-and-highlight; **Show-me mode with automatic step verification** (UI tree diff / screenshot) for GUI apps exposing AT-SPI; one LLM backend (Claude). Proven on 3–5 accessible apps (GIMP, Inkscape, LibreOffice, system settings) plus the workbench pack (terminal + web UI). Proactive struggle detection with back-off ships in the MVP, behind a toggle.
+
+**Scope (default-deny):** Ya-Bro sees no window until the user allows it. The user picks an app (`broctl setup`, `broctl apps allow`) or a *target* such as a web tool by origin (`broctl targets allow`, [ADR-0025](docs/adr/0025-pack-scoped-targets.md)); the extension reports only those windows, and a browser tab only while it proves its origin by a title token. CLI-command targets need the shell hook (#21).
 **v0.15:** Do-it mode (accessibility actions first, then input injection via the RemoteDesktop portal + libei, with consent).
 **v0.2:** KWin Wayland (Plasma ≥ 6.6) via a KWin script bridge and a layer-shell overlay; voice in/out (local only where the Arabic/English bake-off passes), hotkey summon. Multi-monitor and mixed scale are already in the MVP on GNOME (ADR-0023). Opt-in wake word moves to v0.3.
 **v0.3:** more packs, docs ingestion, MCP/skill integration, per-app memory of learned workflows.
@@ -92,7 +95,7 @@ Ya-Bro is **one global tool**. The core (overlay, voice/text, personality, strug
 2. ~~GNOME-on-Wayland overlay strategy~~ — resolved by ADR-0006 and ADR-0023 (Shell extension, now in the MVP).
 3. How well AT-SPI covers Electron, GTK4, Qt, and web content — spike S2 ([ADR-0022](docs/adr/0022-mvp-build-plan.md)).
 4. ~~Wake word vs hotkey~~ — resolved by ADR-0011 (push-to-talk default, wake word opt-in later).
-5. ~~License~~ — resolved by ADR-0020 (MIT OR Apache-2.0).
+5. ~~License~~ — resolved by ADR-0020 (the maintainer chose MIT only, 2026-11-22).
 6. ~~Which desktop does the maintainer dogfood on?~~ — resolved 2026-11-20: the maintainer chose GNOME Wayland first; KWin is the v0.2 port (ADR-0002).
 
 ## 10. Delivery process

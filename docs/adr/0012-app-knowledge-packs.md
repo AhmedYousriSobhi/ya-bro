@@ -101,7 +101,7 @@ Accuracy is lower, and the bro says so once ("I don't know this app well yet, br
 - Packs carry `app_version` ranges, and tasks can carry per-version overrides.
 - Fingerprints tolerate drift through scoring (ADR-0005).
 - User corrections land in `~/.local/share/ya-bro/pack-overrides/<pack-id>/`, never in the shipped pack.
-- `ya-bro pack doctor <id>` replays `tests/` fixtures to flag selectors that broke in a new app version.
+- `broctl pack doctor <id>` replays `tests/` fixtures to flag selectors that broke in a new app version.
 
 **7. App-side hooks.** These are an "app cooperates" path for apps we own:
 - `hooks.toml` declares endpoints like `state = { kind = "http-local", url = "http://127.0.0.1:<port>/api/state", auth = "token-file:<path>" }`, or `mcp`, or `dbus`.
@@ -109,10 +109,10 @@ Accuracy is lower, and the bro says so once ("I don't know this app well yet, br
 - Token files are read, never printed or sent to the LLM (workbench rule).
 
 **8. Authoring workflow.**
-1. `ya-bro pack new <id>` scaffolds a pack.
-2. `ya-bro pack record` (later) watches the maintainer perform a task, capturing AT-SPI fingerprints and predicates, and writes `tasks/<task>.yaml` (the OpenAdapt idea, without pixels).
+1. `broctl pack new <id>` scaffolds a pack.
+2. `broctl pack record` (later) watches the maintainer perform a task, capturing AT-SPI fingerprints and predicates, and writes `tasks/<task>.yaml` (the OpenAdapt idea, without pixels).
 3. The maintainer edits the YAML.
-4. `ya-bro pack test` replays fixtures.
+4. `broctl pack test` replays fixtures.
 
 An Accerciser-like inspector mode in the overlay ("what's this element?") shows the fingerprint to copy.
 

@@ -3,6 +3,7 @@
 - Status: Proposed
 - Date: 2026-11-20
 - Issue: #13
+- S1 measurement (2026-11-22, headless GNOME 50, see [S1 findings](../research/spikes/S1-gnome-extension.md)): the window origin for AT-SPI `WINDOW` extents is the **frame** rect for GTK4 and libadwaita and the **buffer** rect for GTK3, both within 0.6 px at 100% and 150%. XWayland GTK3 needed frame + (0, 37). Qt6 and Firefox are not yet measured.
 - Depends on: ADR-0002, ADR-0003, ADR-0023
 
 > **Amended for GNOME-first (2026-11-20).**

@@ -24,10 +24,17 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (created by the pack-format issue)
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
-- Source code will live in `src/` (created by the first implementation issue)
+- `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
+- `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop, ADR-0026), plans (TOML plans), tone (the bro's lines), policy, config, logs, targets, token_server, ipc, dirs, cli; OS code only under `platform/`)
+- `examples/plans/` — runnable Show-me plans (`broctl show examples/plans/calculator.toml`)
+- `docs/assets/` — images and the Show-me reference GIF (regenerate with `scripts/dev/record_demo.py`)
+- `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
+- `scripts/dev/headless-shell.sh` — isolated headless gnome-shell for extension tests
+- `scripts/check.sh` — full validation; run after every edit and before every PR
+- `docs/PROGRESS.md` — status sheet, update in every PR; `docs/DEVELOPMENT.md` — setup and layout
 
 ## Tech stack (ADR-0001)
-Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run tests and `ruff check` before every PR.
+Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` for lint/format. Run `scripts/check.sh` before every PR. Core code must not import `gi`, `dbus` or `Xlib` (only `src/ya_bro/platform/**` may; ruff enforces it).
 
 ## Architecture rules (summary; details in SPEC.md)
 - Core loop: **perceive → plan → guide/act → confirm → next step**. One step at a time; never dump a wall of instructions.
@@ -40,6 +47,11 @@ Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` f
 - On GNOME the CompositorBridge and the overlay are the Ya-Bro **GNOME Shell extension** in `extension/` (GJS, ADR-0023). Keep it a dumb renderer plus geometry bridge: no app logic, no sync D-Bus calls, no screenshot or input-injection methods, and everything undone in `disable()`. Develop it in a nested `gnome-shell --devkit` session, never by reloading the live one.
 - Beyond the five interfaces, ADR-0003 adds CompositorBridge, Capture, IdleSource, Hotkeys, ShellHook, SecretStore and Policy. Every action passes the `Policy` engine (ADR-0014).
 - App knowledge comes from the app itself (UI tree, `--help`, docs, MCP/skills), not hardcoded per-app scripts.
+
+## Working rules for agents and contributors
+- **Watch what you start.** Long or background jobs (headless shells, test runs) must be monitored for stalls, not waited on blindly. Confirm a real end marker (for example an `exit=` line); a background-task "completed" notice can mean only the launcher exited.
+- **Harnesses must not touch hardware or the live session.** Never use the real camera, microphone, `DISPLAY` or session bus from tests. `scripts/dev/headless-shell.sh` uses private dirs and a private display, and WirePlumber there runs camera-masked (`bwrap`). A harness once lit the webcam LED; after any such incident, tell the maintainer before re-running.
+- Do not store notes in an account-level assistant memory; put durable guidance in this file or in `docs/`.
 
 ## Safety rules for the bro
 - Never type passwords or secrets, never click purchase/delete/send-type controls without explicit user confirmation in the current step.

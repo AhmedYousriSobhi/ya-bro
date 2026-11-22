@@ -4,6 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13. Implementation is split three ways: the new issue "Spike S1: GNOME Shell extension bridge + overlay" (throwaway measurements); the new issue "GNOME Shell extension: skeleton, Bridge1, setup and CI" (§1–4, 7–10, including S3 and the dev loop); and **#3** (`Overlay1` renderer, ask window, docked fallback; §5–6).
 - Depends on: ADR-0002 (GNOME-first), ADR-0003, ADR-0004, ADR-0006, ADR-0014
+- Implementation status (S1, #15, provisional): prototype in `extension/`, measured in a headless shell. Click-through (0/1000 blocked), focus safety, stacking, ring placement (1.5 px) and GTK-on-Wayland coordinates (0.6 px) pass at 100% and 150%. Mutter drops the `addKeybinding` stop key in about half of fresh sessions (cause unknown), so a stage `captured-event` fallback is required (10/10 headless, 5/5 nested after the fix). A nested run on the real GPU measured a median 8.4 ms frame interval. `layout_mode` cannot be read by the extension, and a real keyboard confirmed the stop path in the nested shell (8 presses); XWayland, Qt6, Firefox and the live session are unverified. See [S1 findings](../research/spikes/S1-gnome-extension.md). Still Proposed.
 - Refines: ADR-0004 §3 (GNOME row), ADR-0006 (`GnomeShellOverlay`)
 
 ## Context
@@ -55,7 +56,7 @@ Source facts that shape the design, read from `js/ui/layout.js` on the `gnome-50
 | Window list and geometry, focus, stacking order, monitors, scale, pointer position | AT-SPI, planning, LLM, persona, policy |
 | Drawing avatar, ring, pointer, bubble and state indicators as St/Clutter actors | Screen capture (stays on the portal, ADR-0005) |
 | Hit-testing on avatar and bubble buttons → events to core | Input injection (stays on AT-SPI actions / portal + libei, ADR-0009) |
-| Stop key binding (works even if core hangs) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
+| Stop key binding plus a stage `captured-event` fallback (works even if core hangs; Mutter alone dropped the binding in about half of test sessions) | The text "ask" box. It is a normal, focusable GTK window in `ya-bro-overlay`, because typing into St would need a modal grab. |
 | Dead-man switch: hide everything if core disappears | Settings UI (no `prefs.js` in v0.1) |
 
 ### 3. D-Bus API (session bus, versioned interfaces)
@@ -65,10 +66,10 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 
 | Member | Signature | Notes |
 |---|---|---|
-| `GetInfo()` | `→ a{sv}` | `api` (u), `shell_version`, `extension_version`, `layout_mode` (logical/physical), `capabilities` (as) |
+| `GetInfo()` | `→ a{sv}` | `api` (u), `shell_version`, `extension_version`, `layout_mode` (`logical`/`physical`/`unknown`; the extension cannot read Mutter's mode, so core reads `layout-mode` from `org.gnome.Mutter.DisplayConfig`), `capabilities` (as) |
 | `ListWindows()` | `→ aa{sv}` | Per window: `id` (t, `get_id`), `seq` (`get_stable_sequence`), `pid` (`get_pid`), `app_id` (`get_gtk_application_id` / `get_sandboxed_app_id` / `get_wm_class`), `type` (`get_window_type`), `client` (wayland/x11), `frame` and `buffer` rects, `monitor`, `fullscreen`, `focused`, `transient_for`, `stack` index. **No titles.** |
 | `GetWindowTitle(t id, u step_serial)` | `→ s` | Only for the focused window, or the window of the active guided step identified by `step_serial` from `ShowStep`. Used for AT-SPI frame matching (ADR-0004 §4). |
-| `GetMonitors()` | `→ a(iiiidb)` | index, x, y, w, h, scale, primary |
+| `GetMonitors()` | `→ a(iiiiidb)` | index, x, y, w, h, scale, primary (signature corrected in S1) |
 | `GetPointer()` | `→ (ii)` | `global.get_pointer()`. Rate-limited to 30/s. |
 | `WindowsChanged` | signal `(at added, at removed)` | All signals are **unicast** to allowed peers (§11) |
 | `GeometryChanged` | signal `(t id, (iiii) frame, (iiii) buffer)` | From `position-changed` / `size-changed`, coalesced to at most one per window per frame |
@@ -79,12 +80,13 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 
 | Member | Signature | Notes |
 |---|---|---|
-| `ShowStep(a{sv})` | `→ u serial` | `target` rect or none; `ring` = `confident` / `dashed` / `none` (ADR-0007 tiers); `text` (s, ≤ 280 chars, already localized); `dir` = `ltr` / `rtl` (ADR-0019); `buttons` (as) from a **fixed enum** (`next`, `repeat`, `why`, `do_it`, `stop`, `yes`, `no`, `not_for_app`); `follow_window` (t) |
+| `ShowStep(a{sv})` | `→ u serial` | `target` rect or none; `ring` = `confident` / `dashed` / `none` (ADR-0007 tiers); `text` (s, ≤ 280 chars, already localized); `dir` = `ltr` / `rtl` (ADR-0019); `avatar` (b, default true: false leaves the placeholder avatar out, because the bro's shape is not decided); `buttons` (as) from a **fixed enum** (`next`, `repeat`, `why`, `do_it`, `stop`, `yes`, `no`, `not_for_app`); `follow_window` (t) |
 | `FlyPointer((ii) to, u ms)` | `→ u serial` | Quadratic Bezier with ease-out, 400–700 ms (ADR-0006 §3) |
 | `SetAvatar(a{sv})` | | position, state (`idle`, `watching`, `thinking`, `talking`, `acting`) |
 | `SetIndicators(as)` | | `watching`, `capturing`, `acting` badges (ADR-0014 visible state) |
 | `Hide()` | | Idempotent. Also triggered locally by the stop key and the dead-man switch. |
 | `Ping(u)` | `→ u` | Heartbeat from core every 2 s |
+| `GetState()` | `→ a{sv}` | `visible`, `overview`, `unredirect_disabled`, `bubble` (`(iiii)`, the placed bubble rectangle in stage coordinates, zeros when hidden; #69). Core and Perceiver only (added in S1; replaces an ungated property). |
 | `UserEvent` | signal `(s kind, s id, u serial)` | `avatar_click`, `button:<enum>`, `stop_key` |
 
 There is no method that takes code, file paths, shell strings, images or arbitrary markup. Text is set with `St.Label.text` (Pango plain text), never markup.
@@ -105,6 +107,8 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - **Self-exclusion from capture.** Core asks for `Hide()` for one frame before a portal screenshot, or masks known rects (ADR-0006 §7).
 
 ### 6. Pointer, ring, bubble rendering
+
+Bubble placement (#69): below the target, above it when there is no room below, and always clamped inside the monitor with 8 px to spare and 40 px on the left for the avatar. An explicit `bubble_at` is clamped the same way. Checked for all four corners, an edge and the middle (`tests/fixtures/shell_bubble.py`).
 - Ring: rounded rectangle with a soft glow, drawn with CSS `border` + `box-shadow` in `stylesheet.css`. `dashed` style for Medium confidence. No ring for Low.
 - Pointer: an `St.Icon` that animates with `actor.ease()` along core-computed Bezier keyframes. 60 fps is the target (S1 criterion).
 - Bubble: `St.BoxLayout` with an `St.Label` (wrapping, max width 360 logical px) plus buttons. Core does placement (Floating-UI-style flip/shift, ADR-0006 §3) and sends the final position, so the extension stays dumb. RTL: core sends `dir`. The label uses Pango auto-direction with `Clutter.TextDirection` set from `dir` (unverified detail, ADR-0019).
@@ -115,7 +119,7 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - **Core restarts** resync with `GetInfo` + `ListWindows`. The extension holds no step state apart from what is drawn.
 - **No synchronous D-Bus calls and no subprocesses** from the extension. All work is signal handlers plus O(windows) loops. Every handler is wrapped in `try/catch` and logs through `console.error`, so an exception cannot escape into the shell.
 - **Lock screen.** `user` session mode only, so the extension is disabled on lock and re-enabled on unlock. Core treats `NameOwnerChanged` as "overlay gone" and redraws the current step after unlock.
-- **Errors.** `ya-bro doctor` reads `org.gnome.Shell.Extensions.GetExtensionInfo(uuid)` (state) and `GetExtensionErrors(uuid)`.
+- **Errors.** `broctl doctor` reads `org.gnome.Shell.Extensions.GetExtensionInfo(uuid)` (state) and `GetExtensionErrors(uuid)`.
 
 | Failure | Behaviour |
 |---|---|
@@ -132,12 +136,13 @@ There is no method that takes code, file paths, shell strings, images or arbitra
 - Track gjs.guide port guides each March and September. Budget about 1 day per GNOME release.
 
 ### 9. Install, enable and first-run consent
-1. `ya-bro setup` explains in plain words what the extension can see (window positions, app ids, pointer) and what it cannot (screen pixels, typing, window contents), then asks.
+1. `broctl setup` explains in plain words what the extension can see (window positions, app ids, pointer) and what it cannot (screen pixels, typing, window contents), then asks.
 2. **Files.** From a source or `uv tool` install: copy `extension/` to `~/.local/share/gnome-shell/extensions/<uuid>/` and compile `schemas/` with `glib-compile-schemas`. From the .deb: shipped in `/usr/share/gnome-shell/extensions/<uuid>/` (ADR-0015).
-3. **Enable.** Append the UUID to `org.gnome.shell enabled-extensions`. On Wayland a running shell does not discover a newly installed extension directory, and GNOME Shell cannot restart while the user is logged in (gjs.guide debugging page), so **one logout/login is required** the first time. `gnome-extensions enable` / `EnableExtension` works without logout only once the shell already knows the UUID (unverified in detail; checked in S1).
+3. **Enable.** Append the UUID to `org.gnome.shell enabled-extensions`. On Wayland a running shell does not discover a newly installed extension directory, and GNOME Shell cannot restart while the user is logged in (gjs.guide debugging page), so **one logout/login is required** the first time. `gnome-extensions enable` / `EnableExtension` works without logout only once the shell already knows the UUID. **Measured (2026-11-22, isolated headless GNOME Shell 50.1):** with the shell already running, adding the extension directory, setting `enabled-extensions`, `gnome-extensions enable` and toggling `disable-user-extensions` all left `GetExtensionInfo` empty, so a first install needs a Shell restart (a logout). **Workaround, measured:** typing a one-line snippet into Looking Glass (`Alt+F2`, `lg`) calls `Main.extensionManager.loadExtension(createExtensionObject(uuid, dir, 2))` and the extension went from unknown to ENABLED and `Bridge1` answered, with no restart (isolated shell, keys injected through Mutter RemoteDesktop; `pytest -m gnome`). `broctl load` wraps it (clipboard + steps + wait). It is per boot: the next login loads the extension normally. Installing through extensions.gnome.org would also hot-load but needs publication (§9.6).
 4. After login, doctor confirms state ENABLED and an `api` match. Updates to the extension code also need a re-login.
-5. **Accessibility bus.** On the same consent screen (ADR-0005), because at-spi2-core on 26.04 is 2.60.4, older than the 2.61 listener-based enablement.
-6. **EGO publication** is *not* part of v0.1. EGO rejects AI-generated submissions ("unnecessary code, inconsistent code style, imaginary API usage, comments serving as LLM prompts"). Local install from the repo or .deb is unaffected. Before any EGO submission the maintainer hand-writes or line-by-line reviews the code (README Q4).
+5. **Scope (#43).** Setup asks for one app id and stores it in the extension's `allowed-apps` setting (default empty). The bridge lists, announces and measures only those windows; the extension is a trusted in-shell component, so this is a Ya-Bro rule, not an OS sandbox.
+6. **Accessibility bus.** On the same consent screen (ADR-0005), because at-spi2-core on 26.04 is 2.60.4, older than the 2.61 listener-based enablement.
+7. **EGO publication** is *not* part of v0.1. EGO rejects AI-generated submissions ("unnecessary code, inconsistent code style, imaginary API usage, comments serving as LLM prompts"). Local install from the repo or .deb is unaffected. Before any EGO submission the maintainer hand-writes or line-by-line reviews the code (README Q4).
 
 ### 10. Development and testing
 - **Dev loop.** `sudo apt install mutter-dev-bin` (universe, 50.1; the Mutter Development Kit that GNOME ≥ 49 uses instead of `--nested`), then `dbus-run-session gnome-shell --devkit --wayland` with `G_MESSAGES_DEBUG=all SHELL_DEBUG=all`. Install and enable the extension inside that session's terminal. Restart the nested shell to load changes, so the main session never needs re-login during development. The nested instance is "not fully isolated" (gjs.guide), so don't use it with important data open. Exact devkit behaviour on Ubuntu is unverified until S1.

@@ -1,9 +1,12 @@
 # ADR-0020: Licensing, governance and release engineering
 
-- Status: Proposed
+- Status: Proposed. **Licence decided: MIT only** (maintainer, 2026-11-22), see the update below; the rest is unchanged
 - Date: 2026-11-20
 - Issue: #13
 - Resolves: SPEC.md §9 open question 5 (licence)
+
+## Update 2026-11-22: MIT only
+The maintainer chose **MIT** for the repository, instead of the dual MIT OR Apache-2.0 recommended below. A single `LICENSE` file (MIT) is in the repository root, `pyproject.toml` says `license = "MIT"`, and SPDX headers, when added, read `SPDX-License-Identifier: MIT`. What MIT gives up compared with the recommendation: no express patent grant. The dependency analysis below is unaffected (every core dependency allows an MIT outbound licence). Issue #26 (licence files and compliance gate) still covers the CI check.
 
 ## Context
 SPEC proposes "MIT or Apache-2.0" as the licence. The sibling project workbench is dual-licensed MIT OR Apache-2.0: it ships `LICENSE-MIT` and `LICENSE-APACHE`. CLAUDE.md fixes the delivery flow:
@@ -61,9 +64,9 @@ These are copyleft or restrictive:
 | **MPL-2.0** | File-level copyleft | Unusual in Python desktop projects; adds friction for no specific gain |
 
 ## Decision
-1. **Licence:** `MIT OR Apache-2.0`.
-   - Files: `LICENSE-MIT`, `LICENSE-APACHE`.
-   - SPDX headers on source files: `SPDX-License-Identifier: MIT OR Apache-2.0`.
+1. **Licence:** `MIT OR Apache-2.0` (recommended here; the maintainer chose `MIT` only, see the update above).
+   - Files: `LICENSE-MIT`, `LICENSE-APACHE` (as built: a single `LICENSE`, MIT).
+   - SPDX headers on source files: `SPDX-License-Identifier: MIT` (see the update above).
    - Packs in this repo use the same licence. Third-party packs declare their own in `pack.toml`.
 2. **Copyleft isolation rule.**
    - GPL and AGPL components are **never imported or linked in-process**. They run only as separate optional processes over pipes or sockets: Piper and espeak-ng as Wyoming services, ydotool as an external binary if the user opts in.
