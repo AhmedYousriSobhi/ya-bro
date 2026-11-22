@@ -48,8 +48,13 @@ class StepLoop:
         self._bridge = bridge
         self._policy = policy
         self._timing = timing or Timing()
-        self._log = log or (lambda *a, **k: None)
+        self._sink = log or (lambda *a, **k: None)
         self._events: asyncio.Queue[str] = asyncio.Queue()
+
+    def _log(self, name: str, **fields: int | str) -> None:
+        # Logging is a side channel: whatever the sink does, the loop keeps going.
+        with contextlib.suppress(Exception):
+            self._sink(name, **fields)
 
     async def run(self, plan: Plan, app_id: str) -> Outcome:
         pump = asyncio.create_task(self._pump_events())
@@ -130,7 +135,7 @@ class StepLoop:
                 event = await asyncio.wait_for(self._events.get(), self._timing.poll)
             except TimeoutError:
                 continue
-            self._log("step_event", step=index, event=event)
+            self._log("step_event", step=index, kind=event)
             if event == "stop":
                 return "stop"
             if event == "next":

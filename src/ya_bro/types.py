@@ -87,3 +87,5 @@ class PolicyDecision:
 class Plan:
     goal: str
     steps: list[Step] = field(default_factory=list)
+    # Added to every AT-SPI rectangle: some apps report window extents a constant off (S9).
+    extents_offset: tuple[int, int] = (0, 0)

@@ -56,3 +56,9 @@ why = "Create opens the confirmation."           # shown by the Why button
 risk = 0                                         # 3 = the user's own click, always only shown
 ```
 Run `broctl show plan.toml` with the target app allowed (`broctl apps allow`), `broctl load` done and the app open. The app must expose an accessibility tree (GTK apps do; Firefox and Chrome need the page to report its own state, #31). Buttons: Next, Repeat, Why, Stop; Super+Shift+Esc also stops. If the element is not on screen yet, you get a bubble that says so and the ring appears as soon as it does.
+
+A working example is `examples/plans/calculator.toml` (multiply 7 by 6). If an app's AT-SPI rectangles are a constant off (GNOME Calculator reports keys 12 px right and down), add `extents_offset = [dx, dy]` to `[plan]` ([S9](research/spikes/S9-extents-offset.md)). The reference GIF in the README is regenerated with:
+```bash
+YB_MONITOR=1280x1000 YB_ALLOWED='["org.gnome.Calculator"]' \
+  scripts/dev/headless-shell.sh /usr/bin/python3 scripts/dev/record_demo.py docs/assets/show-me-calculator.gif
+```

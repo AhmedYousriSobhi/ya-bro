@@ -60,7 +60,9 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
     def log(event: str, **fields) -> None:
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
 
-    loop = StepLoop(AtspiPerception(bridge), overlay, bridge, ShowMePolicy(), log=log)
+    loop = StepLoop(
+        AtspiPerception(bridge, plan.extents_offset), overlay, bridge, ShowMePolicy(), log=log
+    )
     print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
     outcome = await loop.run(plan, app)
     print(f"finished: {outcome}")
