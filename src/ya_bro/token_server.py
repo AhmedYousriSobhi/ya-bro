@@ -2,7 +2,7 @@
 
 A page on an allowed origin fetches the per-run token and puts it in `document.title`; the extension
 treats the window as in scope only while the token is in the title. The token is given only to a
-request that carries an allowed `Origin` and the `X-YaBro` header (which forces a CORS preflight),
+request with an allowed `Origin` and the `X-Scope-Token` header (which forces a CORS preflight),
 so a page on any other origin cannot read it.
 """
 
@@ -14,7 +14,7 @@ from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 DEFAULT_PORT = 47800
-HEADER = "X-YaBro"
+HEADER = "X-Scope-Token"
 
 
 def new_token() -> str:

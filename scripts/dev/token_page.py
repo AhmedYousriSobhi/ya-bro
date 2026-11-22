@@ -11,7 +11,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 PAGE = b"""<!doctype html><title>Ya-Bro demo</title><h1>Ya-Bro demo page</h1>
 <script>
 const base = document.title;
-fetch('http://127.0.0.1:47800/token', {headers: {'X-YaBro': '1'}})
+fetch('http://127.0.0.1:47800/token', {headers: {'X-Scope-Token': '1'}})
   .then(r => r.ok ? r.text() : '').then(t => { if (t) document.title = base + ' ' + t; });
 </script>"""
 
