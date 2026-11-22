@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #61 tab-scoped web targets (workbench)
+Done: `broctl targets list|allow|revoke`; a loopback token endpoint in `broctl` (127.0.0.1:47800, token only for an allowed `Origin` + `X-Scope-Token` header + loopback `Host`); `point` and `scope watch` pass the token to the stand-in core over stdin. workbench merged its opt-in title token (workbench#984, off by default, two switches). Verified end to end in the isolated shell with a real Chrome and the real workbench page: flag off, tab invisible; flag on, tab in scope; another tab active, out of scope; back, in scope again (6 of 6, no CSP errors).
+Not done: Firefox and the live desktop (your Firefox must be revoked from `apps` first, then restart workbench with `WORKBENCH_DESKTOP_HELPER=1`); CLI commands are stored but not enforced (needs #21); the port is fixed at 47800; no real core yet issues the token.
+
 ### 2026-11-22: #57 hot-load
 Done: `broctl load` (Looking Glass snippet, clipboard, wait for ENABLED); isolated-shell test with injected keys loads a late-installed extension and `Bridge1` answers; harness option `YB_LATE_EXT=1`. Not done: not yet run on the real desktop (the extension has never been loaded in the live session); Looking Glass layout on your GNOME may differ from the test shell.
 
@@ -31,9 +35,9 @@ Done: `broctl point` and `broctl scope watch` (stand-in core, `platform/gnome_de
 Done: `broctl setup` searches installed apps by name or id, lists up to 15, picks by number, and stores the window class when present. Not done: listing apps that are running right now (the extension is default-deny, so it cannot say what is open); the window-class-versus-desktop-id match is unverified on a real desktop.
 
 ### 2026-11-22: #47 pack-scoped targets (design + apps available)
-Done: `broctl targets` and the token endpoint (#61; unit-tested, the extension side is spike-tested with Chrome; Firefox and the live desktop not yet). Done: `broctl apps available` (app id, name, window class) and ADR-0025 (proposed).
+Done: `broctl apps available` (app id, name, window class) and ADR-0025 (proposed).
 Spike S8 (title token, [findings](research/spikes/S8-active-tab-scope.md)): works in the isolated shell with a stand-in window (listed and dropped in about 25 ms, removal emitted, 3 runs). Also verified with a real browser (Chrome for Testing, non-snap, isolated shell): in scope on tab A, out about 20 ms after switching to another origin, token unreadable from the other origin. Not verified: Firefox, core-side token issuance.
-Not done: targets themselves (`broctl targets ...`), CLI-command scoping, #8 packs and #21 shell hook. Until then workbench can only be covered by allowing a whole app.
+Not done here: CLI-command scoping, #8 packs and #21 shell hook (web targets landed in #61, below).
 
 ### 2026-11-22: #45 broctl
 Done: `broctl` entry point with `version`, `doctor`, `setup`, `apps list|allow|revoke`; docs and ADRs renamed from `ya-bro <cmd>`; ADR-0024.
