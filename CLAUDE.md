@@ -45,6 +45,11 @@ Python 3.12, GTK4 via PyGObject, `uv` for env/deps, `pytest` for tests, `ruff` f
 - Beyond the five interfaces, ADR-0003 adds CompositorBridge, Capture, IdleSource, Hotkeys, ShellHook, SecretStore and Policy. Every action passes the `Policy` engine (ADR-0014).
 - App knowledge comes from the app itself (UI tree, `--help`, docs, MCP/skills), not hardcoded per-app scripts.
 
+## Working rules for agents and contributors
+- **Watch what you start.** Long or background jobs (headless shells, test runs) must be monitored for stalls, not waited on blindly. Confirm a real end marker (for example an `exit=` line); a background-task "completed" notice can mean only the launcher exited.
+- **Harnesses must not touch hardware or the live session.** Never use the real camera, microphone, `DISPLAY` or session bus from tests. `scripts/dev/headless-shell.sh` uses private dirs and a private display, and WirePlumber there runs camera-masked (`bwrap`). A harness once lit the webcam LED; after any such incident, tell the maintainer before re-running.
+- Do not store notes in an account-level assistant memory; put durable guidance in this file or in `docs/`.
+
 ## Safety rules for the bro
 - Never type passwords or secrets, never click purchase/delete/send-type controls without explicit user confirmation in the current step.
 - Anything the bro does on screen must be visible and interruptible.
