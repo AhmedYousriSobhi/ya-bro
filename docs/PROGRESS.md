@@ -18,8 +18,8 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
-### 2026-11-22: #82 better demo GIF
-Done: re-recorded `show-me-calculator.gif` (7 frames, 915 x 1078, 247 KB): title card, solid dark background, captions, the wrong-key moment, ring-only (no avatar). Not done: no sound or cursor in the recording; the GIF shows Calculator only.
+### 2026-11-22: #82, #84 narrated demo GIF
+Done: `show-me-calculator.gif` is 8 frames, 606 x 798, 86 KB: native resolution (no upscaling), one shared 256-colour palette, a narrator caption track, title card, and the wrong key, the tease, the Why? explanation and the forgiveness. Not done: no sound or cursor; Calculator only; the Why? press is sent as the overlay's own event (the click path is covered by the e2e tests).
 
 ### 2026-11-22: #80 README, licence, user guide, artwork
 Done: README rewritten; `LICENSE` (MIT) and pyproject metadata; ADR-0020 and SPEC updated for MIT only; GitHub topics and description set; `docs/guides/getting-started.md` (install, setup, load, demo, own plan, troubleshooting, privacy, undo) checked from a fresh clone (`uv sync`, `broctl --version`, `broctl doctor`); neutral diagram and avatar-free GIF; old mascot sketch removed.
