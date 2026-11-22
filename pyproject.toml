@@ -28,7 +28,10 @@ packages = ["src/ya_bro"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-markers = ["atspi: needs system PyGObject, AT-SPI and dbus-run-session"]
+markers = [
+  "atspi: needs system PyGObject, AT-SPI and dbus-run-session",
+  "gnome: needs gnome-shell 50 (runs an isolated headless shell, ~1 min)",
+]
 
 [tool.ruff]
 line-length = 100

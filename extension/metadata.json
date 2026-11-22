@@ -1,0 +1,9 @@
+{
+  "uuid": "ya-bro@ahmedyousrisobhi.github.io",
+  "name": "Ya-Bro",
+  "description": "Window geometry bridge and overlay renderer for the Ya-Bro sidekick. Dumb renderer: no app logic, no capture, no input injection.",
+  "shell-version": ["50"],
+  "session-modes": ["user"],
+  "settings-schema": "org.gnome.shell.extensions.ya-bro",
+  "version-name": "0.0.1-s1"
+}

@@ -12,6 +12,9 @@ scripts/check.sh          # ruff check, ruff format --check, unit tests, AT-SPI 
 scripts/check.sh --fast   # skip the integration test
 ```
 
+## GNOME extension
+`scripts/dev/headless-shell.sh <cmd>` runs `<cmd>` inside an isolated headless `gnome-shell` with the extension enabled (private bus, config, data and runtime dirs). `pytest -m gnome` uses it. Do not reload the extension in your live session; the ADR-0023 nested `--devkit` loop (needs `mutter-dev-bin`) is for visual checks.
+
 ## CI
 The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so PRs into `dev` are validated locally with `scripts/check.sh`); it is not active until copied to `.github/workflows/` (needs a token with `workflow` scope). See docs/PROGRESS.md.
 

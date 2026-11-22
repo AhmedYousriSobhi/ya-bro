@@ -4,6 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13. Implementation is split three ways: the new issue "Spike S1: GNOME Shell extension bridge + overlay" (throwaway measurements); the new issue "GNOME Shell extension: skeleton, Bridge1, setup and CI" (§1–4, 7–10, including S3 and the dev loop); and **#3** (`Overlay1` renderer, ask window, docked fallback; §5–6).
 - Depends on: ADR-0002 (GNOME-first), ADR-0003, ADR-0004, ADR-0006, ADR-0014
+- Implementation status (S1, #15): prototype in `extension/`; contract, security and lifecycle checks pass in a headless shell. Coordinates, click-through, stacking, fps and stop-key latency are not yet measured. See [S1 findings](../research/spikes/S1-gnome-extension.md). Still Proposed.
 - Refines: ADR-0004 §3 (GNOME row), ADR-0006 (`GnomeShellOverlay`)
 
 ## Context
@@ -68,7 +69,7 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 | `GetInfo()` | `→ a{sv}` | `api` (u), `shell_version`, `extension_version`, `layout_mode` (logical/physical), `capabilities` (as) |
 | `ListWindows()` | `→ aa{sv}` | Per window: `id` (t, `get_id`), `seq` (`get_stable_sequence`), `pid` (`get_pid`), `app_id` (`get_gtk_application_id` / `get_sandboxed_app_id` / `get_wm_class`), `type` (`get_window_type`), `client` (wayland/x11), `frame` and `buffer` rects, `monitor`, `fullscreen`, `focused`, `transient_for`, `stack` index. **No titles.** |
 | `GetWindowTitle(t id, u step_serial)` | `→ s` | Only for the focused window, or the window of the active guided step identified by `step_serial` from `ShowStep`. Used for AT-SPI frame matching (ADR-0004 §4). |
-| `GetMonitors()` | `→ a(iiiidb)` | index, x, y, w, h, scale, primary |
+| `GetMonitors()` | `→ a(iiiiidb)` | index, x, y, w, h, scale, primary (signature corrected in S1) |
 | `GetPointer()` | `→ (ii)` | `global.get_pointer()`. Rate-limited to 30/s. |
 | `WindowsChanged` | signal `(at added, at removed)` | All signals are **unicast** to allowed peers (§11) |
 | `GeometryChanged` | signal `(t id, (iiii) frame, (iiii) buffer)` | From `position-changed` / `size-changed`, coalesced to at most one per window per frame |

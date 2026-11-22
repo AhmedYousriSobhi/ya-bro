@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.ya-bro" path="/org/gnome/shell/extensions/ya-bro/">
+    <key name="stop-key" type="as">
+      <default><![CDATA[['<Super><Shift>Escape']]]></default>
+      <summary>Global stop key</summary>
+      <description>Hides the overlay immediately and tells Ya-Bro to stop.</description>
+    </key>
+  </schema>
+</schemalist>

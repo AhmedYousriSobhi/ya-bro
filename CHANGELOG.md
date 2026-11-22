@@ -4,6 +4,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 ### Added
+- Spike S1 (#15, partial): GNOME Shell extension prototype in `extension/` (`Bridge1`, `Overlay1`, peer checks, dead-man switch, stop key), isolated headless-shell dev loop `scripts/dev/headless-shell.sh`, contract checks, and findings in `docs/research/spikes/S1-gnome-extension.md`. ADR-0023 `GetMonitors` signature corrected.
 - Project skeleton (#16): `src/` layout, uv/ruff/pytest config, 12 provisional interface Protocols with in-memory fakes, IPC name helper, XDG `dirs`, `ya-bro --version`, GTK4 AT-SPI fixture test, `scripts/check.sh`, CI workflow drafted at `docs/ci/ci.yml` (not active: the maintainer's token lacks `workflow` scope, so it must be copied to `.github/workflows/` by hand; never run), `docs/PROGRESS.md`, `docs/DEVELOPMENT.md`.
 - Concept sketch (`docs/assets/ya-bro-concept.png` and SVG source).
 - Architecture ADR set (0002–0023), ADR index with ranked risks and MVP build plan, and research docs on AI tools, non-AI tools and the Linux platform.

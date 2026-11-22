@@ -8,7 +8,7 @@ Legend: done · in progress · todo
 | Milestone | Status | Issues |
 |---|---|---|
 | M0 Foundations | in progress | #16 skeleton (PR open), #17 doctor and setup (todo) |
-| M1 Spikes S1, S2, S3 | todo | #15, #2, #18 |
+| M1 Spikes S1, S2, S3 | in progress | #15 (S1 partial, see log), #2, #18 |
 | M2 Perception + bridge | todo | #4, #18 |
 | M3 Overlay | todo | #3 |
 | M4 Step loop | todo | #5, #19, #20 |
@@ -38,3 +38,8 @@ Verification:
 - `scripts/check.sh` passes locally (25 unit tests, 1 AT-SPI integration test) on Ubuntu with Wayland + system Python 3.14 for the fixture.
 - **CI is not active.** The push of `.github/workflows/ci.yml` was rejected (token lacks `workflow` scope). To enable: `mkdir -p .github/workflows && cp docs/ci/ci.yml .github/workflows/ci.yml`, push with a token that has `workflow` scope (or add the file in the GitHub UI), then confirm the first run is green. The workflow has never run. Trigger: push to `main` only (maintainer decision), so PRs into `dev` get no CI; run `scripts/check.sh` before opening them.
 - Wiki: `Home` and `Development` pages published (mirrors of `docs/`; `docs/` stays the source of truth).
+
+### 2026-11-22: #15 spike S1 (partial)
+Done: extension prototype (`Bridge1`, `Overlay1`, caller check, unicast signals, rate limits, dead-man, stop key), isolated headless-shell harness, 16 contract checks plus 20 enable/disable cycles, all passing. Details: [S1 findings](research/spikes/S1-gnome-extension.md).
+
+Not done: coordinate accuracy per toolkit, click-through via libei, stacking/fullscreen/overview visuals, 60 fps, stop-key latency, 150% scale. **S1 go/no-go is undecided**, and the extension has not been loaded in the live session.
