@@ -1,4 +1,4 @@
-"""Spike S8: real browser tab scoped by a title token, in an isolated headless shell (slow, ~1.5 min)."""
+"""Spike S8: a real browser tab scoped by a title token, in an isolated headless shell (slow)."""
 
 import shutil
 import subprocess
