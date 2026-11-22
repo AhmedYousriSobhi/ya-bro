@@ -18,6 +18,9 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #57 hot-load
+Done: `broctl load` (Looking Glass snippet, clipboard, wait for ENABLED); isolated-shell test with injected keys loads a late-installed extension and `Bridge1` answers; harness option `YB_LATE_EXT=1`. Not done: not yet run on the real desktop (the extension has never been loaded in the live session); Looking Glass layout on your GNOME may differ from the test shell.
+
 ### 2026-11-22: hot-loading the extension
 Measured in the isolated shell: no supported route loads a newly installed extension without a Shell restart (directory, gsettings, `gnome-extensions enable`, `disable-user-extensions` toggle all failed). Open options: one logout (current), a Looking Glass paste (manual, untested), publication, or a no-extension overlay (needs research).
 
