@@ -18,6 +18,9 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #82 better demo GIF
+Done: re-recorded `show-me-calculator.gif` (7 frames, 915 x 1078, 247 KB): title card, solid dark background, captions, the wrong-key moment, ring-only (no avatar). Not done: no sound or cursor in the recording; the GIF shows Calculator only.
+
 ### 2026-11-22: #80 README, licence, user guide, artwork
 Done: README rewritten; `LICENSE` (MIT) and pyproject metadata; ADR-0020 and SPEC updated for MIT only; GitHub topics and description set; `docs/guides/getting-started.md` (install, setup, load, demo, own plan, troubleshooting, privacy, undo) checked from a fresh clone (`uv sync`, `broctl --version`, `broctl doctor`); neutral diagram and avatar-free GIF; old mascot sketch removed.
 Not done: the user guide's setup and load steps were not re-run from scratch on a clean machine (they touch the live session; the commands match the code); no screenshots of the setup prompts; no `broctl uninstall` (manual undo steps are documented); Apache-2.0 dropped, so no express patent grant; the licence CI gate is still #26.

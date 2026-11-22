@@ -12,7 +12,7 @@ It points at the actual button, checks that you pressed the right one, and tease
 
 ![Ya-Bro walking through 7 × 6 in GNOME Calculator: a ring and a bubble move key by key, then leave](docs/assets/show-me-calculator.gif)
 
-<sub>Recorded in an isolated headless GNOME session with the real Calculator and the real step loop. The look of the bro itself is not decided yet, so the demo shows only the ring and the bubble.</sub>
+<sub>Real Calculator, real step loop, recorded in an isolated headless GNOME session: it points at 7, notices a wrong key on purpose, then follows you through 7 × 6 = 42. The look of the bro itself is not decided yet, so the demo shows only the ring and the bubble.</sub>
 
 </div>
 
