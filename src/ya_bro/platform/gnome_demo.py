@@ -27,6 +27,12 @@ class Demo:
         self.shown = None
         self.done = False
         self.hinted = False
+        # broctl sends the web-target token on stdin (not argv or env); empty line without one.
+        self.token = sys.stdin.readline().strip()
+
+    def push_token(self):
+        self.call(BRIDGE, "SetScopeTokens", GLib.Variant("(as)", ([self.token],)))
+        return False
 
     def call(self, iface, method, params=None):
         return self.bus.call_sync(
@@ -39,6 +45,8 @@ class Demo:
         Gio.bus_own_name_on_connection(
             self.bus, f"{PREFIX}.Core", Gio.BusNameOwnerFlags.NONE, None, None
         )
+        if self.token:
+            GLib.timeout_add(100, self.push_token)
         GLib.timeout_add(500, self.loop.quit)  # let the extension notice the new owner
         self.loop.run()
 

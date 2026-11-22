@@ -31,3 +31,11 @@ The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so
 
 ## Adding an interface or fake
 Add the Protocol to `interfaces/__init__.py`, a fake in `tests/fakes/__init__.py`, and a row in `tests/test_interfaces.py`.
+
+## Trying a tab-scoped target
+A page on an allowed origin proves itself by putting a token in its title:
+```js
+fetch('http://127.0.0.1:47800/token', {headers: {'X-YaBro': '1'}})
+  .then(r => r.ok ? r.text() : '').then(t => { if (t) document.title += ' ' + t; });
+```
+Demo without workbench: `scripts/dev/token_page.py`, then `broctl targets allow demo --origin http://127.0.0.1:8099`, `broctl apps revoke <your browser id>` (otherwise the whole browser is already allowed), `broctl point`, and open the page. The ring shows on that tab only. `broctl point` must be running: the token exists only while it runs.

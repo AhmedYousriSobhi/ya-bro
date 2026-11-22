@@ -17,7 +17,11 @@ def check(name, ok, detail=""):
 
 def demo(*args, timeout=30):
     r = subprocess.run(
-        ["/usr/bin/python3", DEMO, *args], capture_output=True, text=True, timeout=timeout
+        ["/usr/bin/python3", DEMO, *args],
+        input="\n",  # the token line broctl sends; empty here
+        capture_output=True,
+        text=True,
+        timeout=timeout,
     )
     return r.returncode, r.stdout + r.stderr
 
