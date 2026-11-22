@@ -222,7 +222,8 @@ export class Overlay {
             const [bx, by, bw, bh] = this._placeBubble(c, target, args.bubble_at);
             c.bubble.set_position(bx - c.monitor.x, by - c.monitor.y);
             c.avatar.set_position(bx - c.monitor.x - AVATAR_GAP, by - c.monitor.y);
-            c.avatar.show();
+            if (args.avatar !== false)   // the avatar is a placeholder: callers may leave it out
+                c.avatar.show();
             this._bubbleRect = [bx, by, bw, bh];
             this._follow = {window: args.follow_window ?? 0, serial};
             this._visible = true;

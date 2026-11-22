@@ -8,7 +8,7 @@ Builders who use many apps often can't learn them from written guides or video t
 ## 2. Vision
 A Navi-style sidekick that **hovers on screen**. Ask in voice or text: *"Ya bro, how do I export this as PNG in GIMP?"* The bro shows the **next single step**, pointing at the real control, explaining briefly, and either waits for you to do it or does it itself while you watch. Then the next step. Like pair-programming, but for using apps.
 
-See the [concept sketch](docs/assets/ya-bro-concept.png) for the intended look: proactive nudge, ring on the real UI, step card, ask bar.
+See [how it works](docs/assets/how-it-works.svg) for the loop and the [Show-me demo](docs/assets/show-me-calculator.gif) for what runs today. The bro's own look (avatar, shape) is not decided yet, so no artwork shows one; the earlier concept sketch with a mascot was removed for that reason.
 
 ## 3. Users
 Primary: the maintainer — an app builder who struggles with guides/tutorials and learns best by doing with a guide present. Secondary: anyone onboarding to unfamiliar software on Linux.
@@ -95,7 +95,7 @@ Ya-Bro is **one global tool**. The core (overlay, voice/text, personality, strug
 2. ~~GNOME-on-Wayland overlay strategy~~ — resolved by ADR-0006 and ADR-0023 (Shell extension, now in the MVP).
 3. How well AT-SPI covers Electron, GTK4, Qt, and web content — spike S2 ([ADR-0022](docs/adr/0022-mvp-build-plan.md)).
 4. ~~Wake word vs hotkey~~ — resolved by ADR-0011 (push-to-talk default, wake word opt-in later).
-5. ~~License~~ — resolved by ADR-0020 (MIT OR Apache-2.0).
+5. ~~License~~ — resolved by ADR-0020 (the maintainer chose MIT only, 2026-11-22).
 6. ~~Which desktop does the maintainer dogfood on?~~ — resolved 2026-11-20: the maintainer chose GNOME Wayland first; KWin is the v0.2 port (ADR-0002).
 
 ## 10. Delivery process

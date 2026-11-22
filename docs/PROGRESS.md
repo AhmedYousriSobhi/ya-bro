@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #80 README, licence, user guide, artwork
+Done: README rewritten; `LICENSE` (MIT) and pyproject metadata; ADR-0020 and SPEC updated for MIT only; GitHub topics and description set; `docs/guides/getting-started.md` (install, setup, load, demo, own plan, troubleshooting, privacy, undo) checked from a fresh clone (`uv sync`, `broctl --version`, `broctl doctor`); neutral diagram and avatar-free GIF; old mascot sketch removed.
+Not done: the user guide's setup and load steps were not re-run from scratch on a clean machine (they touch the live session; the commands match the code); no screenshots of the setup prompts; no `broctl uninstall` (manual undo steps are documented); Apache-2.0 dropped, so no express patent grant; the licence CI gate is still #26.
+
 ### 2026-11-22: #78 documentation audit
 Done: ADR-0026 (step loop), README status and logout wording, ADR-0024 commands, SPEC as-built paragraph, milestone table, CLAUDE.md repo map, config docs for `humour`.
 Not done: a user guide beyond the README and DEVELOPMENT (no `docs/guides/` yet); the SPEC roadmap sections are unchanged.

@@ -54,9 +54,10 @@ class GnomeBridge:
 class GnomeOverlay:
     """Overlay1 over D-Bus. Pings every 2 s (the extension hides after ~6 s of silence)."""
 
-    def __init__(self, bus: Gio.DBusConnection, bridge: GnomeBridge) -> None:
+    def __init__(self, bus: Gio.DBusConnection, bridge: GnomeBridge, avatar: bool = True) -> None:
         self._bus = bus
         self._bridge = bridge
+        self._avatar = avatar
         self._queue: asyncio.Queue[str] = asyncio.Queue()
         self._serial = 0
         self._ping: asyncio.Task | None = None
@@ -91,6 +92,7 @@ class GnomeOverlay:
             "text": GLib.Variant("s", bubble_text),
             "buttons": GLib.Variant("as", list(buttons)),
             "follow_window": GLib.Variant("t", self._window_for(target)),
+            "avatar": GLib.Variant("b", self._avatar),
         }
         if target:
             args["target"] = GLib.Variant("(iiii)", (target.x, target.y, target.w, target.h))
