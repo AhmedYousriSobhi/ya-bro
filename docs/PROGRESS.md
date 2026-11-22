@@ -18,6 +18,9 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #53 point and scope watch
+Done: `broctl point` and `broctl scope watch` (stand-in core, `platform/gnome_demo.py`); overlay shown, followed and hidden in the isolated headless shell. Not done: not run on the real desktop yet (the extension has never been loaded in the live session); no voice, no step logic, no text input.
+
 ### 2026-11-22: #51 setup app picker
 Done: `broctl setup` searches installed apps by name or id, lists up to 15, picks by number, and stores the window class when present. Not done: listing apps that are running right now (the extension is default-deny, so it cannot say what is open); the window-class-versus-desktop-id match is unverified on a real desktop.
 
