@@ -3,6 +3,10 @@
 All notable changes are documented here. Format: [Keep a Changelog](https://keepachangelog.com/), versioning: [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-11-22
+First tagged release (pre-alpha): the scripted Show-me loop on GNOME Wayland, with hand-written plans. No LLM brain, voice or Do-it mode yet.
+
 ### Added
 - Fixed the ring tinting the window interior (its glow filled the box; now a plain 4 px border, pixel-tested) and `broctl point` now draws only on a focused allowed window and tells you which window to click otherwise (#59).
 - `broctl load`: loads the Ya-Bro extension into the running Shell without logging out. It copies a one-line snippet to the clipboard and walks through Alt+F2, `lg`, paste; verified in the isolated headless shell with injected keys (#57).

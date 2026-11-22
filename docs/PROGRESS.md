@@ -18,6 +18,9 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #86 release v0.1.0
+Done: version 0.1.0 (pyproject, `__version__`, test, guide), CHANGELOG moved under 0.1.0, release PR dev to main, tag v0.1.0, GitHub release.
+
 ### 2026-11-22: #82, #84 narrated demo GIF
 Done: `show-me-calculator.gif` is 8 frames, 606 x 798, 86 KB: native resolution (no upscaling), one shared 256-colour palette, a narrator caption track, title card, and the wrong key, the tease, the Why? explanation and the forgiveness. Not done: no sound or cursor; Calculator only; the Why? press is sent as the overlay's own event (the click path is covered by the e2e tests).
 
