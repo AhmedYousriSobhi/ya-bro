@@ -18,7 +18,7 @@ import gi.events
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib  # noqa: E402
 
-from ya_bro import plans  # noqa: E402
+from ya_bro import config, plans  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
     PREFIX,
@@ -29,6 +29,7 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
 )
 from ya_bro.policy import ShowMePolicy  # noqa: E402
 from ya_bro.steps import StepLoop  # noqa: E402
+from ya_bro.tone import Tone  # noqa: E402
 
 
 async def run(plan_path: Path, app_override: str, token: str) -> int:
@@ -61,7 +62,12 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
 
     loop = StepLoop(
-        AtspiPerception(bridge, plan.extents_offset), overlay, bridge, ShowMePolicy(), log=log
+        AtspiPerception(bridge, plan.extents_offset),
+        overlay,
+        bridge,
+        ShowMePolicy(),
+        log=log,
+        tone=Tone(config.load(app).humour),
     )
     print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
     outcome = await loop.run(plan, app)

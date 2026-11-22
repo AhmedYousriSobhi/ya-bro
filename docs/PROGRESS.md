@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #76 tone and Why? after a mistake
+Done: `tone.py` (plain at humour 0, playful from 1, three rotating mismatch lines), wired to `config.humour`; Why? after a wrong key names what is on screen versus what was needed and clears when undone; screen text echoed back is capped at 24 characters. Unit tests and the headless runs updated. Found in the live trial.
+Not done: English only (no Arabic lines, ADR-0019); humour 2 and 3 are the same as 1; lines are fixed templates (the LLM brain will write more); not re-run on the live desktop.
+
 ### 2026-11-22: #74 wrong action
 Done: the loop watches a step's expect element text; if it changes to something else and holds for 0.6 s the bubble says what was expected; clearing it removes the message; Next then goes on at once. `Perception.read_text`. 4 unit tests and a real-Calculator headless test (6 checks). Found in the live trial (pressed another key).
 Not done: "contains" accepts a wrong key typed before the right one (57 contains 7); only text expectations can see a wrong action (button and presence checks cannot); other apps and web text unmeasured; not re-run on the live desktop.

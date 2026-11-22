@@ -13,9 +13,14 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from ya_bro.interfaces import CompositorBridge, Overlay, Perception, Policy
+from ya_bro.tone import Tone
 from ya_bro.types import Mode, Plan, Rect, Step
 
 BUTTONS = ("next", "repeat", "why", "stop")
+
+
+def _joined(fp: tuple[str, ...] | None) -> str:
+    return " ".join(t for t in (fp or ()) if t)
 
 
 class Outcome(StrEnum):
@@ -43,7 +48,9 @@ class StepLoop:
         policy: Policy,
         timing: Timing | None = None,
         log: Log | None = None,
+        tone: Tone | None = None,
     ) -> None:
+        self._tone = tone or Tone()
         self._perception = perception
         self._overlay = overlay
         self._bridge = bridge
@@ -106,10 +113,7 @@ class StepLoop:
     def _text(self, step: Step, rect: Rect | None, count: str) -> str:
         if step.target is None or rect is not None:
             return f"{count} {step.narration}"
-        name = step.target.name
-        return (
-            f"{count} I can't find “{name}” here yet. Open the right screen and I'll point at it."
-        )
+        return f"{count} {self._tone.cant_find(step.target.name)}"
 
     async def _in_scope(self) -> bool:
         return await self._bridge.focused_window() is not None
@@ -130,6 +134,10 @@ class StepLoop:
         baseline: tuple[str, ...] | None = None
         changed_since: float | None = None
         mismatch = False
+        why_is_mistake = False
+        mismatch_text: str | None = None  # picked once per mismatch so the line does not flicker
+        fp: tuple[str, ...] | None = None
+        want_text = step.expect.text if step.expect else ""
         self._log("step_start", step=index)
         while True:
             if not await self._in_scope():
@@ -163,22 +171,22 @@ class StepLoop:
                         mismatch = True
                         self._log("step_mismatch", step=index)
                 else:
-                    changed_since, mismatch = None, False
+                    changed_since, mismatch, mismatch_text = None, False, None
+                    if why_is_mistake:  # the mistake was undone: its explanation no longer applies
+                        extra, shown, why_is_mistake = "", None, False
                 rect = await self._locate(step, app_id)
                 text = extra or self._text(step, rect, count)
                 if predone and not extra:
-                    text = f"{count} This already looks done. Press Next to continue."
+                    text = f"{count} {self._tone.pre_done()}"
                 if mismatch and not extra:
-                    want = step.expect.text if step.expect else ""
-                    text = (
-                        f"{count} That's not what I asked for. I expected “{want}” on screen. "
-                        "Undo it, or press Next to go on."
-                    )
+                    if mismatch_text is None:
+                        mismatch_text = self._tone.mismatch(want_text, _joined(fp))
+                    text = f"{count} {mismatch_text}"
                 if (rect, text) != shown:
                     await self._overlay.show_step(rect, text, BUTTONS)
                     shown = (rect, text)
                 if not nudged and not extra and loop.time() - since > self._timing.nudge:
-                    nudged, extra = True, f"{count} Still here. Press Next when you've done it."
+                    nudged, extra = True, f"{count} {self._tone.still_here()}"
             try:
                 event = await asyncio.wait_for(self._events.get(), self._timing.poll)
             except TimeoutError:
@@ -191,9 +199,13 @@ class StepLoop:
                     return "next"
                 # Next on a step the screen does not show done: ask once, skip on the second press.
                 warned = True
-                extra = f"{count} I don't see that yet. Do it and I'll move on. Next again skips."
+                extra = f"{count} {self._tone.not_yet()}"
                 shown = None
             elif event == "repeat":
-                extra, shown, warned = "", None, False
+                extra, shown, warned, why_is_mistake = "", None, False, False
             elif event == "why":
-                extra = f"{count} {step.why or 'No extra reason for this one.'}"
+                if mismatch and step.expect is not None:
+                    extra = f"{count} {self._tone.why_mismatch(want_text, _joined(fp), step.why)}"
+                    why_is_mistake = True
+                else:
+                    extra = f"{count} {step.why or 'No extra reason for this one.'}"

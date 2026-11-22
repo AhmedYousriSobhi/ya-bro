@@ -106,7 +106,7 @@ async def main():
     sh.click((left + 20) / sh.ratio, sum(ys) / len(ys) / sh.ratio)
     check(
         "Next on an undone step asks first",
-        await until(lambda: any("don't see that yet" in t for t in texts)),
+        await until(lambda: any("don't see" in t for t in texts)),
         str(texts[-1:]),
     )
     check("it stayed on step 1", not any(t.startswith("(2/2)") for t in texts))
