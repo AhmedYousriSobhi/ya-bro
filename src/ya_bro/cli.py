@@ -32,10 +32,42 @@ def _apps(args: argparse.Namespace) -> int:
     return 0
 
 
+def _targets(args: argparse.Namespace) -> int:
+    from ya_bro import targets
+
+    try:
+        if args.verb == "list":
+            found = targets.load_all()
+            for t in found:
+                web, cli = ", ".join(t.origins) or "-", ", ".join(t.commands) or "-"
+                print(f"{t.id}\tweb: {web}\tcli: {cli}")
+            if not found:
+                print("no targets: Ya-Bro sees no web page or command")
+            return 0
+        if args.verb == "allow":
+            path = targets.save(targets.Target(args.id, tuple(args.origin), tuple(args.command)))
+            print(f"allowed {args.id} ({path})")
+            if args.origin:
+                from ya_bro.token_server import DEFAULT_PORT
+
+                print(
+                    "its page must put the token in document.title; see docs/DEVELOPMENT.md "
+                    f"(token endpoint http://127.0.0.1:{DEFAULT_PORT}/token)"
+                )
+            return 0
+        print(f"revoked {args.id}" if targets.remove(args.id) else f"{args.id} was not allowed")
+        return 0
+    except targets.TargetError as e:
+        print(e)
+        return 1
+
+
 def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
     import shutil
     import subprocess
     from pathlib import Path
+
+    from ya_bro import targets, token_server
 
     py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
     if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
@@ -43,10 +75,27 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
         return 1
     script = Path(__file__).parent / "platform" / "gnome_demo.py"
     args = [py, str(script), cmd, str(seconds)] + ([text] if text else [])
+    server = None
+    if targets.allowed_origins():
+        try:
+            server = token_server.TokenServer(token_server.new_token(), targets.allowed_origins)
+            server.start()
+        except OSError as e:
+            print(f"token server not started ({e}); web targets stay out of scope")
     try:
-        return subprocess.run(args, check=False).returncode
+        # The token goes over stdin, not argv or env, so `ps` and /proc/<pid>/environ never show it.
+        proc = subprocess.run(
+            args,
+            input=(server.token if server else "") + "\n",
+            text=True,
+            check=False,
+        )
+        return proc.returncode
     except KeyboardInterrupt:
         return 130
+    finally:
+        if server:
+            server.stop()
 
 
 def _load(wait_seconds: int = 120) -> int:
@@ -91,6 +140,20 @@ def main(argv: list[str] | None = None) -> int:
     scope.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
         "watch", help="print allowed windows entering and leaving scope"
     ).add_argument("--seconds", type=int, default=60)
+    tgt = sub.add_parser(
+        "targets", help="allow one tool (web page and/or command), not a whole app"
+    )
+    tverbs = tgt.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    tverbs.add_parser("list", help="show allowed targets")
+    allow = tverbs.add_parser("allow", help="allow a target")
+    allow.add_argument("id", help="short name, e.g. workbench")
+    allow.add_argument(
+        "--origin", action="append", default=[], help="web origin, e.g. http://127.0.0.1:8080"
+    )
+    allow.add_argument(
+        "--command", action="append", default=[], help="CLI command name, e.g. benchctl"
+    )
+    tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
     sub.add_parser("load", help="load the extension now, without logging out")
     apps = sub.add_parser("apps", help="manage which apps Ya-Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
@@ -121,5 +184,7 @@ def main(argv: list[str] | None = None) -> int:
         return _gnome_demo("watch", args.seconds)
     if args.noun == "apps":
         return _apps(args)
+    if args.noun == "targets":
+        return _targets(args)
     parser.print_help()
     return 0

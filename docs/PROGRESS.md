@@ -31,7 +31,7 @@ Done: `broctl point` and `broctl scope watch` (stand-in core, `platform/gnome_de
 Done: `broctl setup` searches installed apps by name or id, lists up to 15, picks by number, and stores the window class when present. Not done: listing apps that are running right now (the extension is default-deny, so it cannot say what is open); the window-class-versus-desktop-id match is unverified on a real desktop.
 
 ### 2026-11-22: #47 pack-scoped targets (design + apps available)
-Done: `broctl apps available` (app id, name, window class) and ADR-0025 (proposed).
+Done: `broctl targets` and the token endpoint (#61; unit-tested, the extension side is spike-tested with Chrome; Firefox and the live desktop not yet). Done: `broctl apps available` (app id, name, window class) and ADR-0025 (proposed).
 Spike S8 (title token, [findings](research/spikes/S8-active-tab-scope.md)): works in the isolated shell with a stand-in window (listed and dropped in about 25 ms, removal emitted, 3 runs). Also verified with a real browser (Chrome for Testing, non-snap, isolated shell): in scope on tab A, out about 20 ms after switching to another origin, token unreadable from the other origin. Not verified: Firefox, core-side token issuance.
 Not done: targets themselves (`broctl targets ...`), CLI-command scoping, #8 packs and #21 shell hook. Until then workbench can only be covered by allowing a whole app.
 
