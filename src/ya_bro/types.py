@@ -46,6 +46,15 @@ class Mode(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
+class Expect:
+    """What the screen should show once the user did the step (verified through Perception)."""
+
+    role: str
+    name: str
+    appears: bool = True  # False: the element is gone when the step is done
+
+
+@dataclass(frozen=True, slots=True)
 class Step:
     """One step of the loop: intent, target, narration, expected result, risk (SPEC §6)."""
 
@@ -54,6 +63,8 @@ class Step:
     target: ElementRef | None = None
     expected: str = ""
     risk: Risk = Risk.R0
+    expect: Expect | None = None
+    why: str = ""
 
 
 @dataclass(frozen=True, slots=True)

@@ -39,3 +39,20 @@ fetch('http://127.0.0.1:47800/token', {headers: {'X-Scope-Token': '1'}})
   .then(r => r.ok ? r.text() : '').then(t => { if (t) document.title += ' ' + t; });
 ```
 Demo without workbench: `scripts/dev/token_page.py`, then `broctl targets allow demo --origin http://127.0.0.1:8099`, `broctl apps revoke <your browser id>` (otherwise the whole browser is already allowed), `broctl point`, and open the page. The ring shows on that tab only. `broctl point` must be running: the token exists only while it runs.
+
+## Show-me plans (`broctl show`)
+A plan is a TOML file; the loop shows one step at a time on the real window (tests/fixtures/steps_plan.toml is a working example):
+```toml
+[plan]
+goal = "create the thing"
+keywords = ["create"]            # ScriptedBrain picks the plan by these
+app = "org.example.App"          # optional; --app overrides, default: the focused allowed window
+
+[[step]]
+narration = "Click Create."      # what the bubble says (never text read off the screen)
+target = {role = "button", name = "Create"}      # omit for a bubble-only step
+expect = {role = "button", name = "Confirm"}     # screen proof the user did it; appears = false means gone
+why = "Create opens the confirmation."           # shown by the Why button
+risk = 0                                         # 3 = the user's own click, always only shown
+```
+Run `broctl show plan.toml` with the target app allowed (`broctl apps allow`), `broctl load` done and the app open. The app must expose an accessibility tree (GTK apps do; Firefox and Chrome need the page to report its own state, #31). Buttons: Next, Repeat, Why, Stop; Super+Shift+Esc also stops. If the element is not on screen yet, you get a bubble that says so and the ring appears as soon as it does.

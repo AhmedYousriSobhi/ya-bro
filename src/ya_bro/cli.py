@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 
 from ya_bro import __version__
 
@@ -62,7 +63,7 @@ def _targets(args: argparse.Namespace) -> int:
         return 1
 
 
-def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
+def _gnome_demo(cmd: str, seconds: int, text: str = "", show: list[str] | None = None) -> int:
     import shutil
     import subprocess
     from pathlib import Path
@@ -75,6 +76,10 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
         return 1
     script = Path(__file__).parent / "platform" / "gnome_demo.py"
     args = [py, str(script), cmd, str(seconds)] + ([text] if text else [])
+    env = None
+    if show is not None:  # the step loop imports ya_bro, so the system python3 gets the source tree
+        args = [py, "-m", "ya_bro.platform.gnome_show", *show]
+        env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
     server = None
     if targets.allowed_origins():
         try:
@@ -86,6 +91,7 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "") -> int:
         # The token goes over stdin, not argv or env, so `ps` and /proc/<pid>/environ never show it.
         proc = subprocess.run(
             args,
+            env=env,
             input=(server.token if server else "") + "\n",
             text=True,
             check=False,
@@ -154,6 +160,9 @@ def main(argv: list[str] | None = None) -> int:
         "--command", action="append", default=[], help="CLI command name, e.g. benchctl"
     )
     tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
+    show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
+    show.add_argument("plan", help="plan file (TOML), see docs/DEVELOPMENT.md")
+    show.add_argument("--app", default="", help="app id (default: the focused allowed window)")
     sub.add_parser("load", help="load the extension now, without logging out")
     apps = sub.add_parser("apps", help="manage which apps Ya-Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
@@ -180,6 +189,9 @@ def main(argv: list[str] | None = None) -> int:
         return _load()
     if args.noun == "point":
         return _gnome_demo("point", args.seconds, args.text)
+    if args.noun == "show":
+        extra = ["--app", args.app] if args.app else []
+        return _gnome_demo("show", 0, show=[str(args.plan), *extra])
     if args.noun == "scope":
         return _gnome_demo("watch", args.seconds)
     if args.noun == "apps":
