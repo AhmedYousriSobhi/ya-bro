@@ -59,24 +59,24 @@ def server():
 
 def test_token_only_for_allowed_origin_with_header(server):
     assert len(server.token) >= 16
-    status, body, resp = _get(server, Origin=ORIGIN, **{"X-YaBro": "1"})
+    status, body, resp = _get(server, Origin=ORIGIN, **{"X-Scope-Token": "1"})
     assert (status, body) == (200, server.token)
     assert resp.getheader("Access-Control-Allow-Origin") == ORIGIN
-    assert _get(server, Origin="http://evil.example", **{"X-YaBro": "1"})[0] == 403
-    assert _get(server, Origin=ORIGIN)[0] == 403  # no X-YaBro header
-    assert _get(server, **{"X-YaBro": "1"})[0] == 403  # no Origin (curl, a local script)
-    assert _get(server, "/other", Origin=ORIGIN, **{"X-YaBro": "1"})[0] == 403
+    assert _get(server, Origin="http://evil.example", **{"X-Scope-Token": "1"})[0] == 403
+    assert _get(server, Origin=ORIGIN)[0] == 403  # no X-Scope-Token header
+    assert _get(server, **{"X-Scope-Token": "1"})[0] == 403  # no Origin (curl, a local script)
+    assert _get(server, "/other", Origin=ORIGIN, **{"X-Scope-Token": "1"})[0] == 403
 
 
 def test_preflight_only_for_allowed_origin(server):
     ok = _get(server, method="OPTIONS", Origin=ORIGIN)
-    assert ok[0] == 204 and ok[2].getheader("Access-Control-Allow-Headers") == "X-YaBro"
+    assert ok[0] == 204 and ok[2].getheader("Access-Control-Allow-Headers") == "X-Scope-Token"
     bad = _get(server, method="OPTIONS", Origin="http://evil.example")
     assert bad[0] == 403 and bad[2].getheader("Access-Control-Allow-Origin") is None
 
 
 def test_dns_rebinding_host_is_refused(server):
-    status, _, _ = _get(server, Origin=ORIGIN, Host="evil.example", **{"X-YaBro": "1"})
+    status, _, _ = _get(server, Origin=ORIGIN, Host="evil.example", **{"X-Scope-Token": "1"})
     assert status == 403
 
 
@@ -85,9 +85,9 @@ def test_revoked_origin_stops_getting_tokens(tmp_path):
     srv = token_server.TokenServer("yb-x" * 8, lambda: targets.allowed_origins(tmp_path), port=0)
     srv.start()
     try:
-        assert _get(srv, Origin=ORIGIN, **{"X-YaBro": "1"})[0] == 200
+        assert _get(srv, Origin=ORIGIN, **{"X-Scope-Token": "1"})[0] == 200
         targets.remove("w", tmp_path)
-        assert _get(srv, Origin=ORIGIN, **{"X-YaBro": "1"})[0] == 403
+        assert _get(srv, Origin=ORIGIN, **{"X-Scope-Token": "1"})[0] == 403
     finally:
         srv.stop()
 

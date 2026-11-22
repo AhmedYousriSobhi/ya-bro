@@ -31,7 +31,7 @@ The system Chromium and Firefox are snaps, which run against the real user sessi
 
 | Check | Result |
 |---|---|
-| Page A fetches the token (same origin, `X-YaBro: 1` header) | issued |
+| Page A fetches the token (same origin, `X-Scope-Token: 1` header) | issued |
 | Tab A (token in title) in scope after core pushes it | 0.024 to 0.025 s |
 | Switch to tab B (other origin): window out of scope | 0.021 s |
 | Tab B's attempt to read the token | blocked (CORS preflight refused, title "other site (blocked)") |

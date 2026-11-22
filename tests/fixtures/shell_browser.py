@@ -1,6 +1,6 @@
 """Spike S8 step 2: a real browser tab as the scoped target. Run inside scripts/dev/headless-shell.sh.
 
-Page A (allowed origin) fetches a token (only reachable same-origin with the X-YaBro header, so a page
+Page A (allowed origin) fetches a token (only reachable same-origin with the X-Scope-Token header, so a page
 on another origin is stopped by CORS) and puts it in its title. Page B (other origin) tries to read it
 and is the tab we switch to. Uses Playwright's Chrome for Testing (not a snap) with a throwaway profile.
 """
@@ -54,10 +54,10 @@ if not chrome:
     sys.exit(0)
 
 PAGE_A = """<!doctype html><title>loading</title><script>
-fetch('/token',{headers:{'X-YaBro':'1'}}).then(r=>r.text()).then(t=>{document.title='workbench '+t});
+fetch('/token',{headers:{'X-Scope-Token':'1'}}).then(r=>r.text()).then(t=>{document.title='workbench '+t});
 </script>"""
 PAGE_B = """<!doctype html><title>other site</title><script>
-fetch('http://127.0.0.1:%d/token',{headers:{'X-YaBro':'1'}}).then(r=>r.text()).then(()=>{document.title='LEAKED'}).catch(()=>{document.title='other site (blocked)'});
+fetch('http://127.0.0.1:%d/token',{headers:{'X-Scope-Token':'1'}}).then(r=>r.text()).then(()=>{document.title='LEAKED'}).catch(()=>{document.title='other site (blocked)'});
 </script>"""
 
 
@@ -76,7 +76,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/token":
             origin = self.headers.get("Origin")
-            if self.headers.get("X-YaBro") == "1" and origin in (None, type(self).allowed_origin):
+            if self.headers.get("X-Scope-Token") == "1" and origin in (
+                None,
+                type(self).allowed_origin,
+            ):
                 log["issued"] += 1
                 body = TOKEN.encode()
             else:
@@ -195,7 +198,9 @@ try:
         t_in is not None,
         f"{t_in}s app_id={[w['app_id'] for w in windows()]}",
     )
-    check("token issued to page A (same-origin, X-YaBro header)", log["issued"] >= 1, str(log))
+    check(
+        "token issued to page A (same-origin, X-Scope-Token header)", log["issued"] >= 1, str(log)
+    )
 
     tab_a = next(t for t in cdp("/json") if t["type"] == "page")
     tab_b = cdp(f"/json/new?http://127.0.0.1:{srv_b.server_port}/")  # activates the new tab
