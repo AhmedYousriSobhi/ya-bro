@@ -45,6 +45,7 @@ The set 0002–0023 was produced for issue #13 on 2026-11-20. The same day the m
 | [0023](0023-gnome-shell-extension-bridge.md) | GNOME Shell extension bridge and overlay | Proposed | A dumb in-compositor renderer + geometry bridge in GJS. Versioned `Bridge1`/`Overlay1` D-Bus API, caller-checked, content-free, with no capture or injection. Dead-man switch, `user` session mode only. Supports GNOME 48–51 where CI is green. |
 | [0024](0024-broctl-control-cli.md) | `broctl` control CLI | Accepted | kubectl-style `broctl <noun> <verb>` manages the agent: `doctor`, `setup`, `apps allow/revoke`; `ya-bro` stays the product and agent name. |
 | [0025](0025-pack-scoped-targets.md) | Pack-scoped targets | Accepted (web part) | A target (web origins + CLI command names) is the unit of consent for tools like workbench, so the browser and terminal are never allowed whole. Open: how the extension learns the active tab origin. |
+| [0026](0026-show-me-step-loop.md) | Show-me step loop | Accepted (scripted loop) | Core `StepLoop` over the interfaces; plans as TOML; verify by reading AT-SPI text and advance by itself; Next asks before skipping; a wrong action is named and Why? explains it; the perceiver enforces scope itself; playful `tone.py` behind `humour`. |
 
 ## MVP build plan
 

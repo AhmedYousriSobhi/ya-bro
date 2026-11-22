@@ -24,7 +24,11 @@ The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so
 | `src/ya_bro/interfaces/` | Component Protocols (provisional) |
 | `src/ya_bro/types.py` | Shared value types |
 | `src/ya_bro/ipc/` | Versioned D-Bus names and the adapter Protocol |
-| `src/ya_bro/platform/` | The only place for OS and toolkit imports |
+| `src/ya_bro/steps.py`, `plans.py`, `tone.py`, `policy.py` | The Show-me loop, TOML plans, the bro's lines, Show-me policy ([ADR-0026](adr/0026-show-me-step-loop.md)) |
+| `src/ya_bro/platform/` | The only place for OS and toolkit imports (GNOME adapters, setup, demo runners) |
+| `examples/plans/` | Runnable Show-me plans |
+| `extension/` | The GNOME Shell extension (GJS, ADR-0023) |
+| `scripts/dev/` | Isolated headless shell, GIF recorder, token demo page |
 | `tests/fakes/` | In-memory fake per interface |
 | `tests/fixtures/` | AT-SPI fixture app(s) and probe |
 | `scripts/check.sh` | Full validation |

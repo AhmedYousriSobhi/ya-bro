@@ -22,6 +22,7 @@ Primary: the maintainer — an app builder who struggles with guides/tutorials a
    - says one short sentence about what and why,
    - waits (**Show me** mode) or acts (**Do it** mode),
    - verifies the screen changed as expected, then moves on.
+   *As built (ADR-0026, scripted plans, GNOME):* the bro reads the real element's text through AT-SPI, so a step advances by itself once the screen shows the result; Next on a step that is not done asks first; a wrong action is named and **Why?** explains the mistake; the tone is playful unless `humour = 0`.
 5. **Control**: "next", "repeat", "why?", "do it for me", "let me try", "stop", "go back". Stop is instant.
 6. **Recover**: if the UI doesn't match expectations (dialog, different version), re-perceive and re-plan out loud instead of failing silently.
 
