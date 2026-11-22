@@ -17,7 +17,7 @@ sys.path[:0] = [os.path.join(ROOT, "tests", "fixtures"), os.path.join(ROOT, "src
 import gi  # noqa: E402
 import gi.events  # noqa: E402
 from PIL import Image  # noqa: E402
-from shellkit import Shell, find_pixels  # noqa: E402
+from shellkit import Shell  # noqa: E402
 
 from ya_bro import plans  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
@@ -44,17 +44,6 @@ def snap(sh, crop, ms):
         pb.get_rowstride(),
     ).convert("RGB")
     frames.append((img.crop(crop), ms))
-
-
-BUTTON_BG = (0x3A, 0x3A, 0x52)  # .yabro-button in extension/stylesheet.css
-
-
-def click_next(sh):
-    """Press the bubble's Next button: the left end of the button row (Next, Repeat, Why?, Stop)."""
-    px = find_pixels(sh.grab(), BUTTON_BG, 6)
-    left = min(p[0] for p in px)
-    ys = [p[1] for p in px if p[0] < left + 6]
-    sh.click((left + 20) / sh.ratio, sum(ys) / len(ys) / sh.ratio)
 
 
 async def main():
@@ -100,12 +89,10 @@ async def main():
         snap(sh, crop, 1600)  # ring and bubble on the step
         last = target
         sh.click(*target.center)  # the user presses the key the ring points at
-        await asyncio.sleep(0.9)
-        snap(sh, crop, 900)  # the key was pressed; the bubble still waits
-        click_next(sh)
         await asyncio.sleep(0.4)  # let the click finish before moving away
         sh.move(fx - 60, fy + fh // 2)  # park the pointer: no tooltip over the keys
         await asyncio.sleep(0.6)
+        snap(sh, crop, 900)  # the key was pressed; the bro sees the display change and moves on
     await asyncio.wait_for(task, 20)
     await asyncio.sleep(1.5)
     sh.move(fx - 59, fy + fh // 2)  # force a repaint so the grab is not a stale frame

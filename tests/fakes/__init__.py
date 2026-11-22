@@ -10,11 +10,24 @@ from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Risk, Ste
 
 
 class FakePerception:
-    def __init__(self, elements: dict[ElementRef, Rect] | None = None) -> None:
+    def __init__(
+        self,
+        elements: dict[ElementRef, Rect] | None = None,
+        texts: dict[ElementRef, str] | None = None,
+    ) -> None:
         self.elements = elements or {}
+        self.texts = texts or {}
 
-    async def find(self, app_id: str, role: str, name: str) -> list[ElementRef]:
-        return [r for r in self.elements if (r.app_id, r.role, r.name) == (app_id, role, name)]
+    async def find(
+        self, app_id: str, role: str, name: str = "", text: str = ""
+    ) -> list[ElementRef]:
+        return [
+            r
+            for r in self.elements
+            if (r.app_id, r.role) == (app_id, role)
+            and (not name or r.name == name)
+            and (not text or text in self.texts.get(r, ""))
+        ]
 
     async def locate(self, ref: ElementRef) -> Rect | None:
         return self.elements.get(ref)

@@ -124,13 +124,22 @@ class GnomeOverlay:
             yield await self._queue.get()
 
 
-def _matches(node, role: str, name: str) -> bool:
+def _text_of(node) -> str:
     try:
-        return (node.get_name() or "") == name and node.get_role_name() in ROLE_ALIASES.get(
-            role, {role}
-        )
+        return Atspi.Text.get_text(node, 0, Atspi.Text.get_character_count(node)) or ""
+    except GLib.Error:
+        return ""
+
+
+def _matches(node, role: str, name: str, text: str = "") -> bool:
+    try:
+        if node.get_role_name() not in ROLE_ALIASES.get(role, {role}):
+            return False
+        if name and (node.get_name() or "") != name:
+            return False
     except GLib.Error:
         return False
+    return not text or text in _text_of(node)
 
 
 def _child(node, index: int):
@@ -165,7 +174,7 @@ class AtspiPerception:
             except GLib.Error:
                 continue
 
-    def _find(self, app_id: str, role: str, name: str) -> list[ElementRef]:
+    def _find(self, app_id: str, role: str, name: str, text: str) -> list[ElementRef]:
         pids = self._pids(app_id)
         found: list[ElementRef] = []
         budget = [MAX_NODES]
@@ -174,7 +183,7 @@ class AtspiPerception:
             if depth > MAX_DEPTH or budget[0] <= 0 or node is None:
                 return
             budget[0] -= 1
-            if depth and _matches(node, role, name):
+            if depth and _matches(node, role, name, text):
                 found.append(ElementRef(app_id, role, name, f"{pid}:" + "/".join(map(str, trail))))
             try:
                 count = node.get_child_count()
@@ -219,8 +228,10 @@ class AtspiPerception:
             return Rect(origin[0] + ext.x + dx, origin[1] + ext.y + dy, ext.width, ext.height)
         return None
 
-    async def find(self, app_id: str, role: str, name: str) -> list[ElementRef]:
-        return await asyncio.to_thread(self._find, app_id, role, name)
+    async def find(
+        self, app_id: str, role: str, name: str = "", text: str = ""
+    ) -> list[ElementRef]:
+        return await asyncio.to_thread(self._find, app_id, role, name, text)
 
     async def locate(self, ref: ElementRef) -> Rect | None:
         return await asyncio.to_thread(self._locate, ref)

@@ -89,7 +89,9 @@ class StepLoop:
     async def _satisfied(self, step: Step, app_id: str) -> bool:
         if step.expect is None:
             return False
-        found = await self._perception.find(app_id, step.expect.role, step.expect.name)
+        found = await self._perception.find(
+            app_id, step.expect.role, step.expect.name, step.expect.text
+        )
         return bool(found) == step.expect.appears
 
     def _text(self, step: Step, rect: Rect | None, count: str) -> str:
@@ -111,6 +113,11 @@ class StepLoop:
         since = loop.time()
         nudged = False
         extra = ""
+        # A step that is already "done" when it appears must not advance by itself (the screen may
+        # simply still show an old result): it waits for Next until it was seen not done.
+        armed = False
+        predone = False
+        warned = False
         self._log("step_start", step=index)
         while True:
             if not await self._in_scope():
@@ -121,14 +128,22 @@ class StepLoop:
                     self._log("step_paused", step=index)
             else:
                 hidden = False
+                done = await self._satisfied(step, app_id)
+                if done and armed:
+                    self._log("step_verified", step=index)
+                    return "verified"
+                if not done:
+                    armed, predone = True, False
+                elif not armed and not predone:
+                    predone = True
+                    self._log("step_predone", step=index)
                 rect = await self._locate(step, app_id)
                 text = extra or self._text(step, rect, count)
+                if predone and not extra:
+                    text = f"{count} This already looks done. Press Next to continue."
                 if (rect, text) != shown:
                     await self._overlay.show_step(rect, text, BUTTONS)
                     shown = (rect, text)
-                if await self._satisfied(step, app_id):
-                    self._log("step_verified", step=index)
-                    return "verified"
                 if not nudged and not extra and loop.time() - since > self._timing.nudge:
                     nudged, extra = True, f"{count} Still here. Press Next when you've done it."
             try:
@@ -139,8 +154,13 @@ class StepLoop:
             if event == "stop":
                 return "stop"
             if event == "next":
-                return "next"
-            if event == "repeat":
-                extra, shown = "", None
+                if step.expect is None or predone or warned:
+                    return "next"
+                # Next on a step the screen does not show done: ask once, skip on the second press.
+                warned = True
+                extra = f"{count} I don't see that yet. Do it and I'll move on. Next again skips."
+                shown = None
+            elif event == "repeat":
+                extra, shown, warned = "", None, False
             elif event == "why":
                 extra = f"{count} {step.why or 'No extra reason for this one.'}"

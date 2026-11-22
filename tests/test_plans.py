@@ -80,3 +80,14 @@ async def test_scripted_brain_picks_the_best_keyword_match(tmp_path):
     assert (await brain.plan("create a job", "x")).goal == "create a job"
     with pytest.raises(plans.PlanError):
         await brain.plan("fly to the moon", "x")
+
+
+def test_expect_can_match_on_text_and_needs_a_name_or_text(tmp_path):
+    ok = '[plan]\ngoal = "g"\n[[step]]\nnarration = "x"\nexpect = {role = "text", text = "42"}'
+    plan, _, _ = plans.load(write(tmp_path, ok))
+    e = plan.steps[0].expect
+    assert (e.role, e.name, e.text, e.appears) == ("text", "", "42", True)
+    for bad in ('{role = "text"}', '{text = "42"}', '{role = "text", text = 7}'):
+        text = f'[plan]\ngoal = "g"\n[[step]]\nnarration = "x"\nexpect = {bad}'
+        with pytest.raises(plans.PlanError):
+            plans.load(write(tmp_path, text, "b.toml"))
