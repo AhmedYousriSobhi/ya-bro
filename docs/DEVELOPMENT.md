@@ -13,7 +13,7 @@ scripts/check.sh --fast   # skip the integration test
 ```
 
 ## CI
-The workflow draft is `docs/ci/ci.yml`; it is not active until copied to `.github/workflows/` (needs a token with `workflow` scope). See docs/PROGRESS.md.
+The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so PRs into `dev` are validated locally with `scripts/check.sh`); it is not active until copied to `.github/workflows/` (needs a token with `workflow` scope). See docs/PROGRESS.md.
 
 ## Layout
 | Path | Purpose |
