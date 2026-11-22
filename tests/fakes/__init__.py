@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from pathlib import Path
 
@@ -33,9 +34,21 @@ class FakeCompositorBridge:
 class FakeOverlay:
     def __init__(self) -> None:
         self.calls: list[tuple] = []
+        self.buttons: list[tuple[str, ...]] = []
+        self._events: asyncio.Queue[str] = asyncio.Queue()
 
-    async def show_step(self, target: Rect | None, bubble_text: str) -> None:
+    async def show_step(
+        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
+    ) -> None:
         self.calls.append(("show_step", target, bubble_text))
+        self.buttons.append(buttons)
+
+    def push(self, event: str) -> None:
+        self._events.put_nowait(event)
+
+    async def events(self) -> AsyncIterator[str]:
+        while True:
+            yield await self._events.get()
 
     async def fly_pointer(self, to: Rect) -> None:
         self.calls.append(("fly_pointer", to))

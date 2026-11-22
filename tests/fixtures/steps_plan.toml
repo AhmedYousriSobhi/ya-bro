@@ -1,0 +1,14 @@
+[plan]
+goal = "create the thing"
+keywords = ["create"]
+
+[[step]]
+narration = "Click Create."
+target = {role = "button", name = "Create"}
+expect = {role = "button", name = "Confirm"}
+why = "Create opens the confirmation."
+
+[[step]]
+narration = "Now click Confirm."
+target = {role = "button", name = "Confirm"}
+expect = {role = "label", name = "Done"}

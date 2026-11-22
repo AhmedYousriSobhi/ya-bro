@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-22: #66 Show-me step loop
+Done: `StepLoop` (core, interfaces only), TOML plans + `ScriptedBrain`, `ShowMePolicy`, GNOME adapters (`GnomeBridge`, `GnomeOverlay` with user events and 2 s keepalive, `AtspiPerception` enforcing scope itself), `broctl show`. Overlay interface gained buttons and an event stream. 11 unit tests with fakes; headless-shell end to end (15 checks, 3 runs in a row): scope, ring on the right button (the click at its centre advances the plan), the bubble's Stop button, hidden at the end.
+Not done: the Claude brain (#5 stays open), Do-it, voice; non-GTK apps and browsers are unmeasured (browsers need the page to report its state, #31, or a11y flags); multi-window apps pick the focused window; popups and menus; not run on the live desktop yet.
+
 ### 2026-11-22: #61 tab-scoped web targets (workbench)
 Done: `broctl targets list|allow|revoke`; a loopback token endpoint in `broctl` (127.0.0.1:47800, token only for an allowed `Origin` + `X-Scope-Token` header + loopback `Host`); `point` and `scope watch` pass the token to the stand-in core over stdin. workbench merged its opt-in title token (workbench#984, off by default, two switches). Verified end to end in the isolated shell with a real Chrome and the real workbench page: flag off, tab invisible; flag on, tab in scope; another tab active, out of scope; back, in scope again (6 of 6, no CSP errors).
 Not done: Firefox and the live desktop (your Firefox must be revoked from `apps` first, then restart workbench with `WORKBENCH_DESKTOP_HELPER=1`); CLI commands are stored but not enforced (needs #21); the port is fixed at 47800; no real core yet issues the token.
