@@ -90,10 +90,13 @@ Try pressing a wrong key on purpose: the bro teases you and waits for you to und
 ## Ask in plain words
 
 ```bash
-export ANTHROPIC_API_KEY=...        # or put it in a git-ignored .env file
+uv run broctl key set               # hidden prompt; the key goes into your system keyring
+uv run broctl key status            # present or not, and where from (never the key itself)
 uv run broctl ask "multiply 7 by 6" --dry   # print the plan only
 uv run broctl ask "what is seven times six"  # walk through it
 ```
+
+Bro looks for the key in your environment (`ANTHROPIC_API_KEY`), then your keyring, then a git-ignored `.env` file, in that order. `broctl key set` needs a Secret Service (GNOME Keyring or KWallet running and unlocked) and the system `python3` with PyGObject; without one it says so and you can use the environment variable or `.env` instead. `broctl key clear` removes the stored key, and `broctl forget --everything` offers to as well (a key in `.env` or the environment is yours to delete).
 
 Bro first looks for a matching task in the app's knowledge pack (nothing is sent anywhere). If none fits, and you said yes to sending during `broctl setup`, it asks Claude. Each request carries your question, the names of the controls in the allowed app's window (secrets scrubbed), and the pack's notes, never a screenshot; `broctl sent` lists every request. Without a key or without your yes, only pack tasks answer. A plan Claude wrote is shown first (how many steps, and the first one): press **Next** to start or **Stop** to cancel. If a control it counted on is not there, Bro asks Claude again for the remaining steps. Anything risky is marked as yours to press.
 
@@ -134,7 +137,7 @@ why = "Save keeps your work."
 - **Only the app you allow.** Default-deny: with no app named, the extension reports nothing. Revoke with `uv run broctl apps revoke <app-id>`.
 - Everything it draws is visible, and Stop always works. Small dots under the bro say what it is doing right now (blue: reading your app; green: listening; red: sending; orange: acting). You cannot turn them off while that state is active.
 - `uv run broctl sent` lists every request that left your machine (the kind and the size, never the content). Today it says nothing was sent.
-- `uv run broctl panic` stops every Bro process at once, even a frozen one, and turns proactive mode off. `uv run broctl forget` deletes logs and offers (`--everything` also removes allowed apps and targets, the shell hook lines and your consent).
+- `uv run broctl panic` stops every Bro process at once, even a frozen one, and turns proactive mode off. `uv run broctl forget` deletes logs and offers (`--everything` also removes allowed apps and targets, the stored API key, the shell hook lines and your consent).
 - It never types for you or clicks for you (Show-me mode only points).
 - Logs are written to `~/.local/state/ya-bro/logs/` and contain event types and counts, never typed text or screen content. Logs older than 7 days are pruned.
 - Honest limit: the GNOME accessibility setting is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's own code, not by the operating system ([ADR-0023](../adr/0023-gnome-shell-extension-bridge.md)).
@@ -145,7 +148,7 @@ why = "Save keeps your work."
 uv run broctl apps revoke org.gnome.Calculator            # stop seeing any app
 gnome-extensions disable ya-bro@ahmedyousrisobhi.github.io
 rm -rf ~/.local/share/gnome-shell/extensions/ya-bro@ahmedyousrisobhi.github.io
-uv run broctl forget --everything                         # optional: logs, offers, settings, hook lines
+uv run broctl forget --everything                         # optional: logs, offers, settings, hook lines, the stored API key
 ```
 
 The accessibility setting is left on because other tools may rely on it; to turn it off: `gsettings set org.gnome.desktop.interface toolkit-accessibility false`.
