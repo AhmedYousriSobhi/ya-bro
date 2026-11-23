@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 312" width="1536" height="312">
+  <title>Ya-Bro (Brim): states</title>
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:18;stroke-linejoin:round}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:8}
+    .cap{fill:#2B2D42;stroke:#1E1E2E;stroke-width:8;stroke-linejoin:round}
+    .ink{fill:#1E1E2E}
+    .line{fill:none;stroke:#1E1E2E;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+    .glint{fill:#FFFFFF}
+    .fx{fill:#F5A524;stroke:#1E1E2E;stroke-width:5;stroke-linejoin:round}
+    .fxl{fill:none;stroke:#1E1E2E;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.cap{fill:#3A3D5C}.halo{stroke:#F0F0F5}.fxl{stroke:#F0F0F5}}
+    .lbl{font:600 24px sans-serif;fill:#1E1E2E}
+    @media (prefers-color-scheme:dark){.lbl{fill:#F0F0F5}}
+  </style>
+  <g transform="translate(0 0)">
+  <g>
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><circle class="ink" cx="104" cy="178" r="11"/><circle class="glint" cx="108" cy="174" r="3.5"/><circle class="ink" cx="144" cy="178" r="11"/><circle class="glint" cx="148" cy="174" r="3.5"/></g>
+    <path class="line" d="M116 206Q126 213 136 206"/>
+    <g></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">idle</text>
+  </g>
+  <g transform="translate(256 0)">
+  <g transform="translate(4 0)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" transform="rotate(-7 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" transform="rotate(-7 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><circle class="ink" cx="114" cy="174" r="11"/><circle class="glint" cx="118" cy="170" r="3.5"/><circle class="ink" cx="154" cy="174" r="11"/><circle class="glint" cx="158" cy="170" r="3.5"/></g>
+    <path class="line" d="M126 206Q136 212 146 206"/>
+    <g><circle class="fx" cx="212" cy="176" r="5"/><circle class="fx" cx="236" cy="176" r="8"/></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">pointing</text>
+  </g>
+  <g transform="translate(512 0)">
+  <g transform="rotate(-4 116 228)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><circle class="ink" cx="98" cy="170" r="11"/><circle class="glint" cx="102" cy="166" r="3.5"/><circle class="ink" cx="138" cy="170" r="11"/><circle class="glint" cx="142" cy="166" r="3.5"/></g>
+    <path class="line" d="M110 208H130"/>
+    <g><circle class="fx" cx="78" cy="36" r="7"/><circle class="fx" cx="116" cy="36" r="7"/><circle class="fx" cx="154" cy="36" r="7"/></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">thinking</text>
+  </g>
+  <g transform="translate(768 0)">
+  <g transform="translate(0 -8)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" transform="rotate(-6 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" transform="rotate(-6 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><path class="line" d="M93 182Q104 164 115 182"/><path class="line" d="M133 182Q144 164 155 182"/></g>
+    <path class="line" d="M108 200Q126 226 144 200Z"/>
+    <g><path class="fx" d="M226 64L231 77L244 82L231 87L226 100L221 87L208 82L221 77Z"/></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">happy</text>
+  </g>
+  <g transform="translate(1024 0)">
+  <g transform="rotate(3 116 228)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" transform="translate(232 0) scale(-1 1)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" transform="translate(232 0) scale(-1 1)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><path class="line" d="M93 180Q104 162 115 180"/><circle class="ink" cx="144" cy="178" r="11"/><circle class="glint" cx="148" cy="174" r="3.5"/></g>
+    <path class="line" d="M112 204Q128 214 142 200"/>
+    <g></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">teasing</text>
+  </g>
+  <g transform="translate(1280 0)">
+  <g transform="translate(0 6)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" transform="rotate(8 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle class="body" cx="116" cy="156" r="72"/>
+    <path class="cap" transform="rotate(8 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g><path class="line" d="M93 182Q104 196 115 182"/><path class="line" d="M133 182Q144 196 155 182"/></g>
+    <path class="line" d="M118 210H134"/>
+    <g><path class="halo" stroke-width="17" stroke-linecap="round" d="M198 48H222L198 72H222M226 22H240L226 36H240"/><path class="fxl" d="M198 48H222L198 72H222M226 22H240L226 36H240"/></g>
+  </g>
+  <text x="116" y="292" text-anchor="middle" class="lbl">quiet</text>
+  </g>
+</svg>

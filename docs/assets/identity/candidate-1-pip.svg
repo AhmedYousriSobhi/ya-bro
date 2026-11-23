@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ya-Bro candidate 1: Pip</title>
+  <!-- Palette (light / dark): body #2EC4B6 / #45D9CB, ink #1E1E2E, halo #FFFFFF / #F0F0F5, accent #F5A524 -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:18;stroke-linejoin:round}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:8;stroke-linejoin:round}
+    .tuft{fill:#F5A524;stroke:#1E1E2E;stroke-width:8;stroke-linejoin:round}
+    .ink{fill:#1E1E2E}
+    .line{fill:none;stroke:#1E1E2E;stroke-width:8;stroke-linecap:round}
+    .glint{fill:#FFFFFF}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.halo{stroke:#F0F0F5}}
+  </style>
+  <defs>
+    <path id="b" d="M128 72C180 72 208 114 208 160C208 204 174 232 128 232C82 232 48 204 48 160C48 114 76 72 128 72Z"/>
+    <path id="t" d="M122 76C112 54 120 34 146 26C150 48 144 66 134 76Z"/>
+  </defs>
+  <g id="bro">
+    <use xlink:href="#t" class="halo"/>
+    <use xlink:href="#b" class="halo"/>
+    <use xlink:href="#t" class="tuft"/>
+    <use xlink:href="#b" class="body"/>
+    <g id="eyes">
+      <rect class="ink" x="94" y="132" width="20" height="36" rx="10"/>
+      <rect class="ink" x="142" y="132" width="20" height="36" rx="10"/>
+      <circle class="glint" cx="108" cy="141" r="4"/>
+      <circle class="glint" cx="156" cy="141" r="4"/>
+    </g>
+    <path id="mouth" class="line" d="M116 190Q128 198 140 190"/>
+  </g>
+</svg>

@@ -42,6 +42,11 @@ class Tone:
             return "This already looks done. Press Next to continue."
         return "Already done? Show-off. Press Next to continue."
 
+    def done(self) -> str:
+        if not self.humour:
+            return "That's all the steps."
+        return "Done, bro. Told you it'd be easy."
+
     def still_here(self) -> str:
         if not self.humour:
             return "Still here. Press Next when you've done it."

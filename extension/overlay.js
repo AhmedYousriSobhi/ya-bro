@@ -14,7 +14,9 @@ const EVENT_PEERS = ['Core', 'Actuator'];
 const DEAD_MAN_SECONDS = 6;
 const MAX_TEXT = 280;
 const EDGE = 8;           // keep the bubble this far inside the monitor
-const AVATAR_GAP = 40;    // the avatar sits this far left of the bubble
+const AVATAR_SIZE = 48;   // the bro, drawn from assets/bro/<mood>.svg (ADR-0028)
+const AVATAR_GAP = 56;    // the avatar sits this far left of the bubble (its width plus 8)
+const MOODS = ['idle', 'pointing', 'thinking', 'happy', 'teasing', 'quiet'];
 // Labels come from the extension, never from the caller (anti-spoofing, ADR-0023 §11.6).
 const BUTTONS = {
     next: 'Next', repeat: 'Repeat', why: 'Why?', do_it: 'Do it', stop: 'Stop',
@@ -33,14 +35,17 @@ const XML = `<node><interface name="${IFACE}">
 </interface></node>`;
 
 export class Overlay {
-    constructor(connection, peers) {
+    constructor(connection, peers, path) {
         this._peers = peers;
+        this._assets = `${path}/assets/bro`;
+        this._icons = {};
         this._serial = 0;
         this._follow = {window: 0, serial: 0};
         this._containers = [];
         this._lastPing = GLib.get_monotonic_time();
         this._draws = [];
         this._visible = false;
+        this._mood = 'idle';
         this._bubbleRect = [0, 0, 0, 0];
         this._overviewHidden = false;
         this._unredirectOff = false;
@@ -131,16 +136,24 @@ export class Overlay {
             const bubble = new St.BoxLayout({style_class: 'yabro-bubble', vertical: true, reactive: false, visible: false});
             bubble.add_child(label);
             bubble.add_child(buttons);
+            const avatarIcon = new St.Icon({icon_size: AVATAR_SIZE, gicon: this._icon('idle')});
             const avatar = new St.Button({
-                style_class: 'yabro-avatar', label: 'Ya', reactive: true, can_focus: false,
+                style_class: 'yabro-avatar', child: avatarIcon, reactive: true, can_focus: false,
                 track_hover: false, visible: false,
             });
             avatar.connect('clicked', () => this._event('avatar_click', ''));
             for (const a of [ring, pointer, bubble, avatar])
                 root.add_child(a);
             Main.layoutManager.addTopChrome(root, {affectsStruts: false, trackFullscreen: false});
-            this._containers.push({monitor: m, root, ring, pointer, label, buttons, bubble, avatar});
+            this._containers.push({monitor: m, root, ring, pointer, label, buttons, bubble, avatar, avatarIcon});
         }
+    }
+
+    // One Gio icon per mood, from the extension's own folder; an unknown mood is never loaded.
+    _icon(mood) {
+        if (!(mood in this._icons))
+            this._icons[mood] = new Gio.FileIcon({file: Gio.File.new_for_path(`${this._assets}/${mood}.svg`)});
+        return this._icons[mood];
     }
 
     _destroyContainers() {
@@ -222,7 +235,10 @@ export class Overlay {
             const [bx, by, bw, bh] = this._placeBubble(c, target, args.bubble_at);
             c.bubble.set_position(bx - c.monitor.x, by - c.monitor.y);
             c.avatar.set_position(bx - c.monitor.x - AVATAR_GAP, by - c.monitor.y);
-            if (args.avatar !== false)   // the avatar is a placeholder: callers may leave it out
+            // The mood is a plain word from a fixed list; anything else falls back (never a path).
+            this._mood = MOODS.includes(args.mood) ? args.mood : (target ? 'pointing' : 'idle');
+            c.avatarIcon.gicon = this._icon(this._mood);
+            if (args.avatar !== false)   // callers may leave the bro out
                 c.avatar.show();
             this._bubbleRect = [bx, by, bw, bh];
             this._follow = {window: args.follow_window ?? 0, serial};
@@ -302,6 +318,7 @@ export class Overlay {
             overview: new GLib.Variant('b', this._overviewHidden),
             unredirect_disabled: new GLib.Variant('b', this._unredirectOff),
             bubble: new GLib.Variant('(iiii)', this._bubbleRect),
+            mood: new GLib.Variant('s', this._visible ? this._mood : ''),
         }]));
     }
 

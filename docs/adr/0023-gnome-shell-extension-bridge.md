@@ -80,7 +80,7 @@ Core is the client. The extension owns the name. All rects are `(iiii)` x, y, w,
 
 | Member | Signature | Notes |
 |---|---|---|
-| `ShowStep(a{sv})` | `→ u serial` | `target` rect or none; `ring` = `confident` / `dashed` / `none` (ADR-0007 tiers); `text` (s, ≤ 280 chars, already localized); `dir` = `ltr` / `rtl` (ADR-0019); `avatar` (b, default true: false leaves the placeholder avatar out, because the bro's shape is not decided); `buttons` (as) from a **fixed enum** (`next`, `repeat`, `why`, `do_it`, `stop`, `yes`, `no`, `not_for_app`); `follow_window` (t) |
+| `ShowStep(a{sv})` | `→ u serial` | `target` rect or none; `ring` = `confident` / `dashed` / `none` (ADR-0007 tiers); `text` (s, ≤ 280 chars, already localized); `dir` = `ltr` / `rtl` (ADR-0019); `avatar` (b, default true: false leaves the bro out); `mood` (s, one of `idle` `pointing` `thinking` `happy` `teasing` `quiet`, else `pointing` with a target and `idle` without; ADR-0028); `buttons` (as) from a **fixed enum** (`next`, `repeat`, `why`, `do_it`, `stop`, `yes`, `no`, `not_for_app`); `follow_window` (t) |
 | `FlyPointer((ii) to, u ms)` | `→ u serial` | Quadratic Bezier with ease-out, 400–700 ms (ADR-0006 §3) |
 | `SetAvatar(a{sv})` | | position, state (`idle`, `watching`, `thinking`, `talking`, `acting`) |
 | `SetIndicators(as)` | | `watching`, `capturing`, `acting` badges (ADR-0014 visible state) |

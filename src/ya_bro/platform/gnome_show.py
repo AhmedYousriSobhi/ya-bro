@@ -28,7 +28,7 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
     _call,
 )
 from ya_bro.policy import ShowMePolicy  # noqa: E402
-from ya_bro.steps import StepLoop  # noqa: E402
+from ya_bro.steps import StepLoop, Timing  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
 
 
@@ -66,6 +66,7 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
         overlay,
         bridge,
         ShowMePolicy(),
+        Timing(done_hold=1.5),
         log=log,
         tone=Tone(config.load(app).humour),
     )

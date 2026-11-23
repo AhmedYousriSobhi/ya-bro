@@ -23,6 +23,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `CHANGELOG.md` — Keep a Changelog format
 - `.github/` — issue and PR templates
 - `packs/` — per-app knowledge packs (format v1, ADR-0027; `workbench` and `gnome-calculator`; loader `src/ya_bro/packs.py`; `broctl pack list|check`)
+- `docs/design/BRO_IDENTITY.md` and `docs/assets/identity/` — the bro's look (candidates, provisional pick, SVG moods; ADR-0028); the extension's copies are in `extension/assets/bro/`
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
 - `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop, ADR-0026), plans (TOML plans), packs (app knowledge, ADR-0027), grounding (pointing tiers), pointing_eval (the pointing eval harness), struggle_eval (the replay eval), tone (the bro's lines), policy (risk tiers, ADR-0014), redact (secret scrubbing), shell_spool and terminal (shell hook, ADR-0021), struggle and struggle_host (the detector, ADR-0010), config, logs, targets, token_server, ipc, dirs, cli; OS code only under `platform/`)

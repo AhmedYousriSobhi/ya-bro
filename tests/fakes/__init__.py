@@ -51,13 +51,19 @@ class FakeOverlay:
     def __init__(self) -> None:
         self.calls: list[tuple] = []
         self.buttons: list[tuple[str, ...]] = []
+        self.moods: list[str] = []
         self._events: asyncio.Queue[str] = asyncio.Queue()
 
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
     ) -> None:
         self.calls.append(("show_step", target, bubble_text))
         self.buttons.append(buttons)
+        self.moods.append(mood)
 
     def push(self, event: str) -> None:
         self._events.put_nowait(event)
