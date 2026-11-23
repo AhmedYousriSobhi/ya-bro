@@ -17,7 +17,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ya_bro import dirs, logs, struggle, terminal
+from ya_bro import dirs, keystore, logs, struggle, terminal
 
 CONSENT_VERSION = 1
 KINDS = ("question", "elements", "screenshot", "terminal", "pack")  # what a request may carry
@@ -159,7 +159,9 @@ def format_sent(records: list[dict]) -> str:
 
 
 def forget_plan(
-    everything: bool = False, rc: Path | None = None
+    everything: bool = False,
+    rc: Path | None = None,
+    store: Callable[[], keystore.Backend] | None = None,
 ) -> list[tuple[str, Callable[[], bool]]]:
     """What `forget` would remove, as (description, action). Settings go only with `everything`."""
     plan: list[tuple[str, Callable[[], bool]]] = [
@@ -177,8 +179,19 @@ def forget_plan(
             ("allowed targets", lambda: _rm(dirs.config_dir() / "targets")),
             ("allowed-app records", lambda: _rm(dirs.config_dir() / "apps")),
             ("the shell hook lines in ~/.bashrc", lambda: terminal.remove_block(rcfile)),
+            (
+                "the API key stored in your keyring (a key in .env or the environment stays)",
+                lambda: _clear_key(store or keystore.default_store),
+            ),
         ]
     return plan
+
+
+def _clear_key(store: Callable[[], keystore.Backend]) -> bool:
+    try:
+        return store().clear()
+    except keystore.KeyStoreError:
+        return False  # no keyring here, so nothing of ours is in one
 
 
 def _rm(path: Path) -> bool:
@@ -214,7 +227,8 @@ _LONG = {"show": None, "point": None, "scope": "watch", "struggle": "watch", "sh
 
 def _is_yabro(argv: list[str]) -> bool:
     names = [os.path.basename(a) for a in argv]
-    if "ya_bro.platform.gnome_show" in argv or "gnome_demo.py" in names[:3]:
+    cores = {"ya_bro.platform.gnome_show", "ya_bro.platform.gnome_offers"}
+    if cores & set(argv) or "gnome_demo.py" in names[:3]:
         return True
     # `broctl`, `python broctl`, `uv run broctl`: the name sits near the front, so an editor that
     # has a file called broctl open is left alone.

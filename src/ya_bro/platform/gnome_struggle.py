@@ -19,7 +19,7 @@ import gi.events  # noqa: E402
 from gi.repository import Gio  # noqa: E402
 
 from ya_bro import packs, struggle, struggle_host, targets  # noqa: E402
-from ya_bro.platform.gnome_adapters import GnomeBridge  # noqa: E402
+from ya_bro.platform.gnome_adapters import GnomeBridge, own_perceiver  # noqa: E402
 from ya_bro.platform.gnome_atspi_events import AtspiUiEvents  # noqa: E402
 from ya_bro.platform.gnome_idle import GnomeIdleSource  # noqa: E402
 from ya_bro.shell_spool import ShellSpool  # noqa: E402
@@ -35,7 +35,9 @@ async def run(seconds: int) -> int:
         return 1
     found, _problems = packs.load_all()
     struggle_host.tune_from_packs(det, found, commands, gui)
-    bridge = GnomeBridge(Gio.bus_get_sync(Gio.BusType.SESSION, None))
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    perceiver = own_perceiver(bus)
+    bridge = GnomeBridge(bus)
 
     async def focused() -> str | None:
         win = await bridge.focused_window()
@@ -65,6 +67,7 @@ async def run(seconds: int) -> int:
     finally:
         if shell_cmds:
             spool.close()
+        Gio.bus_unown_name(perceiver)
     return 0
 
 

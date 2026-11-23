@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 
 from ya_bro import __version__
 
@@ -203,15 +204,23 @@ def _struggle(args: argparse.Namespace) -> int:
     found = targets.load_all()
     commands = struggle_host.command_apps(found)
     watched = [a for a in sorted(set(commands.values())) if det.is_watching(a)]
-    gui = sorted(a for a in det._opted_in if det.is_watching(a) and a not in commands.values())
-    if gui:  # menus, dialogs, alerts and undo come from AT-SPI, which needs the system python3
-        code = _struggle_gui(args.seconds)
-        if code is not None:
-            return code
-        print(f"no AT-SPI here, so only commands and idle are watched, not: {', '.join(gui)}")
-    if not watched:
-        print("watching nothing: `broctl struggle enable APP` for an allowed target first")
+    gui = [a for a in det._opted_in if det.is_watching(a) and a not in commands.values()]
+    if not watched and not gui:
+        print("watching nothing: `broctl struggle enable APP` first")
         return 1
+    # Menus, dialogs, alerts and undo come from AT-SPI, so the bubble (and the printing watcher)
+    # run under the system python3; without PyGObject only commands and idle can be watched.
+    code = _struggle_gui(args.seconds) if args.print_only else _gnome_offers(args.seconds)
+    if code is not None:
+        return code
+    if gui:
+        print(
+            f"no AT-SPI here, so only commands and idle are watched, not: {', '.join(sorted(gui))}"
+        )
+    if not watched:
+        return 1
+    if not args.print_only:
+        print("no bubble here (needs the system python3 with PyGObject); printing offers only")
     spool = ShellSpool()
     spool.open(sorted(c for c, a in commands.items() if a in watched))
     packs_found, _problems = packs.load_all()
@@ -232,6 +241,23 @@ def _struggle(args: argparse.Namespace) -> int:
     finally:
         spool.close()
     return 0
+
+
+def _gnome_offers(seconds: int) -> int | None:
+    """Run the watcher with the offer bubble; None when this machine cannot draw one."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        return None
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
+    try:
+        cmd = [py, "-m", "ya_bro.platform.gnome_offers", "--seconds", str(seconds)]
+        return subprocess.run(cmd, env=env, check=False).returncode
+    except KeyboardInterrupt:
+        return 130
 
 
 def _persona(args: argparse.Namespace) -> int:
@@ -346,6 +372,41 @@ def _forget(args: argparse.Namespace) -> int:
         return 1
     for what, act in plan:
         print(f"{'removed' if act() else 'nothing to remove'}: {what}")
+    return 0
+
+
+def _key(args: argparse.Namespace) -> int:
+    import getpass
+
+    from ya_bro import keystore
+
+    store = keystore.default_store()
+    try:
+        if args.verb == "status":
+            try:
+                store.get()
+            except keystore.KeyStoreError as e:
+                print(f"keyring not reachable: {e}")
+            print(keystore.status_text(store=store))
+            return 0
+        if args.verb == "clear":
+            print("removed the key from the keyring" if store.clear() else "no key in the keyring")
+            return 0
+        # Hidden prompt on a tty, one line from a pipe otherwise; never a command-line argument.
+        try:
+            raw = getpass.getpass("Anthropic API key (hidden): ") if sys.stdin.isatty() else input()
+        except (EOFError, KeyboardInterrupt):
+            print("nothing stored")
+            return 1
+        note = keystore.save(raw, store)
+    except keystore.KeyStoreError as e:
+        print(f"key not stored: {e}" if args.verb == "set" else str(e))
+        return 1
+    print("stored the key in the keyring")
+    if note:
+        print(note)
+    if keystore.from_env():
+        print(f"note: {keystore.VAR} is set in this environment and takes precedence")
     return 0
 
 
@@ -506,16 +567,27 @@ def main(argv: list[str] | None = None) -> int:
     sv.add_parser("enable", help="watch one app or target for struggle").add_argument("app")
     sv.add_parser("disable", help="stop watching it").add_argument("app")
     sv.add_parser("sensitivity", help="1 (quiet) to 4 (eager)").add_argument("step", type=int)
-    sv.add_parser("watch", help="print offers as they would appear").add_argument(
-        "--seconds", type=int, default=300
-    )
+    sw = sv.add_parser("watch", help="offer help in a bubble when you seem stuck")
+    sw.add_argument("--seconds", type=int, default=300)
+    sw.add_argument("--print-only", action="store_true", help="print offers, draw no bubble")
     co = sub.add_parser("consent", help="what you agreed to send (ADR-0014)")
     cv = co.add_subparsers(dest="verb", required=True, metavar="<verb>")
     cv.add_parser("show", help="your answer to the first-run screen")
     cv.add_parser("revoke", help="turn sending off")
+    ke = sub.add_parser("key", help="the Anthropic API key, kept in your system keyring")
+    kv = ke.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    kv.add_parser(
+        "set", help="store the key (asked with a hidden prompt, never on the command line)"
+    )
+    kv.add_parser("status", help="whether a key is set and where it comes from; never the key")
+    kv.add_parser("clear", help="remove the key from the keyring")
     sub.add_parser("sent", help="every request that left this machine: kind and size, no content")
     fg = sub.add_parser("forget", help="delete logs, offers and the sent list")
-    fg.add_argument("--everything", action="store_true", help="also allowed apps, targets, hook")
+    fg.add_argument(
+        "--everything",
+        action="store_true",
+        help="also allowed apps, targets, hook, the stored API key",
+    )
     fg.add_argument("--yes", action="store_true", help="do not ask")
     sub.add_parser("panic", help="stop every Bro process now (works with the core wedged)")
     pe = sub.add_parser("persona", help="what the bro says (ADR-0013): preview, review, lint")
@@ -534,10 +606,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.noun == "persona":
         return _persona(args)
-    if args.noun in ("consent", "sent", "forget", "panic"):
-        return {"consent": _consent, "sent": _sent, "forget": _forget, "panic": _panic}[args.noun](
-            args
-        )
+    if args.noun in ("consent", "sent", "forget", "panic", "key"):
+        handlers = {
+            "consent": _consent,
+            "sent": _sent,
+            "forget": _forget,
+            "panic": _panic,
+            "key": _key,
+        }
+        return handlers[args.noun](args)
     if args.noun == "struggle":
         return _struggle(args)
     if args.noun == "hook":
@@ -552,9 +629,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"broctl {__version__}")
         return 0
     if args.noun == "doctor":
-        from ya_bro import doctor
+        from ya_bro import doctor, keystore
 
-        report, code = doctor.doctor()
+        report, code = doctor.doctor(store=keystore.default_store())
         print(report)
         return code
     if args.noun == "setup":

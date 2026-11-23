@@ -58,7 +58,7 @@ class Shell:
 
     def __init__(self):
         self.conn = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-        Gio.bus_own_name_on_connection(
+        self._core = Gio.bus_own_name_on_connection(
             self.conn, f"{PREFIX}.Core", Gio.BusNameOwnerFlags.NONE, None, None
         )
         self.events = []  # (monotonic, signal name, params)
@@ -68,6 +68,10 @@ class Shell:
             )
         pump_until(lambda: self._has_owner(DEST), 30)
         pump(1.0)
+
+    def release_core(self):
+        """Let go of the Core name (what a finished step loop does)."""
+        Gio.bus_unown_name(self._core)
 
     def _on_signal(self, _c, _s, _p, _i, name, params, *_):
         self.events.append((time.monotonic(), name, params.unpack()))
