@@ -2,7 +2,7 @@
 
 $XDG_RUNTIME_DIR/ya-bro/ (0700, tmpfs) holds `commands`, one allowed command name per line, and
 `shell.spool`, the file the hook appends to. Core creates both when it starts and removes them when
-it stops, so the hook is silent while Ya-Bro is not running. A command that is not allowed is never
+it stops, so the hook is silent while Bro is not running. A command that is not allowed is never
 written at all; core checks again on read anyway.
 
 Record, one JSON line: {"v":1,"ts":ms,"argv0":name,"exit":code,"ms":duration,"tty":"pts/3"}.

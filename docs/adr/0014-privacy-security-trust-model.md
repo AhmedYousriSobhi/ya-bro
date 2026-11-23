@@ -1,6 +1,6 @@
 # ADR-0014: Privacy, security and trust model
 
-- Status: Proposed
+- Status: Proposed (partly built: consent screen, `sent` ledger, `forget`, `panic`, state dots; see PROGRESS #25)
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0003, ADR-0005, ADR-0008, ADR-0009, ADR-0010, ADR-0023

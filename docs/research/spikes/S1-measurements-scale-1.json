@@ -165,7 +165,7 @@
     "sent": 1000,
     "reached_app": 1000,
     "blocked": 0,
-    "seconds": 1.4,
+    "seconds": 1.5,
     "focus_events": 0,
     "app_still_focused": true
   },
@@ -174,7 +174,7 @@
     "leaked_to_app": 0
   },
   "bubble_button_click": {
-    "found_pixels": 1066,
+    "found_pixels": 1071,
     "user_event": [
       "button:next"
     ],
@@ -186,16 +186,13 @@
     "hidden": 50,
     "latency_ms": {
       "n": 50,
-      "median": 7.09,
-      "p95": 8.23,
-      "max": 8.26
+      "median": 7.98,
+      "p95": 8.39,
+      "max": 8.64
     }
   },
   "pointer_flight_lands": {
-    "orange_pixels_near_target": 235
-  },
-  "popover_in_window_list": {
-    "new_windows": []
+    "orange_pixels_near_target": 232
   },
   "overview": {
     "state_overview": true,

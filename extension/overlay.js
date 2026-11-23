@@ -15,6 +15,7 @@ const DEAD_MAN_SECONDS = 6;
 const MAX_TEXT = 280;
 const EDGE = 8;           // keep the bubble this far inside the monitor
 const AVATAR_SIZE = 48;   // the bro, drawn from assets/bro/<mood>.svg (ADR-0028)
+const INDICATORS = ['watching', 'listening', 'sending', 'acting'];  // ADR-0014 §3, fixed list
 const AVATAR_GAP = 56;    // the avatar sits this far left of the bubble (its width plus 8)
 const MOODS = ['idle', 'pointing', 'thinking', 'happy', 'teasing', 'quiet'];
 // Labels come from the extension, never from the caller (anti-spoofing, ADR-0023 §11.6).
@@ -46,6 +47,7 @@ export class Overlay {
         this._draws = [];
         this._visible = false;
         this._mood = 'idle';
+        this._indicators = [];
         this._bubbleRect = [0, 0, 0, 0];
         this._overviewHidden = false;
         this._unredirectOff = false;
@@ -101,6 +103,7 @@ export class Overlay {
             c.bubble.hide();
             c.pointer.hide();
             c.avatar.hide();
+            c.dots.hide();
         }
         this._follow = {window: 0, serial: 0};
         this._bubbleRect = [0, 0, 0, 0];
@@ -142,10 +145,11 @@ export class Overlay {
                 track_hover: false, visible: false,
             });
             avatar.connect('clicked', () => this._event('avatar_click', ''));
-            for (const a of [ring, pointer, bubble, avatar])
+            const dots = new St.BoxLayout({style_class: 'yabro-dots', reactive: false, visible: false});
+            for (const a of [ring, pointer, bubble, avatar, dots])
                 root.add_child(a);
             Main.layoutManager.addTopChrome(root, {affectsStruts: false, trackFullscreen: false});
-            this._containers.push({monitor: m, root, ring, pointer, label, buttons, bubble, avatar, avatarIcon});
+            this._containers.push({monitor: m, root, ring, pointer, label, buttons, bubble, avatar, avatarIcon, dots});
         }
     }
 
@@ -240,6 +244,9 @@ export class Overlay {
             c.avatarIcon.gicon = this._icon(this._mood);
             if (args.avatar !== false)   // callers may leave the bro out
                 c.avatar.show();
+            if (args.indicators)
+                this._indicators = INDICATORS.filter(k => args.indicators.includes(k));
+            this._drawDots(c, bx - c.monitor.x - AVATAR_GAP, by - c.monitor.y + AVATAR_SIZE + 4);
             this._bubbleRect = [bx, by, bw, bh];
             this._follow = {window: args.follow_window ?? 0, serial};
             this._visible = true;
@@ -306,8 +313,24 @@ export class Overlay {
         this._guard(invocation, () => null);
     }
 
-    SetIndicatorsAsync(_p, invocation) {
-        this._guard(invocation, () => null);
+    // What the bro is doing right now, as small dots under it. Names come from a fixed list, so an
+    // unknown word draws nothing. They are shown whenever the bro is, and cannot be turned off.
+    SetIndicatorsAsync([names], invocation) {
+        this._guard(invocation, () => {
+            this._indicators = INDICATORS.filter(k => names.includes(k));
+            const c = this._containers.find(k => k.avatar.visible);
+            if (c)
+                this._drawDots(c, c.avatar.x, c.avatar.y + AVATAR_SIZE + 4);
+            return null;
+        });
+    }
+
+    _drawDots(c, x, y) {
+        c.dots.destroy_all_children();
+        for (const k of this._indicators)
+            c.dots.add_child(new St.Widget({style_class: `yabro-dot yabro-dot-${k}`, reactive: false}));
+        c.dots.set_position(x, y);
+        c.dots.visible = this._indicators.length > 0;
     }
 
     GetStateAsync(_p, invocation) {
@@ -319,6 +342,7 @@ export class Overlay {
             unredirect_disabled: new GLib.Variant('b', this._unredirectOff),
             bubble: new GLib.Variant('(iiii)', this._bubbleRect),
             mood: new GLib.Variant('s', this._visible ? this._mood : ''),
+            indicators: new GLib.Variant('as', this._visible ? this._indicators : []),
         }]));
     }
 

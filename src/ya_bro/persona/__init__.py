@@ -136,7 +136,7 @@ def load() -> Data:
     lines = {loc: _lines(loc, _load_toml("lines", f"{loc}.toml"), moments) for loc in LOCALES}
     style = (resources.files("ya_bro.persona") / "style.md").read_text(encoding="utf-8")
     return Data(
-        name=str(head.get("name", "Ya-Bro")),
+        name=str(head.get("name", "Bro")),
         max_chars=int(head.get("max_chars", 140)),
         recency=int(head.get("recency", 10)),
         bro_once=bool(head.get("bro_once_per_task", True)),

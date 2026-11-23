@@ -59,6 +59,7 @@ class GnomeOverlay:
         self._bus = bus
         self._bridge = bridge
         self._avatar = avatar
+        self.indicators: tuple[str, ...] = ("watching",)  # reading the allowed app, always shown
         self._queue: asyncio.Queue[str] = asyncio.Queue()
         self._serial = 0
         self._ping: asyncio.Task | None = None
@@ -99,6 +100,7 @@ class GnomeOverlay:
             "follow_window": GLib.Variant("t", self._window_for(target)),
             "avatar": GLib.Variant("b", self._avatar),
             "dir": GLib.Variant("s", "rtl" if is_rtl(bubble_text) else "ltr"),
+            "indicators": GLib.Variant("as", list(self.indicators)),
         }
         if mood:
             args["mood"] = GLib.Variant("s", mood)
@@ -113,6 +115,11 @@ class GnomeOverlay:
         _call(self._bus, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", (args,)))
         if self._ping is None:
             self._ping = asyncio.get_running_loop().create_task(self._keepalive())
+
+    async def set_indicators(self, names: tuple[str, ...]) -> None:
+        """What the bro is doing, shown as dots under it (ADR-0014 §3); the next step keeps them."""
+        self.indicators = names
+        _call(self._bus, OVERLAY, "SetIndicators", GLib.Variant("(as)", (list(names),)))
 
     async def _keepalive(self) -> None:
         while True:

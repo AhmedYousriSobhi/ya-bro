@@ -335,7 +335,7 @@ def test_broctl_persona(capsys):
     assert cli.main(["persona", "list", "--lang", "ar"]) == 0
     out = capsys.readouterr().out
     assert "[mismatch] max humour 3" in out and "[risk_confirm] max humour 0, sensitive" in out
-    assert cli.main(["persona", "style"]) == 0 and "Ya-Bro" in capsys.readouterr().out
+    assert cli.main(["persona", "style"]) == 0 and "You are Bro" in capsys.readouterr().out
 
 
 def test_lint_catches_broken_data(monkeypatch):
