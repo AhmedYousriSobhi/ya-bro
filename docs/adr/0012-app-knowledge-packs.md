@@ -1,6 +1,6 @@
 # ADR-0012: App knowledge packs: format, sources, retrieval, versioning, hooks
 
-- Status: Proposed
+- Status: Proposed (v1 subset implemented: ADR-0027)
 - Date: 2026-11-20
 - Issue: #13 (designs #8)
 - Depends on: ADR-0005, ADR-0008, ADR-0014

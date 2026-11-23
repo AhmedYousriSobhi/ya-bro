@@ -63,6 +63,29 @@ def _targets(args: argparse.Namespace) -> int:
         return 1
 
 
+def _pack(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from ya_bro import packs
+
+    if args.verb == "check":
+        try:
+            p = packs.load(Path(args.dir))
+        except packs.PackError as e:
+            print(e)
+            return 1
+        print(f"{p.id} {p.version}: ok ({len(p.tasks)} tasks, trust {p.trust})")
+        return 0
+    found, problems = packs.load_all()
+    for p in found:
+        print(f"{p.id}\t{p.version}\t{len(p.tasks)} tasks\t{p.name}")
+    for line in problems:
+        print(f"skipped {line}")
+    if not found:
+        print("no packs found")
+    return 0
+
+
 def _gnome_demo(cmd: str, seconds: int, text: str = "", show: list[str] | None = None) -> int:
     import shutil
     import subprocess
@@ -170,8 +193,14 @@ def main(argv: list[str] | None = None) -> int:
     verbs.add_parser("available", help="list installed app ids you could allow")
     for verb, text in (("allow", "allow an app id"), ("revoke", "stop allowing an app id")):
         verbs.add_parser(verb, help=text).add_argument("app", help="app id, e.g. org.gimp.GIMP")
+    pk = sub.add_parser("pack", help="app knowledge packs (ADR-0012)")
+    pverbs = pk.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    pverbs.add_parser("list", help="show packs found (shipped and yours)")
+    pverbs.add_parser("check", help="validate a pack directory").add_argument("dir")
     args = parser.parse_args(argv)
 
+    if args.noun == "pack":
+        return _pack(args)
     if args.noun == "version":
         print(f"broctl {__version__}")
         return 0

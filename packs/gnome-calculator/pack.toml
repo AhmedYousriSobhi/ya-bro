@@ -1,0 +1,9 @@
+[pack]
+id = "gnome-calculator"
+name = "GNOME Calculator"
+version = "0.1.0"
+locales = ["en"]
+
+[match]
+desktop_ids = ["org.gnome.Calculator"]
+window_classes = ["org.gnome.Calculator"]
