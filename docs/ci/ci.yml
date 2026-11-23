@@ -12,7 +12,8 @@ jobs:
       - run: uv sync
       - run: uv run ruff check .
       - run: uv run ruff format --check .
-      - run: uv run pytest -m "not atspi" -q
+      # Same selection as scripts/check.sh: the other marks need a desktop session
+      - run: uv run pytest -m "not atspi and not gnome and not gnome_measure and not live and not keyring" -q
 
   licence-gate:
     runs-on: ubuntu-latest

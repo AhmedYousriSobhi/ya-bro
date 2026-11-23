@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #18 CI draft corrected (not active)
+Done: the unit-test line in `docs/ci/ci.yml` now uses the same marker selection as `scripts/check.sh` (the old `-m "not atspi"` would also have run the gnome, keyring and live tests, which cannot work on a runner).
+Not done: **CI is still not active**: pushing `.github/workflows/` needs a token with `workflow` scope and the current one has `repo`, `read:org` and `gist` only (checked with `gh auth status`); the maintainer must copy the file or widen the token. The GNOME headless job and the 48/49/51 version matrix (#30) are not written: they need a container with each Shell version and I could not test one here. #18 stays open.
+
 ### 2026-11-23: #3 docked overlay (first part)
 Done: `DockedOverlay` (GTK4 bubble window, same Overlay contract, Esc and close are Stop, RTL direction), `broctl show --docked`, real-frame test (real clicks, a mutation fails it). Found: the GLib asyncio loop does not service GTK's Wayland source while sleeping, so the overlay drives the context itself.
 Then the ask window (`broctl ask` with no goal; real-frame test).
