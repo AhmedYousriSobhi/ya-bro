@@ -79,11 +79,12 @@ class TerminalWriter:
             return WriteResult(False, "I see more than one terminal; use Copy")
         return WriteResult(True)
 
-    def write(self, command: str) -> WriteResult:
-        check = self.can_write(command)
-        if not check.ok:
-            return check
-        tty = self.idle_terminals()[0]
+    def _device(self) -> tuple[str, str] | WriteResult:
+        """(tty name, device path) of the one idle terminal, checked, or why not."""
+        found = self.idle_terminals()
+        if len(found) != 1:
+            return WriteResult(False, "no single idle terminal")
+        tty = found[0]
         dev = "/dev/pts/" + tty.split("_")[1]
         try:
             st = os.stat(dev)
@@ -91,6 +92,35 @@ class TerminalWriter:
             return WriteResult(False, "that terminal is gone")
         if not stat.S_ISCHR(st.st_mode) or st.st_uid != os.getuid():
             return WriteResult(False, "that terminal is not yours")
+        return tty, dev
+
+    def announce(self) -> bool:
+        """Nudge the one idle terminal so its hook sets the scope token in the title now, not at the
+        next prompt. Same query and guards as write, with no suggestion; the line is left alone."""
+        target = self._device()
+        if isinstance(target, WriteResult):
+            return False
+        tty, dev = target
+        suggest = self._root / f"suggest.{tty}"
+        suggest.unlink(missing_ok=True)  # nothing stale may be inserted by this nudge
+        try:
+            tfd = self._open(dev)
+            try:
+                os.write(tfd, QUERY)
+            finally:
+                os.close(tfd)
+        except OSError:
+            return False
+        return True
+
+    def write(self, command: str) -> WriteResult:
+        check = self.can_write(command)
+        if not check.ok:
+            return check
+        target = self._device()
+        if isinstance(target, WriteResult):
+            return target
+        tty, dev = target
         suggest = self._root / f"suggest.{tty}"
         result = self._root / f"suggest.{tty}.result"
         result.unlink(missing_ok=True)

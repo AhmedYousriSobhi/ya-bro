@@ -53,9 +53,20 @@ _yb_post() {
   return "$rc"
 }
 
+# While a run holds a scope token (ADR-0029 §8) it goes into the terminal title (OSC 2), so the
+# extension reports this terminal's window only while Bro runs, without allowing the whole app.
+_yb_title() {
+  local t
+  [[ -r $_yb_dir/scope-token ]] || return 0
+  IFS= read -r t <"$_yb_dir/scope-token"
+  [[ $t =~ ^yb-[0-9a-f]{32}$ ]] && printf '\033]2;ya-bro %s\007' "$t"
+  return 0
+}
+
 # Last in PROMPT_COMMAND: from here on the next simple command is the user's.
 _yb_arm() {
   _yb_armed=1
+  _yb_title
   [[ -d $_yb_dir ]] && printf 'idle %s\n' "$$" >"$_yb_mark" 2>/dev/null
   return 0
 }
@@ -65,6 +76,7 @@ _yb_arm() {
 # empty, and Enter is never pressed. The outcome goes to a result file core reads.
 _yb_insert() {
   local f=$_yb_dir/suggest.${_yb_tty//\//_} s= r=nothing
+  _yb_title
   [[ -r $f ]] && IFS= read -r s <"$f"
   if [[ -n $s ]]; then
     if [[ -z $READLINE_LINE ]]; then

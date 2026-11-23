@@ -22,9 +22,13 @@ Legend: done · in progress · todo
 Done: `Step.text`, validation, R2 confirm that shows the text, secret and password refusal, `EditableText` entry that never overwrites; unit tests and a real GTK4 run with a mutation.
 Not done: portal + libei, multi-line and rich text, Arabic in a real app, undo offer, live desktop.
 
+### 2026-11-23: #117 terminal scoped by a title token
+Done: the hook puts a per-run token in the terminal title, core pushes it to the extension and nudges the idle terminal, so the bubble hovers with no `apps allow` for the terminal; pty tests and a real-frame run with no app allowed.
+Not done: Ptyxis honouring OSC 2 for the window title (unverified), zsh and fish, the live desktop.
+
 ### 2026-11-23: #115 terminal companion
 Done: plan `command`, snippet and Copy/Write it buttons (extension, GNOME and docked overlays), hook idle marker and `bind -x` insert, guarded `TerminalWriter`, `CommandWatch` auto-advance, hover beside an allowed terminal, background companion; 7 real-pty tests with mutations, 7 loop tests, and a real VTE run in the isolated shell with screenshots.
-Not done: the live desktop (needs `broctl load` for the new extension), zsh and fish, Ptyxis and Console, scoping the bubble by terminal title (ADR-0029 open question), typing without the hook, a mutation run of the real-frame test, Write it with two idle terminals.
+Not done: the live desktop (needs `broctl load` for the new extension), zsh and fish, Ptyxis and Console, typing without the hook, a mutation run of the real-frame test, Write it with two idle terminals.
 
 ### 2026-11-23: running Bro on workbench
 Done: `broctl ask GOAL --pack workbench` (plain window, pack task, user presses Next; real-frame test) and `docs/guides/workbench.md`. Found: there was no way to run the pack at all: the workbench pack matches only `argv0`, so a terminal window never selects it, and `broctl show` needs an allowed focused window, which a CLI tool never has.

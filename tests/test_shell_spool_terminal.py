@@ -198,3 +198,16 @@ def test_broctl_shell_watch_needs_an_allowed_command(tmp_path, monkeypatch, caps
     assert cli.main(["shell", "watch", "--seconds", "1"]) == 0
     assert "watching benchctl" in capsys.readouterr().out
     assert not (tmp_path / "run" / "ya-bro").exists()  # cleaned up on exit
+
+
+def test_the_scope_token_file_is_private_and_only_a_real_token_is_accepted(spool):
+    token = "yb-" + "0f" * 16
+    spool.set_scope_token(token)
+    f = spool.spool_path.parent / "scope-token"
+    assert f.read_text() == token + "\n"
+    assert stat.S_IMODE(f.stat().st_mode) == 0o600
+    for bad in ("", "yb-short", token + "\n", "yb-" + "G" * 32, "x" * 35):
+        with pytest.raises(ValueError):
+            spool.set_scope_token(bad)
+    spool.close()
+    assert not f.exists()
