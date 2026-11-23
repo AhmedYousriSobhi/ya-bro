@@ -48,6 +48,8 @@ class StruggleHost:
         on_offer: Callable[[Offer], None] = lambda _o: None,
         sink: Sink | None = None,
         clock: Callable[[], float] = time.time,
+        present: Callable[[Offer], Awaitable[object]] | None = None,
+        busy: Callable[[], bool] = lambda: False,
     ) -> None:
         self._d = detector
         self._commands = commands
@@ -57,6 +59,9 @@ class StruggleHost:
         self._on_offer = on_offer
         self._sink = sink
         self._clock = clock
+        self._present = present  # shows the offer and answers the detector (ya_bro.offers)
+        self._busy = busy  # a step loop is running: ask nothing, and do not even take an offer
+        self._showing: set[asyncio.Task] = set()
 
     def _log(self, name: str, **fields: int | str) -> None:
         if self._sink is not None:  # a log failure never stops the detector
@@ -90,10 +95,28 @@ class StruggleHost:
             await asyncio.sleep(POLL)
 
     def _offer(self) -> None:
+        if self._busy():
+            return  # never interrupt a step loop; the offer stays due until it is over
         offer = self._d.poll()
         if offer is not None:
             self._log("struggle_offer", app=offer.app, score=round(offer.score, 2))
             self._on_offer(offer)
+            if self._present is not None:  # poll() holds one pending offer, so one task at most
+                task = asyncio.create_task(self._show(offer))
+                self._showing.add(task)
+                task.add_done_callback(self._showing.discard)
+
+    async def _show(self, offer: Offer) -> None:
+        assert self._present is not None
+        try:
+            result = await self._present(offer)
+        except Exception as e:  # noqa: BLE001 - a broken bubble must not stop the detector
+            self._d.answer(offer, "ignored")  # no-op if it was already answered or withdrawn
+            self._log("struggle_bubble_failed", error=type(e).__name__)
+            return
+        outcome = getattr(result, "outcome", "")
+        if outcome and outcome != "withdrawn":
+            self._log("struggle_answer", app=offer.app, outcome=outcome)
 
     async def run(self) -> None:
         tasks = [asyncio.create_task(self._tick_loop())]
@@ -102,5 +125,5 @@ class StruggleHost:
         try:
             await asyncio.gather(*tasks)
         finally:
-            for t in tasks:
+            for t in [*tasks, *self._showing]:
                 t.cancel()

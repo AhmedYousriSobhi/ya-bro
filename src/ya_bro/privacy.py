@@ -214,7 +214,8 @@ _LONG = {"show": None, "point": None, "scope": "watch", "struggle": "watch", "sh
 
 def _is_yabro(argv: list[str]) -> bool:
     names = [os.path.basename(a) for a in argv]
-    if "ya_bro.platform.gnome_show" in argv or "gnome_demo.py" in names[:3]:
+    cores = {"ya_bro.platform.gnome_show", "ya_bro.platform.gnome_offers"}
+    if cores & set(argv) or "gnome_demo.py" in names[:3]:
         return True
     # `broctl`, `python broctl`, `uv run broctl`: the name sits near the front, so an editor that
     # has a file called broctl open is left alone.

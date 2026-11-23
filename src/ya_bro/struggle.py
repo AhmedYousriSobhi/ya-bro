@@ -398,6 +398,17 @@ class Detector:
                     self._halved.add(key)  # it learns this one is a false alarm here
         self._save()
 
+    def withdraw(self, offer: Offer) -> None:
+        """Take back an offer that was never shown (a step loop got there first): no answer is
+        counted and nothing is silenced. The cooldown and the hourly cap stay spent."""
+        if offer is self._pending:
+            self._pending = None
+
+    def is_quiet(self, app: str) -> bool:
+        """True while the app is silenced by the two-answers-in-a-row back-off."""
+        st = self._apps.get(app)
+        return st is not None and self._clock() < st.quiet_until
+
     def stats(self) -> dict[str, int]:
         """Local outcome counts (dogfood metrics: acceptance rate, "never" rate)."""
         return dict(self._outcomes)

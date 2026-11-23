@@ -186,6 +186,11 @@ def _struggle(args: argparse.Namespace) -> int:
     if not watched:
         print("watching nothing: `broctl struggle enable APP` for an allowed target first")
         return 1
+    if not args.print_only:
+        rc = _gnome_offers(args.seconds)
+        if rc is not None:
+            return rc
+        print("no bubble here (needs the system python3 with PyGObject); printing offers only")
     spool = ShellSpool()
     spool.open(sorted(c for c, a in commands.items() if a in watched))
     host = struggle_host.StruggleHost(
@@ -204,6 +209,23 @@ def _struggle(args: argparse.Namespace) -> int:
     finally:
         spool.close()
     return 0
+
+
+def _gnome_offers(seconds: int) -> int | None:
+    """Run the watcher with the offer bubble; None when this machine cannot draw one."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        return None
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
+    try:
+        cmd = [py, "-m", "ya_bro.platform.gnome_offers", "--seconds", str(seconds)]
+        return subprocess.run(cmd, env=env, check=False).returncode
+    except KeyboardInterrupt:
+        return 130
 
 
 def _persona(args: argparse.Namespace) -> int:
@@ -478,9 +500,9 @@ def main(argv: list[str] | None = None) -> int:
     sv.add_parser("enable", help="watch one app or target for struggle").add_argument("app")
     sv.add_parser("disable", help="stop watching it").add_argument("app")
     sv.add_parser("sensitivity", help="1 (quiet) to 4 (eager)").add_argument("step", type=int)
-    sv.add_parser("watch", help="print offers as they would appear").add_argument(
-        "--seconds", type=int, default=300
-    )
+    sw = sv.add_parser("watch", help="offer help in a bubble when you seem stuck")
+    sw.add_argument("--seconds", type=int, default=300)
+    sw.add_argument("--print-only", action="store_true", help="print offers, draw no bubble")
     co = sub.add_parser("consent", help="what you agreed to send (ADR-0014)")
     cv = co.add_subparsers(dest="verb", required=True, metavar="<verb>")
     cv.add_parser("show", help="your answer to the first-run screen")
