@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #2 spike S2, first AT-SPI coverage run
+Done: `tests/fixtures/shell_atspi_coverage.py` (whole-tree census per role: found, named, rect in window) and [S2 findings](research/spikes/S2-atspi-coverage.md); LibreOffice Writer measured (names near complete; most nodes hidden).
+Not done: VS Code (app id unknown, no window), Firefox (snap refuses a private run), GIMP, Inkscape, KDE Settings (not installed); no position accuracy check; no go/no-go on the vision fallback. #2 stays open.
+
 ### 2026-11-23: #27 Do-it through AT-SPI actions
 Done: `StepLoop` takes an `Actuator`; `broctl show --do-it` (needs `[do_it] allowed`) presses controls itself via `AtspiActuator` (narrate, pointer, pause, press, verify, one retry), with `LocalPolicy(do_it=True)` deciding each step: R2 asks first, R3, secrets, dangerous names and any doubtful or missing control go back to Show-me. Stop aborts before and during a press. 12 loop tests on fakes; a real-Calculator run in the isolated shell presses 7 × 6 = 42 with no injected click, and a mutation (an actuator that cannot press) fails it.
 Not done: **portal + libei injection (S7, drags, canvas, apps without AT-SPI actions)**, text entry, undo offer, pacing setting, the 30-action coverage run (GIMP, LibreOffice, Settings, Firefox), a `do_it` toggle command (the config key is set by hand); only GTK4 Calculator was run for real; the double-press risk if an app's `do_action` hangs and the user retries is untested. #27 stays open.
