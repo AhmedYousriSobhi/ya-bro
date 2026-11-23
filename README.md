@@ -110,7 +110,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 | **Run a walkthrough** | `ask "what you want to do" [--dry]`, `show <plan.toml>`, `point`, `scope watch` |
 | **Knowledge packs** | `pack list \| check <dir>` |
 | **Terminal** | `hook install \| uninstall \| print \| status`, `shell watch` |
-| **Offers** | `struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` |
+| **Offers** | `struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch [--print-only]` (`watch` asks "you stuck, bro?" in a bubble with Yes, No and Not for this app) |
 | **Privacy** | `consent show \| revoke`, `sent` (what left this machine), `forget [--everything]`, `panic` (stop everything now) |
 | **Words** | `persona say \| list \| lint \| style` (preview and review what the bro says) |
 | **Measure** | `eval pointing`, `eval struggle [--sweep]` |

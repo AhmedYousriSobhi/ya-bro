@@ -135,7 +135,7 @@ export class Overlay {
             const pointer = new St.Widget({style_class: 'yabro-pointer', reactive: false, visible: false});
             const label = new St.Label({style_class: 'yabro-bubble-label', reactive: false});
             label.clutter_text.line_wrap = true;
-            const buttons = new St.BoxLayout({reactive: false});
+            const buttons = new St.BoxLayout({style_class: 'yabro-buttons', reactive: false});
             const bubble = new St.BoxLayout({style_class: 'yabro-bubble', vertical: true, reactive: false, visible: false});
             bubble.add_child(label);
             bubble.add_child(buttons);
