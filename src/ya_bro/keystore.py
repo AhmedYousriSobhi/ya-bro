@@ -81,14 +81,21 @@ def from_store(store: Backend | None) -> str:
         return ""
 
 
-def _candidates(env, dotenv, store) -> list[Found]:
-    """Every place a key is set, in lookup order."""
-    both = (
-        ("environment", from_env(env)),
-        ("keyring", from_store(store)),
-        (".env file", from_dotenv(dotenv)),
+def _candidates(env, dotenv, store, first_only: bool = False) -> list[Found]:
+    """The places a key is set, in lookup order. Lazy, so a key in the environment means the
+    keyring (a subprocess, maybe an unlock prompt) is never asked; `status` wants them all."""
+    getters = (
+        ("environment", lambda: from_env(env)),
+        ("keyring", lambda: from_store(store)),
+        (".env file", lambda: from_dotenv(dotenv)),
     )
-    return [Found(value, source) for source, value in both if value]
+    found = []
+    for source, get in getters:
+        if value := get():
+            found.append(Found(value, source))
+            if first_only:
+                break
+    return found
 
 
 def find(
@@ -97,7 +104,7 @@ def find(
     store: Backend | None = None,
 ) -> Found | None:
     """The key that wins, and where it came from. `store=None` skips the keyring."""
-    found = _candidates(env, dotenv, store)
+    found = _candidates(env, dotenv, store, first_only=True)
     return found[0] if found else None
 
 

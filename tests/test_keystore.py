@@ -58,6 +58,15 @@ def test_order_is_environment_then_keyring_then_dotenv(tmp_path):
     assert keystore.find({}, tmp_path / "nope", FakeStore()) is None
 
 
+def test_the_keyring_is_not_asked_when_the_environment_has_a_key(tmp_path):
+    class Boom:
+        def get(self):
+            pytest.fail("the keyring was queried although the environment has a key")
+
+    assert brain.load_key({"ANTHROPIC_API_KEY": KEY}, tmp_path / "x", Boom()) == KEY
+    assert keystore.find({"ANTHROPIC_API_KEY": KEY}, None, Boom()).source == "environment"
+
+
 def test_an_unreachable_keyring_falls_through_to_dotenv(tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text(f"ANTHROPIC_API_KEY={KEY}\n")

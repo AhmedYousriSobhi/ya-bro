@@ -530,7 +530,11 @@ def main(argv: list[str] | None = None) -> int:
     kv.add_parser("clear", help="remove the key from the keyring")
     sub.add_parser("sent", help="every request that left this machine: kind and size, no content")
     fg = sub.add_parser("forget", help="delete logs, offers and the sent list")
-    fg.add_argument("--everything", action="store_true", help="also allowed apps, targets, hook")
+    fg.add_argument(
+        "--everything",
+        action="store_true",
+        help="also allowed apps, targets, hook, the stored API key",
+    )
     fg.add_argument("--yes", action="store_true", help="do not ask")
     sub.add_parser("panic", help="stop every Bro process now (works with the core wedged)")
     pe = sub.add_parser("persona", help="what the bro says (ADR-0013): preview, review, lint")

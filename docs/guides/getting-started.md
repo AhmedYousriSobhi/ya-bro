@@ -137,7 +137,7 @@ why = "Save keeps your work."
 - **Only the app you allow.** Default-deny: with no app named, the extension reports nothing. Revoke with `uv run broctl apps revoke <app-id>`.
 - Everything it draws is visible, and Stop always works. Small dots under the bro say what it is doing right now (blue: reading your app; green: listening; red: sending; orange: acting). You cannot turn them off while that state is active.
 - `uv run broctl sent` lists every request that left your machine (the kind and the size, never the content). Today it says nothing was sent.
-- `uv run broctl panic` stops every Bro process at once, even a frozen one, and turns proactive mode off. `uv run broctl forget` deletes logs and offers (`--everything` also removes allowed apps and targets, the shell hook lines and your consent).
+- `uv run broctl panic` stops every Bro process at once, even a frozen one, and turns proactive mode off. `uv run broctl forget` deletes logs and offers (`--everything` also removes allowed apps and targets, the stored API key, the shell hook lines and your consent).
 - It never types for you or clicks for you (Show-me mode only points).
 - Logs are written to `~/.local/state/ya-bro/logs/` and contain event types and counts, never typed text or screen content. Logs older than 7 days are pruned.
 - Honest limit: the GNOME accessibility setting is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's own code, not by the operating system ([ADR-0023](../adr/0023-gnome-shell-extension-bridge.md)).
@@ -148,7 +148,7 @@ why = "Save keeps your work."
 uv run broctl apps revoke org.gnome.Calculator            # stop seeing any app
 gnome-extensions disable ya-bro@ahmedyousrisobhi.github.io
 rm -rf ~/.local/share/gnome-shell/extensions/ya-bro@ahmedyousrisobhi.github.io
-uv run broctl forget --everything                         # optional: logs, offers, settings, hook lines
+uv run broctl forget --everything                         # optional: logs, offers, settings, hook lines, the stored API key
 ```
 
 The accessibility setting is left on because other tools may rely on it; to turn it off: `gsettings set org.gnome.desktop.interface toolkit-accessibility false`.
