@@ -156,7 +156,7 @@ def install_extension(
     return f"installed to {target} and enabled; log out and in once to load it"
 
 
-# --- per-app scoping (#43): the user names the one app Ya-Bro may see ---------------------
+# --- per-app scoping (#43): the user names the one app Bro may see ---------------------
 
 
 def valid_app_id(app_id: str) -> bool:
@@ -205,7 +205,7 @@ def allow_app(
     if current is None or not set_allowed(runner, [*dict.fromkeys([*current, app_id])], target):
         return "could not write the extension allowlist (install the extension first)"
     _write_app_config(app_id, True, config_dir)
-    return f"Ya-Bro may now see: {', '.join(get_allowed(runner, target) or [app_id])}"
+    return f"Bro may now see: {', '.join(get_allowed(runner, target) or [app_id])}"
 
 
 def revoke_app(
@@ -233,7 +233,7 @@ def allowed_apps_check(runner: Runner, target: Path | None = None) -> Check:
         return Check("allowed apps", "warn", "unreadable")
     if not apps:
         return Check(
-            "allowed apps", "warn", "none: Ya-Bro sees no app", "run `broctl setup` and name one"
+            "allowed apps", "warn", "none: Bro sees no app", "run `broctl setup` and name one"
         )
     return Check("allowed apps", "ok", ", ".join(apps))
 

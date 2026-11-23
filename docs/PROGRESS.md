@@ -14,10 +14,15 @@ Legend: done · in progress · todo
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23 (persona done; nothing generates lines and the offer bubble is not built yet), #24 (replay eval done: 62 scenarios, passes the gates) |
-| M7 MVP hardening | in progress | #25, #26 (licence gate done) |
+| M7 MVP hardening | in progress | #25 (consent screen, sent ledger, forget, panic, state dots done; wiring to a real request waits for #5), #26 (licence gate done) |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #25 consent UX and kill switch
+Done: `ya_bro.privacy` (first-run consent screen in `broctl setup`, `consent.toml`, `may_send` gate; content-free sent ledger; `forget` with preview and `--everything`; 7-day log pruning; `panic` that SIGKILLs Bro's long-running processes), `broctl consent|sent|forget|panic`, state dots in the overlay (`indicators`, `SetIndicators`, `GetState`), `tests/conftest.py` isolating XDG dirs, 21 unit tests (panic on real processes including a SIGSTOPped one) and a real-frame test in the isolated shell (mutating the stylesheet makes it fail).
+Found: a `broctl struggle status` run by someone else matched a naive "broctl struggle" panic pattern; only the verbs that keep running are matched now.
+Not done: nothing calls `may_send` or `record_sent` yet (no LLM request exists, #5); no "listening", "sending" or "acting" source yet (only "watching" is shown); the screen is terminal text, not a GUI; panic cannot revoke a portal session or close a mic because neither exists yet; the stop key under a SIGSTOPped core is covered by the extension's dead-man test only; `prune_logs` is not scheduled; no per-app screenshot toggle or capture-deny app list.
+
 ### 2026-11-23: #23 persona
 Done: `ya_bro.persona` (14 moments, 79 EN and 79 AR lines, humour ceilings, sensitive moments, frustration drop, less chatty, bro once per task, recency, bidi isolates, language following, the vet filter for generated lines, a tone guide, `lint`), `Tone` now a thin face over it, the step loop's risky-step line and the humour-gated teasing face, config `language` and `less_chatty`, `dir = rtl` to the overlay, `broctl persona say|list|lint|style`, 46 unit tests, and a real-frame test in the isolated shell (Arabic renders as real text; the RTL bubble mirrors its buttons).
 Found: the banned-topic filter missed Arabic words with the article (`الموت`); a test caught it. Arabic text direction inside a label follows its content, not the widget, so only the button strip mirrors with `dir`.

@@ -1,4 +1,4 @@
-"""Targets (ADR-0025): a tool with a web UI and/or CLI that Ya-Bro may see, not a whole browser.
+"""Targets (ADR-0025): a tool with a web UI and/or CLI that Bro may see, not a whole browser.
 
 One file per target in `$XDG_CONFIG_HOME/ya-bro/targets/<id>.toml`; having the file is the consent.
 """

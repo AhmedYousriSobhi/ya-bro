@@ -47,7 +47,7 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
     try:
         wins = bridge.raw_windows()
     except GLib.Error as e:
-        print(f"cannot reach the Ya-Bro extension ({e.message}); run: broctl doctor")
+        print(f"cannot reach the Bro extension ({e.message}); run: broctl doctor")
         return 1
     if not app:
         focused = next((w for w in wins if w["focused"]), wins[0] if wins else None)

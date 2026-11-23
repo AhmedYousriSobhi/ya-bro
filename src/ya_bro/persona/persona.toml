@@ -3,7 +3,7 @@
 # skipped in "less chatty" mode. sensitive moments are never humorous, even when the context says so.
 
 [persona]
-name = "Ya-Bro"
+name = "Bro"
 bro_once_per_task = true   # "bro" at most once per task (the tone guide)
 max_chars = 140            # a generated line may not be longer
 recency = 10               # no line repeats within this many lines

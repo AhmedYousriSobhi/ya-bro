@@ -67,7 +67,7 @@ class Demo:
         try:
             return self.call(BRIDGE, "ListWindows").unpack()[0]
         except GLib.Error as e:
-            sys.exit(f"cannot reach the Ya-Bro extension ({e.message}); run: broctl doctor")
+            sys.exit(f"cannot reach the Bro extension ({e.message}); run: broctl doctor")
 
     def visible(self):
         return self.call(OVERLAY, "GetState").unpack()[0]["visible"]

@@ -7,7 +7,7 @@
   },
   "become_monitor_sees_unicast": {
     "became_monitor": true,
-    "ya_bro_signals_seen": 0
+    "ya_bro_signals_seen": 6
   },
   "coords[gtk4]": {
     "window": {
@@ -175,7 +175,7 @@
     "leaked_to_app": 0
   },
   "bubble_button_click": {
-    "found_pixels": 2511,
+    "found_pixels": 2512,
     "user_event": [
       "button:next"
     ],
@@ -187,13 +187,13 @@
     "hidden": 50,
     "latency_ms": {
       "n": 50,
-      "median": 7.76,
-      "p95": 8.27,
-      "max": 8.3
+      "median": 5.64,
+      "p95": 7.38,
+      "max": 8.33
     }
   },
   "pointer_flight_lands": {
-    "orange_pixels_near_target": 543
+    "orange_pixels_near_target": 537
   },
   "popover_in_window_list": {
     "new_windows": []
@@ -222,12 +222,12 @@
     ],
     "fullscreen": false,
     "edges_found": {
-      "top": 0,
-      "bottom": 0,
-      "left": 0,
-      "right": 0
+      "top": 102,
+      "bottom": 102,
+      "left": 102,
+      "right": 102
     },
-    "unredirect_disabled": false
+    "unredirect_disabled": true
   },
   "ring_above_fullscreen": {
     "frame": [

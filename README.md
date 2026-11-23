@@ -12,7 +12,7 @@ It points at the actual button, checks you pressed the right one, and teases you
 [![Platform](https://img.shields.io/badge/platform-Linux%20%C2%B7%20GNOME%2050%20Wayland-e95420.svg)](docs/guides/getting-started.md#1-what-you-need)
 [![Status: pre-alpha](https://img.shields.io/badge/status-pre--alpha-f5a524.svg)](docs/PROGRESS.md)
 
-<img src="docs/assets/show-me-calculator.gif" alt="Ya-Bro walking through 7 × 6 in GNOME Calculator: the bro and a ring move key by key, teases a wrong key, explains it, then celebrates" width="560">
+<img src="docs/assets/show-me-calculator.gif" alt="Bro walking through 7 × 6 in GNOME Calculator: the bro and a ring move key by key, teases a wrong key, explains it, then celebrates" width="560">
 
 <sub>Real Calculator, real step loop, real overlay, recorded in an isolated headless GNOME session at 2× and replayed with a camera that zooms onto the bro's bubble so you can read it. The bro points at 7, you press 5 on purpose, it teases you, <b>Why?</b> explains the mistake, it forgives you, and it finishes happy.</sub>
 
@@ -20,11 +20,11 @@ It points at the actual button, checks you pressed the right one, and teases you
 
 ---
 
-*"Ya"* is the Arabic "O …!", as in calling a friend for help: **"Ya bro!"**
+The agent is called **Bro**. *"Ya"* is the Arabic "O …!", the way you call a friend over: you say **"Ya bro!"** and Bro comes. The project and repository are named Ya-Bro after that call.
 
 ## Why
 
-Guides and tutorials make you switch between a document and the app, and they go stale the moment a button moves. Ya-Bro works **in the app you are using**. You say what you want to do; it finds the real control on your screen, points at it, explains why, and waits. It reads the screen to know whether you did it, so it can move on, or say "that's not what I asked for".
+Guides and tutorials make you switch between a document and the app, and they go stale the moment a button moves. Bro works **in the app you are using**. You say what you want to do; it finds the real control on your screen, points at it, explains why, and waits. It reads the screen to know whether you did it, so it can move on, or say "that's not what I asked for".
 
 ## Meet the bro
 
@@ -48,6 +48,7 @@ One small character with six moods: it **points** at the control, **thinks** whe
 | Knowledge packs per app (format, loader, a workbench pack) | ✅ |
 | Bash hook that sees allowed commands finish (name, exit code, duration only) | ✅ |
 | Policy engine and redaction (risk tiers, secret scrubbing) | ✅ |
+| First-run consent (nothing is sent unless you say yes), a list of everything sent, state dots on the bro, `panic` and `forget` ([#25](https://github.com/AhmedYousriSobhi/ya-bro/issues/25)) | ✅ |
 | "You stuck, bro?" detector with back-off, scored on 62 replayed scenarios | ✅ core, 🚧 no offer bubble yet ([#9](https://github.com/AhmedYousriSobhi/ya-bro/issues/9)) |
 | Pointing and struggle evals you can run yourself (`broctl eval ...`) | ✅ |
 | Ask in plain words and let Claude write the plan | 🚧 next ([#5](https://github.com/AhmedYousriSobhi/ya-bro/issues/5)) |
@@ -84,18 +85,19 @@ Click the Calculator window and follow the ring. The full walkthrough, with what
 
 ## How it works
 
-![How Ya-Bro works: ask, point, you act, check, repeat](docs/assets/how-it-works.svg)
+![How Bro works: ask, point, you act, check, repeat](docs/assets/how-it-works.svg)
 
 A small **GNOME Shell extension** draws the ring, the bubble and the bro, and reports window positions. A Python core does the thinking: it finds the control through the accessibility tree (AT-SPI), places the ring using the window position from the extension, and checks the screen after each step. The core only talks to interfaces, so other desktops can be added later. Details: [SPEC](SPEC.md), [architecture decisions](docs/adr/README.md), [step loop (ADR-0026)](docs/adr/0026-show-me-step-loop.md).
 
 ## Safety and privacy
 
-- **One app at a time.** Default-deny: until you name an app, Ya-Bro sees nothing. `broctl apps list` and `revoke` show and undo it.
+- **One app at a time.** Default-deny: until you name an app, Bro sees nothing. `broctl apps list` and `revoke` show and undo it.
 - **Visible and interruptible.** Everything it does on screen is drawn, and Stop always works.
 - **Show-me only today.** It points; it never types or clicks for you.
 - **Screen text is data, not orders.** Words on a page never change what the bro does.
 - **Content-free monitoring.** Logs, the shell hook and the struggle detector keep event types and counts only, never typed text or screen content, and the detector is off for every app until you turn it on.
-- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Ya-Bro's code, not by the OS ([details](docs/guides/getting-started.md#9-privacy-what-ya-bro-can-see)).
+- **Kill switch and receipts.** `broctl panic` stops every Bro process even if the core is frozen, `broctl sent` lists each request that left your machine (kind and size, never content), `broctl forget` deletes what it logged, and dots under the bro show when it is watching, listening, sending or acting.
+- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's code, not by the OS ([details](docs/guides/getting-started.md#9-privacy-what-ya-bro-can-see)).
 
 ## The `broctl` command
 
@@ -109,6 +111,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 | **Knowledge packs** | `pack list \| check <dir>` |
 | **Terminal** | `hook install \| uninstall \| print \| status`, `shell watch` |
 | **Offers** | `struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` |
+| **Privacy** | `consent show \| revoke`, `sent` (what left this machine), `forget [--everything]`, `panic` (stop everything now) |
 | **Words** | `persona say \| list \| lint \| style` (preview and review what the bro says) |
 | **Measure** | `eval pointing`, `eval struggle [--sweep]` |
 
