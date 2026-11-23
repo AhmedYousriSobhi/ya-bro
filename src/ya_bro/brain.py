@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import re
 import urllib.error
 import urllib.parse
@@ -23,7 +22,7 @@ from collections.abc import Awaitable, Callable, Iterable
 from dataclasses import replace
 from pathlib import Path
 
-from ya_bro import persona, plans, policy, privacy, redact
+from ya_bro import keystore, persona, plans, policy, privacy, redact
 from ya_bro.packs import Pack
 from ya_bro.types import ElementRef, Expect, Plan, Risk, Step
 
@@ -54,19 +53,14 @@ class BrainError(RuntimeError):
 # --- the key -----------------------------------------------------------------------------------
 
 
-def load_key(env: dict[str, str] | None = None, dotenv: Path | None = None) -> str:
-    """`ANTHROPIC_API_KEY` from the environment, else from a `.env` file; empty when neither."""
-    env = os.environ if env is None else env
-    if env.get("ANTHROPIC_API_KEY"):
-        return env["ANTHROPIC_API_KEY"].strip()
-    try:
-        for line in (dotenv or Path(".env")).read_text().splitlines():
-            name, _, value = line.strip().partition("=")
-            if name.strip() == "ANTHROPIC_API_KEY" and value.strip():
-                return value.strip().strip("\"'")
-    except OSError:
-        pass
-    return ""
+def load_key(
+    env: dict[str, str] | None = None,
+    dotenv: Path | None = None,
+    store: keystore.Backend | None = None,
+) -> str:
+    """The API key: environment, then the keyring `store` (None skips it), then `.env`."""
+    found = keystore.find(env, dotenv, store)
+    return found.value if found else ""
 
 
 # --- the request -------------------------------------------------------------------------------
@@ -300,7 +294,7 @@ class ClaudeBrain:
         if not goal:
             raise BrainError("say what you want to do")
         if not self._key:
-            raise BrainError("no API key: set ANTHROPIC_API_KEY (or put it in .env)")
+            raise BrainError("no API key: run `broctl key set` (or set ANTHROPIC_API_KEY)")
         if not privacy.may_send("question"):
             raise BrainError("sending is off: run `broctl setup` (or `broctl consent show`)")
         if self.calls >= self._max_calls:

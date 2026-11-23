@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from ya_bro import keystore
 from ya_bro.platform import desktop_apps
 from ya_bro.platform import linux_setup as ls
 
@@ -36,8 +37,12 @@ def format_report(checks: list[ls.Check]) -> str:
     return "\n".join(lines)
 
 
-def doctor(env: dict[str, str] | None = None, runner: ls.Runner | None = None) -> tuple[str, int]:
-    checks = ls.run_all(env, runner or ls.run)
+def doctor(
+    env: dict[str, str] | None = None,
+    runner: ls.Runner | None = None,
+    store: keystore.Backend | None = None,
+) -> tuple[str, int]:
+    checks = ls.run_all(env, runner or ls.run, store)
     return format_report(checks), 1 if any(c.status == "fail" for c in checks) else 0
 
 
