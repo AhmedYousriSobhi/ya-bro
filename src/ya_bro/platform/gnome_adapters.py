@@ -52,6 +52,14 @@ class GnomeBridge:
         return next((w for w in await self.windows() if w.focused), None)
 
 
+def own_perceiver(bus: Gio.DBusConnection) -> int:
+    """Claim the read-only Perceiver role, so a watcher may list the allowed windows without owning
+    Core (which the extension reserves for whoever draws). Returns the id to hand to unown."""
+    return Gio.bus_own_name_on_connection(
+        bus, f"{PREFIX}.Perceiver", Gio.BusNameOwnerFlags.NONE, None, None
+    )
+
+
 class GnomeOverlay:
     """Overlay1 over D-Bus. Pings every 2 s (the extension hides after ~6 s of silence)."""
 

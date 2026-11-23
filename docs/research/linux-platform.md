@@ -176,6 +176,8 @@ Protocol versions seen (wayland-explorer dumps): KWin 6.7 v5, Hyprland 0.57 v5, 
 | `object:text-changed:insert` / `:delete` | typing then deleting (rough undo proxy) | Very high volume. Throttle. |
 | `object:property-change:accessible-name` | title changes (e.g. "*unsaved") | |
 
+**Measured on GNOME 50, GTK4 (#9, ADR-0010 "AT-SPI sources, measured"):** the `showing` row does not hold for GTK4 menus (the MenuButton sends `expanded` 1/0, item clicks send `expanded` 0 from the item only the first time), there is no `window:create` or `destroy` (a dialog is `children-changed` on the application node), GTK4/Adwaita alert dialogs are role `dialog`, and a GTK3 error dialog is `alert`. Event listeners receive every app's events, and need the default GLib main context pumped.
+
 Repeated undo can only be inferred, from text-changed deletes or from menu item activation via `object:state-changed:selected` (unverified for shortcuts). There is no key event.
 
 **Reliability caveats:**

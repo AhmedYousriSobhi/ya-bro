@@ -144,12 +144,32 @@ def _shell_watch(args: argparse.Namespace) -> int:
     return 0
 
 
+def _struggle_gui(seconds: int) -> int | None:
+    """Run the watch with the AT-SPI sources under the system python3; None when it has none."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        return None
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
+    try:
+        return subprocess.run(
+            [py, "-m", "ya_bro.platform.gnome_struggle", "--seconds", str(seconds)],
+            env=env,
+            check=False,
+        ).returncode
+    except KeyboardInterrupt:
+        return 130
+
+
 def _struggle(args: argparse.Namespace) -> int:
     import asyncio
     import contextlib
     import time
 
-    from ya_bro import struggle, struggle_host, targets
+    from ya_bro import packs, struggle, struggle_host, targets
     from ya_bro.shell_spool import ShellSpool
 
     det = struggle.Detector(time.time, struggle.default_state_path())
@@ -184,16 +204,27 @@ def _struggle(args: argparse.Namespace) -> int:
     found = targets.load_all()
     commands = struggle_host.command_apps(found)
     watched = [a for a in sorted(set(commands.values())) if det.is_watching(a)]
+    gui = [a for a in det._opted_in if det.is_watching(a) and a not in commands.values()]
+    if not watched and not gui:
+        print("watching nothing: `broctl struggle enable APP` first")
+        return 1
+    # Menus, dialogs, alerts and undo come from AT-SPI, so the bubble (and the printing watcher)
+    # run under the system python3; without PyGObject only commands and idle can be watched.
+    code = _struggle_gui(args.seconds) if args.print_only else _gnome_offers(args.seconds)
+    if code is not None:
+        return code
+    if gui:
+        print(
+            f"no AT-SPI here, so only commands and idle are watched, not: {', '.join(sorted(gui))}"
+        )
     if not watched:
-        print("watching nothing: `broctl struggle enable APP` for an allowed target first")
         return 1
     if not args.print_only:
-        rc = _gnome_offers(args.seconds)
-        if rc is not None:
-            return rc
         print("no bubble here (needs the system python3 with PyGObject); printing offers only")
     spool = ShellSpool()
     spool.open(sorted(c for c, a in commands.items() if a in watched))
+    packs_found, _problems = packs.load_all()
+    struggle_host.tune_from_packs(det, packs_found, commands, [])
     host = struggle_host.StruggleHost(
         det, commands, shell=spool, on_offer=lambda o: print(f"OFFER ({o.score:.1f}): {o.why}")
     )

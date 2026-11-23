@@ -23,10 +23,12 @@ import gi.events
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib  # noqa: E402
 
-from ya_bro import config, struggle, struggle_host, targets  # noqa: E402
+from ya_bro import config, packs, struggle, struggle_host, targets  # noqa: E402
 from ya_bro.offers import OfferBubble, Result  # noqa: E402
 from ya_bro.persona import Persona  # noqa: E402
-from ya_bro.platform.gnome_adapters import PREFIX, GnomeBridge, GnomeOverlay  # noqa: E402
+from ya_bro.platform.gnome_adapters import PREFIX, GnomeBridge, GnomeOverlay, own_perceiver  # noqa: E402
+from ya_bro.platform.gnome_atspi_events import AtspiUiEvents  # noqa: E402
+from ya_bro.platform.gnome_idle import GnomeIdleSource  # noqa: E402
 from ya_bro.shell_spool import ShellSpool  # noqa: E402
 from ya_bro.struggle import Offer  # noqa: E402
 
@@ -82,9 +84,10 @@ async def run(seconds: int) -> int:
     det = struggle.Detector(time.time, struggle.default_state_path())
     found = targets.load_all()
     commands = struggle_host.command_apps(found)
-    watched = [a for a in sorted(set(commands.values())) if det.is_watching(a)]
+    gui = sorted(a for a in det._opted_in if det.is_watching(a) and a not in commands.values())
+    watched = sorted({a for a in commands.values() if det.is_watching(a)} | set(gui))
     if not watched:
-        print("watching nothing: `broctl struggle enable APP` for an allowed target first")
+        print("watching nothing: `broctl struggle enable APP` first")
         return 1
     if owner_of(bus, f"{PREFIX}.Shell") == "":
         print("cannot reach the Bro extension; run: broctl doctor")
@@ -92,7 +95,16 @@ async def run(seconds: int) -> int:
     cfg = config.load()
     persona = Persona(humour=cfg.humour, locale="ar" if cfg.language == "ar" else "en",
                       less_chatty=cfg.less_chatty)  # fmt: skip
-    overlay = GnomeOverlay(bus, GnomeBridge(bus))
+    perceiver = own_perceiver(bus)  # read the allowed windows; Core is held only for a bubble
+    bridge = GnomeBridge(bus)
+    overlay = GnomeOverlay(bus, bridge)
+    packs_found, _problems = packs.load_all()
+    struggle_host.tune_from_packs(det, packs_found, commands, gui)
+
+    async def focused() -> str | None:
+        win = await bridge.focused_window()
+        return win.app_id if win else None
+
     lease = CoreLease(bus)
 
     def log(event: str, **fields) -> None:
@@ -114,9 +126,12 @@ async def run(seconds: int) -> int:
             lease.release()
 
     spool = ShellSpool()
-    spool.open(sorted(c for c, a in commands.items() if a in watched))
+    shell_cmds = sorted(c for c, a in commands.items() if det.is_watching(a))
+    if shell_cmds:
+        spool.open(shell_cmds)
     host = struggle_host.StruggleHost(
-        det, commands, shell=spool, sink=log, present=present,
+        det, commands, shell=spool if shell_cmds else None, sink=log, present=present,
+        idle=GnomeIdleSource(), focused_app=focused, ui=AtspiUiEvents(bridge, det.is_watching),
         on_offer=lambda o: print(f"OFFER ({o.score:.1f}): {o.why}", flush=True),
         busy=lambda: owner_of(bus, CORE) != "",
     )  # fmt: skip
@@ -128,8 +143,10 @@ async def run(seconds: int) -> int:
         with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(host.run(), seconds)
     finally:
-        spool.close()
+        if shell_cmds:
+            spool.close()
         lease.release()
+        Gio.bus_unown_name(perceiver)
     return 0
 
 

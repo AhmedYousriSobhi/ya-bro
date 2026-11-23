@@ -1,0 +1,40 @@
+{
+ "id": "atspi-menu-items-used",
+ "kind": "menu_thrash",
+ "source": "recorded",
+ "label": "not_struggle",
+ "app": "gtk-fixture",
+ "duration": 33.5,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "menu_shown",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_activated",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_hidden",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 2.4,
+   "kind": "menu_shown",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 3.5,
+   "kind": "menu_activated",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 3.5,
+   "kind": "menu_hidden",
+   "key": "k6e851d6ca3"
+  }
+ ]
+}
