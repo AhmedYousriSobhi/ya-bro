@@ -11,13 +11,18 @@ Legend: done · in progress · todo
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
-| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
+| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain built against a stand-in, live API untested), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23 (persona done; nothing generates lines and the offer bubble is not built yet), #24 (replay eval done: 62 scenarios, passes the gates) |
 | M7 MVP hardening | in progress | #25 (consent screen, sent ledger, forget, panic, state dots done; wiring to a real request waits for #5), #26 (licence gate done) |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #5 Claude brain
+Done: `ya_bro.brain` (`ClaudeBrain`, `FallbackBrain`, key loading, observation framing, plan validation), `broctl ask`, `[brain]` config, the consent gate and sent ledger now used by a real request path, 31 unit tests over a local HTTP stand-in, and a real-Calculator test in the isolated shell (an empty observation made it fail before I added the focus click).
+Decided: plain `urllib` instead of the `anthropic` SDK (ADR-0008 named the SDK): no new dependency or licence entry, and the whole wire format is visible in one file. Trade-off: no streaming and no SDK-side retries.
+Not done: **never run against the live API** (no key here), so the request shape, strict-tool schema, `tool_choice: auto` behaviour on the 5.5 models and cache hits are unverified; run `uv run pytest -m live` with a key. No streaming (first words in the bubble), no `revise_plan` or re-planning after a mismatch, no "why?" or chat routes, no struggle-offer wording, no screenshots, no libsecret key storage, `expect` predicates only role/name/text, the cost and latency budgets and the ten-task eval are unmeasured, and the plan is not shown for approval before it runs.
+
 ### 2026-11-23: #25 consent UX and kill switch
 Done: `ya_bro.privacy` (first-run consent screen in `broctl setup`, `consent.toml`, `may_send` gate; content-free sent ledger; `forget` with preview and `--everything`; 7-day log pruning; `panic` that SIGKILLs Bro's long-running processes), `broctl consent|sent|forget|panic`, state dots in the overlay (`indicators`, `SetIndicators`, `GetState`), `tests/conftest.py` isolating XDG dirs, 21 unit tests (panic on real processes including a SIGSTOPped one) and a real-frame test in the isolated shell (mutating the stylesheet makes it fail).
 Found: a `broctl struggle status` run by someone else matched a naive "broctl struggle" panic pattern; only the verbs that keep running are matched now.

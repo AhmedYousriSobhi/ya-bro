@@ -51,12 +51,12 @@ One small character with six moods: it **points** at the control, **thinks** whe
 | First-run consent (nothing is sent unless you say yes), a list of everything sent, state dots on the bro, `panic` and `forget` ([#25](https://github.com/AhmedYousriSobhi/ya-bro/issues/25)) | ✅ |
 | "You stuck, bro?" detector with back-off, scored on 62 replayed scenarios | ✅ core, 🚧 no offer bubble yet ([#9](https://github.com/AhmedYousriSobhi/ya-bro/issues/9)) |
 | Pointing and struggle evals you can run yourself (`broctl eval ...`) | ✅ |
-| Ask in plain words and let Claude write the plan | 🚧 next ([#5](https://github.com/AhmedYousriSobhi/ya-bro/issues/5)) |
+| Ask in plain words (`broctl ask`): a pack task if one fits, else Claude writes the plan | ✅ built and tested against a stand-in model; not yet run against the live API ([#5](https://github.com/AhmedYousriSobhi/ya-bro/issues/5)) |
 | "Do it for me" mode (the bro clicks, narrated) | 🚧 planned ([#27](https://github.com/AhmedYousriSobhi/ya-bro/issues/27)) |
 | Voice, English and Arabic | 🚧 planned ([#29](https://github.com/AhmedYousriSobhi/ya-bro/issues/29)) |
 | KDE Plasma | 🚧 planned ([#28](https://github.com/AhmedYousriSobhi/ya-bro/issues/28)) |
 
-Pre-alpha: the loop is real and tested, but plans are written by hand for now and only a few GTK apps are measured. The full picture, including what is *not* done, is in [docs/PROGRESS.md](docs/PROGRESS.md) and the [spec](SPEC.md).
+Pre-alpha: the loop is real and tested; plans come from packs, hand-written files, or Claude (that last path is not yet verified against the live API), and only a few GTK apps are measured. The full picture, including what is *not* done, is in [docs/PROGRESS.md](docs/PROGRESS.md) and the [spec](SPEC.md).
 
 ## Quick start
 
@@ -107,7 +107,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 |---|---|
 | **Set up** | `doctor` (checks the machine), `setup` (first run, asks before each change), `load` (loads the extension now) |
 | **What it may see** | `apps list \| available \| allow \| revoke`, `targets list \| allow \| revoke` (one web tool or command instead of a whole app) |
-| **Run a walkthrough** | `show <plan.toml>`, `point`, `scope watch` |
+| **Run a walkthrough** | `ask "what you want to do" [--dry]`, `show <plan.toml>`, `point`, `scope watch` |
 | **Knowledge packs** | `pack list \| check <dir>` |
 | **Terminal** | `hook install \| uninstall \| print \| status`, `shell watch` |
 | **Offers** | `struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` |
@@ -115,7 +115,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 | **Words** | `persona say \| list \| lint \| style` (preview and review what the bro says) |
 | **Measure** | `eval pointing`, `eval struggle [--sweep]` |
 
-Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. `ANTHROPIC_API_KEY` is only checked by `broctl doctor` (present or not, never its value); it is reserved for the Claude brain and unused today.
+Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. `ANTHROPIC_API_KEY` (in your environment or a git-ignored `.env`) is what `broctl ask` uses; `broctl doctor` only checks that it is present, never its value. `[brain] model = "..."` and `max_calls` in `config.toml` choose the model and cap the calls per task.
 
 ## Documentation
 

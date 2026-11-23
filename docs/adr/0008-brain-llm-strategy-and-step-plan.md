@@ -1,6 +1,6 @@
 # ADR-0008: Brain: LLM strategy, step-plan representation, re-planning, budgets
 
-- Status: Proposed
+- Status: Proposed (partly built in #5: one `plan` route over plain HTTPS instead of the SDK, see PROGRESS)
 - Date: 2026-11-20
 - Issue: #13 (implements #5)
 - Depends on: ADR-0003, ADR-0005, ADR-0007, ADR-0012

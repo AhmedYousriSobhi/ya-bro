@@ -429,6 +429,10 @@ def main(argv: list[str] | None = None) -> int:
         "--command", action="append", default=[], help="CLI command name, e.g. benchctl"
     )
     tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
+    ask = sub.add_parser("ask", help="say what you want to do; Bro plans it and walks you through")
+    ask.add_argument("goal", help="in your own words, e.g. 'multiply 7 by 6'")
+    ask.add_argument("--app", default="", help="app id (default: the focused allowed window)")
+    ask.add_argument("--dry", action="store_true", help="print the plan and stop")
     show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
     show.add_argument("plan", help="plan file (TOML), see docs/DEVELOPMENT.md")
     show.add_argument("--app", default="", help="app id (default: the focused allowed window)")
@@ -536,6 +540,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.noun == "show":
         extra = ["--app", args.app] if args.app else []
         return _gnome_demo("show", 0, show=[str(args.plan), *extra])
+    if args.noun == "ask":
+        extra = ["--app", args.app] if args.app else []
+        return _gnome_demo("show", 0, show=["--ask", args.goal, *extra, *(["--dry"] * args.dry)])
     if args.noun == "scope":
         return _gnome_demo("watch", args.seconds)
     if args.noun == "apps":
