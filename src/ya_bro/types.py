@@ -66,6 +66,9 @@ class Step:
     risk: Risk = Risk.R0
     expect: Expect | None = None
     why: str = ""
+    command: str = (
+        ""  # a shell command the user is to run; shown as a snippet (see ya_bro.shell_command)
+    )
 
 
 @dataclass(frozen=True, slots=True)

@@ -486,3 +486,24 @@ text = "That didn't work, so it's yours: I'll point and you press it."
 moment = "act_failed"
 humour = 0
 text = "I couldn't do that one. Over to you."
+
+[[line]]
+moment = "copied"
+humour = 0
+text = "Copied. Paste it in your terminal with Ctrl+Shift+V."
+
+[[line]]
+moment = "written"
+humour = 0
+text = "It's at your prompt. Check it, then press Enter."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+requires = ["got"]
+text = "That ended with code {got}. Run it again, or press Next to skip."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+text = "That ended with an error. Run it again, or press Next to skip."

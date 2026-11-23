@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #115 terminal companion
+Done: plan `command`, snippet and Copy/Write it buttons (extension, GNOME and docked overlays), hook idle marker and `bind -x` insert, guarded `TerminalWriter`, `CommandWatch` auto-advance, hover beside an allowed terminal, background companion; 7 real-pty tests with mutations, 7 loop tests, and a real VTE run in the isolated shell with screenshots.
+Not done: the live desktop (needs `broctl load` for the new extension), zsh and fish, Ptyxis and Console, scoping the bubble by terminal title (ADR-0029 open question), typing without the hook, a mutation run of the real-frame test, Write it with two idle terminals.
+
 ### 2026-11-23: running Bro on workbench
 Done: `broctl ask GOAL --pack workbench` (plain window, pack task, user presses Next; real-frame test) and `docs/guides/workbench.md`. Found: there was no way to run the pack at all: the workbench pack matches only `argv0`, so a terminal window never selects it, and `broctl show` needs an allowed focused window, which a CLI tool never has.
 Not done: pointing at web page elements (#31, selectors), explaining an error code when the user accepts the stuck offer, Do-it on terminals, zsh/fish, Firefox, the web token path was not re-run on the live desktop here (it was verified with real Chrome in #61).

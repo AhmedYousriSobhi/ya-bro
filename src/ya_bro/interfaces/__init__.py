@@ -50,8 +50,10 @@ class Overlay(Protocol):
         bubble_text: str,
         buttons: tuple[str, ...] = (),
         mood: str = "",
+        snippet: str = "",
     ) -> None:
-        """mood: how the bro looks (idle, pointing, thinking, happy, teasing, quiet); "" lets the
+        """snippet: a command, monospace and left to right (the copy and write buttons use it).
+        mood: how the bro looks (idle, pointing, thinking, happy, teasing, quiet); "" lets the
         overlay choose (pointing when there is a target, else idle)."""
         ...
 

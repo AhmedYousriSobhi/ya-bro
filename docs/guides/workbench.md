@@ -8,21 +8,38 @@ Do [Getting started](getting-started.md) first (extension loaded, `broctl doctor
 
 | You want | Works | How |
 |---|---|---|
-| Bro walks you through a workbench task (start the cluster, run a scenario, clear faults, export a report) | yes | section 1 |
+| Bro beside your terminal with the command to type: Copy, or Write it at your prompt | yes (bash, VTE terminals) | section 1 |
 | Bro explains a failing `benchctl` command and offers help when you are stuck | partly | section 2 |
 | Bro shows the workbench web page only while that tab is active | yes | section 3 |
 | Bro points at buttons on the workbench web page | no | needs the page to report its own state (workbench #31) or Chromium's accessibility tree |
-| Bro types or runs `benchctl` for you | no | Do-it on terminals is not built; the bro never runs a command without you |
+| Bro runs `benchctl` for you | no, by design | Write it only fills your prompt; you press Enter |
 
-## 1. Walk through a task (no extension, no app to allow)
+## 1. Bro beside your terminal (the main way)
+
+One-time setup (needs the extension loaded, see getting started; **the extension changed, so run `broctl load` again or log out and in**):
+
+```bash
+uv run broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
+uv run broctl apps allow <your terminal's id>   # e.g. org.gnome.Ptyxis; lets Bro place its bubble beside it
+```
+
+Then, in that terminal:
 
 ```bash
 uv run broctl ask "start the cluster" --pack workbench
 ```
 
-A small Bro window opens with one step at a time ("(1/3) In the workbench folder, run: ./scripts/benchctl plan"). **You** run the command in your terminal, then press **Next** in the Bro window. **Why?** explains the step, **Stop** (or Esc) ends it. Nothing is read from your screen and nothing is sent anywhere: the steps come from the pack.
+The prompt comes back at once and Bro's bubble appears at the terminal's top-right with one step at a time: a sentence, and the command in a code box. Buttons:
 
-Tasks in the pack: `start-cluster`, `run-scenario`, `clear-faults`, `export-test-report` (`broctl pack list`). Say it in plain words ("run a scenario", "clear the faults"); the best keyword match wins. With no goal (`broctl ask --pack workbench`) a window asks you to type it. Words the pack has no task for fail with the list of tasks; Claude is not used in this mode.
+| Button | What it does |
+|---|---|
+| **Copy** | puts exactly that command on the clipboard; paste with Ctrl+Shift+V |
+| **Write it** | types the command at your prompt for you. It never presses Enter: check it, press Enter yourself |
+| **Next** / **Why?** / **Stop** | skip the step / explain it / end (Esc-style stop key also works) |
+
+When you run the command, Bro sees it finish (name and exit code only) and moves to the next step by itself; if it fails it says so and waits for you to run it again. **Write it** only appears when your terminal is at an empty idle prompt with the hook installed; it refuses (and says why) when text is already at your prompt, when something is running, or for a destructive command (those are yours to type; Copy still works). Without the allowed terminal Bro shows the same bubble in its own small window.
+
+Tasks: `start-cluster`, `run-scenario`, `clear-faults`, `export-test-report` (`broctl pack list`). Say it in plain words; the best keyword match wins. Without a goal a window asks you. `--wait` keeps Bro in the foreground; `broctl panic` stops it.
 
 ## 2. Failing `benchctl` commands (shell hook)
 

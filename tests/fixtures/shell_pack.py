@@ -53,12 +53,13 @@ async def main():
     sh = Shell()
     sh.start_input()
     overlay = DockedOverlay()
-    shown = []
+    shown, snippets = [], []
     real_show = overlay.show_step
 
-    async def spy(target, text, buttons=(), mood=""):
+    async def spy(target, text, buttons=(), mood="", snippet=""):
         shown.append(text)
-        await real_show(target, text, buttons, mood)
+        snippets.append(snippet)
+        await real_show(target, text, buttons, mood, snippet)
 
     overlay.show_step = spy
     task = asyncio.create_task(run_pack("workbench", "start the cluster", overlay))
@@ -72,7 +73,9 @@ async def main():
         )
         await click_next(sh, overlay)
     check("the plan finishes after the third Next", await asyncio.wait_for(task, 30) == 0)
-    check("the steps are the pack's own", any("benchctl plan" in t for t in shown), str(shown[:1]))
+    check(
+        "the commands are the pack's own", "./scripts/benchctl plan" in snippets, str(snippets[:1])
+    )
 
 
 asyncio.run(main(), loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop)

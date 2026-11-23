@@ -10,6 +10,8 @@ _YB_HOOK=1
 
 _yb_tty=$(tty 2>/dev/null) || _yb_tty=
 _yb_tty=${_yb_tty#/dev/}
+_yb_dir=${XDG_RUNTIME_DIR:-/nonexistent}/ya-bro
+_yb_mark=$_yb_dir/prompt.${_yb_tty//\//_}   # "idle|busy PID" for this terminal (ADR-0029)
 _yb_armed=
 _yb_ran=
 _yb_a0=
@@ -30,6 +32,7 @@ _yb_debug() {
   [[ -n $_yb_armed ]] || return 0
   [[ $BASH_COMMAND == _yb_* ]] && return 0
   _yb_armed=
+  [[ -d $_yb_dir ]] && printf 'busy %s\n' "$$" >"$_yb_mark" 2>/dev/null
   _yb_ran=1
   _yb_t0=${EPOCHREALTIME/./}
   _yb_a0=${BASH_COMMAND%% *}
@@ -51,7 +54,31 @@ _yb_post() {
 }
 
 # Last in PROMPT_COMMAND: from here on the next simple command is the user's.
-_yb_arm() { _yb_armed=1; }
+_yb_arm() {
+  _yb_armed=1
+  [[ -d $_yb_dir ]] && printf 'idle %s\n' "$$" >"$_yb_mark" 2>/dev/null
+  return 0
+}
+
+# "Write it" (ADR-0029): core asks the terminal for a status report (ESC [ 5 n); the terminal answers
+# ESC [ 0 n on our input, which lands here. The suggestion is put at the prompt only when the line is
+# empty, and Enter is never pressed. The outcome goes to a result file core reads.
+_yb_insert() {
+  local f=$_yb_dir/suggest.${_yb_tty//\//_} s= r=nothing
+  [[ -r $f ]] && IFS= read -r s <"$f"
+  if [[ -n $s ]]; then
+    if [[ -z $READLINE_LINE ]]; then
+      READLINE_LINE=$s
+      READLINE_POINT=${#s}
+      r=ok
+    else
+      r=line-not-empty
+    fi
+    : >"$f"
+  fi
+  printf '%s\n' "$r" >"$f.result" 2>/dev/null
+}
+bind -x '"\e[0n": _yb_insert' 2>/dev/null
 
 # An existing DEBUG trap must keep working, but `trap -p DEBUG` shows nothing inside a sourced file
 # or a function, so the first prompt reads it from the top level (this string is eval'd there).

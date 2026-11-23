@@ -19,7 +19,14 @@ from ya_bro.persona import is_rtl  # noqa: E402
 from ya_bro.types import Rect  # noqa: E402
 
 APP_ID = "io.github.ahmedyousrisobhi.YaBro.Docked"
-LABELS = {"next": "Next", "repeat": "Repeat", "why": "Why?", "stop": "Stop"}
+LABELS = {
+    "next": "Next",
+    "repeat": "Repeat",
+    "why": "Why?",
+    "stop": "Stop",
+    "copy": "Copy",
+    "write": "Write it",
+}
 
 
 class DockedOverlay:
@@ -29,15 +36,21 @@ class DockedOverlay:
         self.indicators: tuple[str, ...] = ("watching",)
         self.last_target: Rect | None = None
         self._pump: asyncio.Task | None = None
+        self._copyable = ""
         self._win = Gtk.Window(title="Bro", resizable=False, default_width=360)
         self._win.set_hide_on_close(True)
         self._label = Gtk.Label(wrap=True, xalign=0, max_width_chars=44, selectable=False)
         self._label.set_margin_start(12)
         self._label.set_margin_end(12)
         self._label.set_margin_top(12)
+        self._snippet = Gtk.Label(xalign=0, selectable=True, visible=False, wrap=False)
+        self._snippet.add_css_class("monospace")
+        self._snippet.set_margin_start(12)
+        self._snippet.set_margin_end(12)
         self._row = Gtk.Box(spacing=6, margin_start=12, margin_end=12, margin_bottom=12)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         box.append(self._label)
+        box.append(self._snippet)
         box.append(self._row)
         self._win.set_child(box)
         keys = Gtk.EventControllerKey()
@@ -55,6 +68,13 @@ class DockedOverlay:
         self._queue.put_nowait("stop")  # closing the window counts as stop
         return False
 
+    def _clicked(self, name: str) -> None:
+        if name == "copy" and self._copyable:
+            self._win.get_clipboard().set(
+                self._copyable
+            )  # the window has focus: it was just clicked
+        self._queue.put_nowait(name)
+
     def _buttons(self, names: tuple[str, ...]) -> None:
         child = self._row.get_first_child()
         while child is not None:
@@ -63,7 +83,7 @@ class DockedOverlay:
             child = nxt
         for name in names:
             b = Gtk.Button(label=LABELS.get(name, name))
-            b.connect("clicked", lambda _b, n=name: self._queue.put_nowait(n))
+            b.connect("clicked", lambda _b, n=name: self._clicked(n))
             self._row.append(b)
 
     async def show_step(
@@ -72,9 +92,14 @@ class DockedOverlay:
         bubble_text: str,
         buttons: tuple[str, ...] = (),
         mood: str = "",
+        snippet: str = "",
     ) -> None:
         self.last_target = target
         self._label.set_text(bubble_text)
+        self._snippet.set_text(snippet)
+        self._snippet.set_direction(Gtk.TextDirection.LTR)
+        self._snippet.set_visible(bool(snippet))
+        self._copyable = snippet
         direction = Gtk.TextDirection.RTL if is_rtl(bubble_text) else Gtk.TextDirection.LTR
         self._win.set_direction(direction)
         self._buttons(buttons)

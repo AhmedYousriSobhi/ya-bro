@@ -63,7 +63,10 @@ def own_perceiver(bus: Gio.DBusConnection) -> int:
 class GnomeOverlay:
     """Overlay1 over D-Bus. Pings every 2 s (the extension hides after ~6 s of silence)."""
 
-    def __init__(self, bus: Gio.DBusConnection, bridge: GnomeBridge, avatar: bool = True) -> None:
+    def __init__(
+        self, bus: Gio.DBusConnection, bridge: GnomeBridge, avatar: bool = True, corner: str = ""
+    ) -> None:
+        self._corner = corner  # "top-right": park a bubble-only step out of a terminal's way
         self._bus = bus
         self._bridge = bridge
         self._avatar = avatar
@@ -99,6 +102,7 @@ class GnomeOverlay:
         bubble_text: str,
         buttons: tuple[str, ...] = (),
         mood: str = "",
+        snippet: str = "",
     ) -> None:
         self.last_target = target
         args = {
@@ -112,6 +116,8 @@ class GnomeOverlay:
         }
         if mood:
             args["mood"] = GLib.Variant("s", mood)
+        if snippet:
+            args["snippet"] = GLib.Variant("s", snippet)
         if target:
             args["target"] = GLib.Variant("(iiii)", (target.x, target.y, target.w, target.h))
         else:
@@ -119,7 +125,8 @@ class GnomeOverlay:
             win = next((w for w in self._bridge.raw_windows() if w["focused"]), None)
             if win:
                 x, y, w, _h = win["frame"]
-                args["bubble_at"] = GLib.Variant("(ii)", (x + 20, y + 20))
+                at = (x + w - 410, y + 48) if self._corner == "top-right" else (x + 20, y + 20)
+                args["bubble_at"] = GLib.Variant("(ii)", at)
         _call(self._bus, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", (args,)))
         if self._ping is None:
             self._ping = asyncio.get_running_loop().create_task(self._keepalive())
