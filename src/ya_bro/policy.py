@@ -8,15 +8,23 @@ command list). Nothing from screen text can lower it.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 
+from ya_bro.packs import Pack
 from ya_bro.types import Mode, PolicyDecision, Risk, Step
 
-# Stems, matched at the start of a word after lower-casing and Arabic letter folding.
-_R3_STEMS = (
-    "delet", "remov", "erase", "wipe", "send", "publish", "buy", "purchas", "pay",
-    "checkout", "sudo", "uninstall", "factory",
-    "حذف", "ازال", "مسح", "ارسال", "نشر", "شراء", "دفع", "شري",
-)  # fmt: skip
+# Whole words (lower-case, Arabic letters folded): exact forms, not stems, so `Payload` and
+# `Position` stay R0. A miss only costs a missed warning; a pack can still declare the element.
+_R3_WORDS = frozenset(
+    """
+    delete deletes deleting deleted remove removes removing removed erase erasing wipe wiping
+    destroy purge trash discard terminate revoke uninstall
+    send sends sending sent reply forward publish publishing post submit share
+    buy buying purchase purchasing pay paying payment payments checkout subscribe donate
+    transfer withdraw sudo
+    حذف احذف ازاله مسح امسح ارسال ارسل رد نشر انشر شراء اشتري دفع ادفع تحويل سحب اشتراك
+    """.split()
+)
 _SECRET_ROLES = frozenset({"password text", "password_text"})
 _FOLD = str.maketrans({"إ": "ا", "أ": "ا", "آ": "ا", "ى": "ي", "ة": "ه"})
 _WORD = re.compile(r"[^\W\d_]+", re.UNICODE)
@@ -40,12 +48,21 @@ _DESTRUCTIVE = tuple(
 )
 
 
+def _variants(word: str) -> set[str]:
+    """The word, and it without Arabic's article or conjunction (`الحذف`, `والحذف`)."""
+    out = {word}
+    for prefix in ("وال", "ال", "و"):
+        if word.startswith(prefix) and len(word) > len(prefix) + 1:
+            out.add(word[len(prefix) :])
+    return out
+
+
 def name_risk(role: str, name: str) -> Risk:
     """Risk from an element's role and name alone."""
     if role.lower() in _SECRET_ROLES:
         return Risk.R3
     words = _WORD.findall(name.lower().translate(_FOLD))
-    return Risk.R3 if any(w.startswith(s) for w in words for s in _R3_STEMS) else Risk.R0
+    return Risk.R3 if any(v in _R3_WORDS for w in words for v in _variants(w)) else Risk.R0
 
 
 def command_risk(command: str) -> Risk:
@@ -63,14 +80,32 @@ def effective_risk(step: Step, pack_risk: Risk = Risk.R0, command: str = "") -> 
 
 
 class LocalPolicy:
-    """Decides each step. `do_it` stays off until the actuator exists (#27)."""
+    """Decides each step. `do_it` stays off until the actuator exists (#27).
 
-    def __init__(self, do_it: bool = False) -> None:
+    `packs` may raise an element's risk or mark it secret; they never lower anything (ADR-0012 §9).
+    """
+
+    def __init__(self, do_it: bool = False, packs: Iterable[Pack] = ()) -> None:
         self._do_it = do_it
+        self._packs = tuple(packs)
 
-    def check(self, step: Step, mode: Mode, pack_risk: Risk = Risk.R0) -> PolicyDecision:
-        risk = effective_risk(step, pack_risk)
-        secret = step.target is not None and step.target.role.lower() in _SECRET_ROLES
+    def _from_packs(self, step: Step) -> tuple[Risk, bool]:
+        t = step.target
+        if t is None:
+            return Risk.R0, False
+        risk, secret = Risk.R0, False
+        for pack in self._packs:
+            if pack.matches(app_id=t.app_id):
+                risk = max(risk, pack.risk_of(t.role, t.name))
+                secret = secret or pack.is_secret(t.role, t.name)
+        return Risk(risk), secret
+
+    def check(self, step: Step, mode: Mode) -> PolicyDecision:
+        pack_risk, pack_secret = self._from_packs(step)
+        risk = effective_risk(step, Risk.R3 if pack_secret else pack_risk)
+        secret = pack_secret or (
+            step.target is not None and step.target.role.lower() in _SECRET_ROLES
+        )
         if mode is Mode.SHOW_ME:
             if risk is Risk.R3:
                 return PolicyDecision(True, needs_confirmation=True, reason="the user's own click")

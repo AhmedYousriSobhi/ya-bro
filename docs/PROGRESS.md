@@ -19,8 +19,8 @@ Legend: done · in progress · todo
 
 ## Log
 ### 2026-11-23: #20 policy engine and redaction
-Done: `policy.py` (`effective_risk` = max of planner, pack and heuristics; `LocalPolicy` for Show-me and a switched-off Do-it; `command_risk`), `redact.py` (9 secret shapes, counts per kind, the value never kept), 45 unit tests including a no-R3-without-confirmation property over every mode.
-Not done: nothing calls `redact` yet (no LLM request exists; the bubble's echoed screen text is not redacted); the deny-list is stem-based so it over-flags (`Payload` is R3) and misses synonyms; the ADR's 200+ action table and 50-page injection eval; pack-declared risk and secret flags (no pack field yet); terminal commands reach `command_risk` only once #21 exists; the `Policy` protocol has no `pack_risk` argument.
+Done: `policy.py` (`effective_risk` = max of planner, pack and heuristics; whole-word EN and AR deny-list, so `Payload` is R0; `LocalPolicy` for Show-me and a switched-off Do-it; `command_risk`), pack-declared element risk and secrets (`[[element]]`, ADR-0027), `redact.py` (9 secret shapes, counts per kind, the value never kept) applied to the echoed screen text in `tone.snippet`, the ADR-0014 tables: 177 names x 2 modes and 50 injected texts, and a no-R3-without-confirmation check over every mode.
+Not done: no LLM request exists, so nothing else calls `redact` (log records are already free-text-free); the deny-list is a word list and still misses synonyms and phrases ("place order"); the injection eval covers the policy and redaction only, not model behaviour or real pages and terminals; terminal commands reach `command_risk` only once #21 exists; no pack ships `[[element]]` rows yet; the 177 names and 50 texts are written by us, not an independent corpus.
 
 ### 2026-11-23: #22 workbench pack
 Done: `packs/workbench` (match on `benchctl`, knowledge from AGENTS.md, four narration-only terminal tasks, 32 `fixits.toml` rows copied from ERROR-CODES.md contract 2.5); loader reads and checks `fixits.toml`; 8 new tests.

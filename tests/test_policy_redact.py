@@ -1,8 +1,13 @@
+import tomllib
+from pathlib import Path
+
 import pytest
 
+from ya_bro import packs as packs_mod
+from ya_bro.packs import Pack, PackElement
 from ya_bro.policy import LocalPolicy, ShowMePolicy, command_risk, effective_risk, name_risk
 from ya_bro.redact import redact
-from ya_bro.types import ElementRef, Mode, Risk, Step
+from ya_bro.types import ElementRef, Mode, PolicyDecision, Risk, Step
 
 
 def step(name="", role="button", risk=Risk.R0):
@@ -140,3 +145,124 @@ def test_leaves_ordinary_text_alone():
 def test_never_echoes_the_secret_in_the_counts():
     out = redact(FAKE["aws-key"])
     assert FAKE["aws-key"] not in str(out)
+
+
+# ---- the ADR-0014 validation tables --------------------------------------------------------
+
+FIX = Path(__file__).parent / "fixtures"
+NAMES = tomllib.loads((FIX / "policy_names.toml").read_text())
+INJECTIONS = tomllib.loads((FIX / "injections.toml").read_text())["texts"]
+
+
+def expected(tier_is_r3: bool, mode: Mode):
+    """The ADR's rules written out independently of the implementation: (allowed, confirm)."""
+    if mode is Mode.SHOW_ME:
+        return (True, tier_is_r3)
+    return (False, True) if tier_is_r3 else (True, False)
+
+
+def test_action_table_has_over_200_decisions_in_english_and_arabic():
+    names = [(n, False) for n in NAMES["r0"]] + [(n, True) for n in NAMES["r3"]]
+    live = LocalPolicy(do_it=True)
+    count = 0
+    for name, is_r3 in names:
+        for mode in (Mode.SHOW_ME, Mode.DO_IT):
+            d = live.check(step(name), mode)
+            assert (d.allowed, d.needs_confirmation) == expected(is_r3, mode), (name, mode)
+            count += 1
+    assert count >= 200
+    assert any("ا" <= c <= "ي" for n, _ in names for c in n)
+
+
+def test_no_r3_name_is_ever_allowed_in_do_it():
+    live = LocalPolicy(do_it=True)
+    for name in NAMES["r3"]:
+        assert not live.check(step(name), Mode.DO_IT).allowed, name
+
+
+@pytest.mark.parametrize("text", INJECTIONS)
+def test_injected_text_changes_nothing(text):
+    assert len(INJECTIONS) == 50
+    live = LocalPolicy(do_it=True)
+    for mode in Mode:
+        for target in ("Delete", "Next", "إرسال"):
+            plain = live.check(Step("i", "x", ElementRef("a", "button", target)), mode)
+            hostile = live.check(
+                Step(
+                    text,
+                    text,
+                    ElementRef("a", "button", target),
+                    expected=text,
+                    why=text,
+                    risk=Risk.R0,
+                ),
+                mode,
+            )
+            assert hostile == plain
+    # And the R3 outcome is unchanged: it is still the user's own click.
+    d = live.check(Step(text, text, ElementRef("a", "button", "Delete")), Mode.DO_IT)
+    assert not d.allowed and d.needs_confirmation
+
+
+def test_injected_text_is_inert_in_redaction():
+    for text in INJECTIONS:
+        assert redact(text).text == text
+
+
+# ---- pack-declared risk and secrets ---------------------------------------------------------
+
+
+def pack(*elements):
+    return Pack("p", "P", "1.0.0", Path("."), match={"desktop_ids": ("app",)}, elements=elements)
+
+
+def test_pack_can_raise_risk_never_lower():
+    p = LocalPolicy(do_it=True, packs=[pack(PackElement("button", "Apply", Risk.R2))])
+    d = p.check(step("Apply"), Mode.DO_IT)
+    assert d.allowed and d.needs_confirmation
+    lower = LocalPolicy(do_it=True, packs=[pack(PackElement("button", "Delete", Risk.R0, True))])
+    assert not lower.check(step("Delete"), Mode.DO_IT).allowed  # the heuristic still wins
+    only_r0 = LocalPolicy(do_it=True, packs=[pack(PackElement("button", "Apply"))])
+    assert only_r0.check(step("Apply"), Mode.DO_IT).allowed
+
+
+def test_pack_secret_field_is_never_touched_and_pointing_is_confirmed():
+    p = LocalPolicy(do_it=True, packs=[pack(PackElement("text", "API token", secret=True))])
+    s = step("API token", role="text")
+    d = p.check(s, Mode.DO_IT)
+    assert not d.allowed and "password" in d.reason
+    shown = p.check(s, Mode.SHOW_ME)
+    assert shown.allowed and shown.needs_confirmation
+
+
+def test_pack_applies_only_to_its_own_app():
+    other = Step("i", "n", ElementRef("elsewhere", "button", "Apply"))
+    p = LocalPolicy(do_it=True, packs=[pack(PackElement("button", "Apply", Risk.R2))])
+    assert p.check(other, Mode.DO_IT) == PolicyDecision(True)
+
+
+def test_pack_element_loading(tmp_path):
+    root = tmp_path / "demo"
+    root.mkdir()
+    body = (
+        '[pack]\nid="demo"\nname="D"\nversion="1.0.0"\n[match]\ndesktop_ids=["app"]\n'
+        '[[element]]\nrole="button"\nname="Apply"\nrisk=2\n'
+        '[[element]]\nrole="text"\nsecret=true\n'
+    )
+    (root / "pack.toml").write_text(body)
+    loaded = packs_mod.load(root)
+    assert loaded.risk_of("Button", "apply") is Risk.R2
+    assert loaded.risk_of("button", "Other") is Risk.R0
+    assert loaded.is_secret("text", "anything") and not loaded.is_secret("button", "Apply")
+    for bad in ('role="button"\nrisk=9', 'role="button"', 'name="x"\nrisk=1'):
+        (root / "pack.toml").write_text(body.split("[[element]]")[0] + "[[element]]\n" + bad)
+        with pytest.raises(packs_mod.PackError, match="element 1"):
+            packs_mod.load(root)
+
+
+def test_echoed_screen_text_is_redacted_before_it_is_cut():
+    from ya_bro.tone import snippet
+
+    secret = "ghp_" + "a1B2c3D4e5F6g7H8i9J0" * 2
+    out = snippet(f"token {secret} end")
+    assert secret[:8] not in out and "ghp_" not in out
