@@ -1,0 +1,59 @@
+# Licence policy for dependencies (ADR-0020). Written by hand after reading each licence.
+# scripts/check_licences.py fails on any package in the dependency closure that is not listed
+# here, on strong copyleft (GPL, AGPL) in anything that ships, and when an installed package's
+# own metadata says something stronger than this file does.
+#
+# scope: runtime (always installed), optional (an extra), dev (developer tools, never shipped),
+#        tests-only (may be copyleft because it is never shipped or imported by src/)
+# LGPL is allowed: GTK, PyGObject and pycairo are used dynamically and unmodified.
+
+[packages.pygobject]
+license = "LGPL-2.1-or-later"
+scope = "optional"
+
+[packages.pycairo]
+license = "LGPL-2.1-only OR MPL-1.1"
+scope = "optional"
+
+[packages.pytest]
+license = "MIT"
+scope = "dev"
+
+[packages.pytest-asyncio]
+license = "Apache-2.0"
+scope = "dev"
+
+[packages.ruff]
+license = "MIT"
+scope = "dev"
+
+[packages.iniconfig]
+license = "MIT"
+scope = "dev"
+
+[packages.packaging]
+license = "Apache-2.0 OR BSD-2-Clause"
+scope = "dev"
+
+[packages.pluggy]
+license = "MIT"
+scope = "dev"
+
+[packages.pygments]
+license = "BSD-2-Clause"
+scope = "dev"
+
+[packages.colorama]
+license = "BSD-3-Clause"
+scope = "dev"
+
+[packages.typing-extensions]
+license = "PSF-2.0"
+scope = "dev"
+
+# Never in the runtime or optional closure, by name, whatever its metadata says (ADR-0020 §2):
+# GPL/AGPL programs run only as separate processes the user installs, never imported or bundled.
+[forbidden]
+names = ["piper-tts", "piper1-gpl", "espeak-ng", "espeakng", "ydotool", "dogtail", "omniparser"]
+# Importing these from src/ is also refused.
+modules = ["piper", "espeakng", "ydotool", "dogtail"]

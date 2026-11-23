@@ -27,6 +27,7 @@ MAX_KNOWLEDGE_CHARS = 16_000  # about 4k tokens, ADR-0012 §4
 TRUST = ("data-only", "hooks")
 MATCH_KEYS = ("desktop_ids", "window_classes", "argv0", "urls")
 _ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}")
+_LICENCE = re.compile(r"[A-Za-z0-9.+() -]{1,80}")
 _CODE = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+")
 _VERSION = re.compile(r"\d+\.\d+\.\d+")
 
@@ -72,6 +73,7 @@ class Pack:
     locales: tuple[str, ...] = ("en",)
     match: dict[str, tuple[str, ...]] = field(default_factory=dict)
     sources: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    license: str = ""
     knowledge: str = ""
     tasks: dict[str, Path] = field(default_factory=dict)
     fixits: dict[str, Fixit] = field(default_factory=dict)
@@ -213,6 +215,9 @@ def load(root: Path) -> Pack:
     if trust not in TRUST:
         raise PackError(f"pack.trust must be one of {', '.join(TRUST)}")
     locales = _strings(head, "locales", "pack") or ("en",)
+    licence = head.get("license", "")
+    if not isinstance(licence, str) or (licence and not _LICENCE.fullmatch(licence)):
+        raise PackError("pack.license must be an SPDX identifier or expression, like MIT")
 
     raw_match = data.get("match", {})
     unknown = set(raw_match) - set(MATCH_KEYS)
@@ -246,8 +251,8 @@ def load(root: Path) -> Pack:
     elements = _elements(data.get("element", []))
     weights, counts = _signals(root)
     return Pack(
-        pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits,
-        elements, weights, counts,
+        pid, name, version, root, trust, locales, match, sources, licence, knowledge, tasks,
+        fixits, elements, weights, counts,
     )  # fmt: skip
 
 

@@ -32,6 +32,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)
 - `shell/` — the bash hook (`ya-bro.bash`, ADR-0021); core side in `src/ya_bro/shell_spool.py` and `terminal.py`
 - `scripts/dev/headless-shell.sh` — isolated headless gnome-shell for extension tests
+- `scripts/check_licences.py` — the licence gate (policy in `docs/licences.toml`, notes in `docs/LICENCES.md`); a new dependency needs a policy entry
 - `scripts/check.sh` — full validation; run after every edit and before every PR
 - `docs/PROGRESS.md` — status sheet, update in every PR; `docs/DEVELOPMENT.md` — setup and layout
 

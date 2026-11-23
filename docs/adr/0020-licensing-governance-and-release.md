@@ -8,6 +8,12 @@
 ## Update 2026-11-22: MIT only
 The maintainer chose **MIT** for the repository, instead of the dual MIT OR Apache-2.0 recommended below. A single `LICENSE` file (MIT) is in the repository root, `pyproject.toml` says `license = "MIT"`, and SPDX headers, when added, read `SPDX-License-Identifier: MIT`. What MIT gives up compared with the recommendation: no express patent grant. The dependency analysis below is unaffected (every core dependency allows an MIT outbound licence). Issue #26 (licence files and compliance gate) still covers the CI check.
 
+## Implemented (#26, 2026-11-23)
+- `LICENSE` (MIT) and `pyproject.toml` were already in place (#80). New: `scripts/check_licences.py`, run by `scripts/check.sh` and in the CI draft, with the hand-written policy `docs/licences.toml` and the human-readable `docs/LICENCES.md`. It fails closed on anything not listed, on strong copyleft in what ships, on the forbidden names (Piper, espeak-ng, ydotool, dogtail, OmniParser), on installed metadata that disagrees with the policy, and on a copyleft import under `src/`. It reads the closure from `uv.lock`, so transitive dependencies (pycairo under PyGObject) and dev tools are covered.
+- The pack format gained `license` (ADR-0027); every shipped pack says MIT and the gate checks it. `broctl pack list` shows it.
+- A first version of the metadata reader missed licences written out in words ("GNU General Public License v3"); a test caught it and it is fixed.
+- **Not done:** the model register (no model yet), SPDX headers on source files, DCO sign-off enforcement, CODE_OF_CONDUCT.md, SECURITY.md, CONTRIBUTING.md, `pip-licenses` on the built wheel (the gate reads the lock file, not the wheel), a check of system packages, and the CI job has never run (CI is not active, #16).
+
 ## Context
 SPEC proposes "MIT or Apache-2.0" as the licence. The sibling project workbench is dual-licensed MIT OR Apache-2.0: it ships `LICENSE-MIT` and `LICENSE-APACHE`. CLAUDE.md fixes the delivery flow:
 
