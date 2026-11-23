@@ -1,0 +1,77 @@
+{
+ "id": "pingpong-and-undo",
+ "kind": "focus_pingpong",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 9.1,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 13.0,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 15.4,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 18.6,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 20.8,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 23.0,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 25.5,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 30.1,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 34.6,
+   "kind": "undo"
+  },
+  {
+   "t": 36.9,
+   "kind": "undo"
+  },
+  {
+   "t": 39.4,
+   "kind": "undo"
+  },
+  {
+   "t": 43.6,
+   "kind": "undo"
+  },
+  {
+   "t": 49.6,
+   "kind": "idle_span",
+   "value": 7
+  }
+ ],
+ "onset": 5
+}

@@ -1,0 +1,333 @@
+{
+ "id": "fix-cycle-with-edits",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 11,
+   "kind": "typing"
+  },
+  {
+   "t": 12,
+   "kind": "typing"
+  },
+  {
+   "t": 13,
+   "kind": "typing"
+  },
+  {
+   "t": 14,
+   "kind": "typing"
+  },
+  {
+   "t": 15,
+   "kind": "typing"
+  },
+  {
+   "t": 16,
+   "kind": "typing"
+  },
+  {
+   "t": 17,
+   "kind": "typing"
+  },
+  {
+   "t": 18,
+   "kind": "typing"
+  },
+  {
+   "t": 19,
+   "kind": "typing"
+  },
+  {
+   "t": 20,
+   "kind": "typing"
+  },
+  {
+   "t": 21,
+   "kind": "typing"
+  },
+  {
+   "t": 22,
+   "kind": "typing"
+  },
+  {
+   "t": 23,
+   "kind": "typing"
+  },
+  {
+   "t": 24,
+   "kind": "typing"
+  },
+  {
+   "t": 25,
+   "kind": "typing"
+  },
+  {
+   "t": 26,
+   "kind": "typing"
+  },
+  {
+   "t": 27,
+   "kind": "typing"
+  },
+  {
+   "t": 28,
+   "kind": "typing"
+  },
+  {
+   "t": 29,
+   "kind": "typing"
+  },
+  {
+   "t": 30,
+   "kind": "typing"
+  },
+  {
+   "t": 31,
+   "kind": "typing"
+  },
+  {
+   "t": 32,
+   "kind": "typing"
+  },
+  {
+   "t": 33,
+   "kind": "typing"
+  },
+  {
+   "t": 34,
+   "kind": "typing"
+  },
+  {
+   "t": 35,
+   "kind": "typing"
+  },
+  {
+   "t": 37,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 38,
+   "kind": "typing"
+  },
+  {
+   "t": 39,
+   "kind": "typing"
+  },
+  {
+   "t": 40,
+   "kind": "typing"
+  },
+  {
+   "t": 41,
+   "kind": "typing"
+  },
+  {
+   "t": 42,
+   "kind": "typing"
+  },
+  {
+   "t": 43,
+   "kind": "typing"
+  },
+  {
+   "t": 44,
+   "kind": "typing"
+  },
+  {
+   "t": 45,
+   "kind": "typing"
+  },
+  {
+   "t": 46,
+   "kind": "typing"
+  },
+  {
+   "t": 47,
+   "kind": "typing"
+  },
+  {
+   "t": 48,
+   "kind": "typing"
+  },
+  {
+   "t": 49,
+   "kind": "typing"
+  },
+  {
+   "t": 50,
+   "kind": "typing"
+  },
+  {
+   "t": 51,
+   "kind": "typing"
+  },
+  {
+   "t": 52,
+   "kind": "typing"
+  },
+  {
+   "t": 53,
+   "kind": "typing"
+  },
+  {
+   "t": 54,
+   "kind": "typing"
+  },
+  {
+   "t": 55,
+   "kind": "typing"
+  },
+  {
+   "t": 56,
+   "kind": "typing"
+  },
+  {
+   "t": 57,
+   "kind": "typing"
+  },
+  {
+   "t": 58,
+   "kind": "typing"
+  },
+  {
+   "t": 59,
+   "kind": "typing"
+  },
+  {
+   "t": 60,
+   "kind": "typing"
+  },
+  {
+   "t": 61,
+   "kind": "typing"
+  },
+  {
+   "t": 62,
+   "kind": "typing"
+  },
+  {
+   "t": 64,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 65,
+   "kind": "typing"
+  },
+  {
+   "t": 66,
+   "kind": "typing"
+  },
+  {
+   "t": 67,
+   "kind": "typing"
+  },
+  {
+   "t": 68,
+   "kind": "typing"
+  },
+  {
+   "t": 69,
+   "kind": "typing"
+  },
+  {
+   "t": 70,
+   "kind": "typing"
+  },
+  {
+   "t": 71,
+   "kind": "typing"
+  },
+  {
+   "t": 72,
+   "kind": "typing"
+  },
+  {
+   "t": 73,
+   "kind": "typing"
+  },
+  {
+   "t": 74,
+   "kind": "typing"
+  },
+  {
+   "t": 75,
+   "kind": "typing"
+  },
+  {
+   "t": 76,
+   "kind": "typing"
+  },
+  {
+   "t": 77,
+   "kind": "typing"
+  },
+  {
+   "t": 78,
+   "kind": "typing"
+  },
+  {
+   "t": 79,
+   "kind": "typing"
+  },
+  {
+   "t": 80,
+   "kind": "typing"
+  },
+  {
+   "t": 81,
+   "kind": "typing"
+  },
+  {
+   "t": 82,
+   "kind": "typing"
+  },
+  {
+   "t": 83,
+   "kind": "typing"
+  },
+  {
+   "t": 84,
+   "kind": "typing"
+  },
+  {
+   "t": 85,
+   "kind": "typing"
+  },
+  {
+   "t": 86,
+   "kind": "typing"
+  },
+  {
+   "t": 87,
+   "kind": "typing"
+  },
+  {
+   "t": 88,
+   "kind": "typing"
+  },
+  {
+   "t": 89,
+   "kind": "typing"
+  },
+  {
+   "t": 91,
+   "kind": "command_exit",
+   "key": "make"
+  }
+ ]
+}

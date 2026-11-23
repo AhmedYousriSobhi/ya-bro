@@ -1,0 +1,61 @@
+{
+ "id": "pingpong-alone",
+ "kind": "focus_pingpong",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 8.8,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 12.5,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 17.0,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 22.0,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 26.8,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 29.2,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 32.6,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 36.9,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 40.6,
+   "kind": "focus",
+   "key": "w2"
+  }
+ ],
+ "onset": 5
+}

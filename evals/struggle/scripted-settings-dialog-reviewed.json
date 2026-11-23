@@ -1,0 +1,20 @@
+{
+ "id": "settings-dialog-reviewed",
+ "kind": "idle_in_context",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 5,
+   "kind": "dialog_opened",
+   "key": "prefs"
+  },
+  {
+   "t": 30,
+   "kind": "dialog_closed",
+   "key": "prefs"
+  }
+ ]
+}

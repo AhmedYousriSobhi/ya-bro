@@ -1,0 +1,28 @@
+{
+ "id": "different-commands-fail",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 38.2,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 66.7,
+   "kind": "command_exit",
+   "key": "ls",
+   "value": 1
+  }
+ ]
+}

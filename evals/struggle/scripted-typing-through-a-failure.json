@@ -1,0 +1,140 @@
+{
+ "id": "typing-through-a-failure",
+ "kind": "typing",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "typing"
+  },
+  {
+   "t": 6,
+   "kind": "typing"
+  },
+  {
+   "t": 7,
+   "kind": "typing"
+  },
+  {
+   "t": 8,
+   "kind": "typing"
+  },
+  {
+   "t": 9,
+   "kind": "typing"
+  },
+  {
+   "t": 10,
+   "kind": "typing"
+  },
+  {
+   "t": 11,
+   "kind": "typing"
+  },
+  {
+   "t": 12,
+   "kind": "typing"
+  },
+  {
+   "t": 13,
+   "kind": "typing"
+  },
+  {
+   "t": 14,
+   "kind": "typing"
+  },
+  {
+   "t": 15,
+   "kind": "typing"
+  },
+  {
+   "t": 16,
+   "kind": "typing"
+  },
+  {
+   "t": 17,
+   "kind": "typing"
+  },
+  {
+   "t": 18,
+   "kind": "typing"
+  },
+  {
+   "t": 19,
+   "kind": "typing"
+  },
+  {
+   "t": 20,
+   "kind": "typing"
+  },
+  {
+   "t": 21,
+   "kind": "typing"
+  },
+  {
+   "t": 22,
+   "kind": "typing"
+  },
+  {
+   "t": 23,
+   "kind": "typing"
+  },
+  {
+   "t": 24,
+   "kind": "typing"
+  },
+  {
+   "t": 25,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 26,
+   "kind": "typing"
+  },
+  {
+   "t": 27,
+   "kind": "typing"
+  },
+  {
+   "t": 28,
+   "kind": "typing"
+  },
+  {
+   "t": 29,
+   "kind": "typing"
+  },
+  {
+   "t": 30,
+   "kind": "typing"
+  },
+  {
+   "t": 31,
+   "kind": "typing"
+  },
+  {
+   "t": 32,
+   "kind": "typing"
+  },
+  {
+   "t": 33,
+   "kind": "typing"
+  },
+  {
+   "t": 34,
+   "kind": "typing"
+  },
+  {
+   "t": 35,
+   "kind": "typing"
+  },
+  {
+   "t": 36,
+   "kind": "typing"
+  }
+ ]
+}

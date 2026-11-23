@@ -1,0 +1,29 @@
+{
+ "id": "fail-loop-1",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 22.4,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 35.4,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  }
+ ],
+ "onset": 10
+}

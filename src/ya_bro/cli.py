@@ -206,8 +206,39 @@ def _struggle(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval_struggle(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from ya_bro import struggle_eval
+
+    directory = (
+        Path(args.dir) if args.dir else Path(__file__).resolve().parents[2] / "evals/struggle"
+    )
+    try:
+        if args.sweep:
+            for step in (1, 2, 3, 4):
+                r = struggle_eval.run(directory, step)
+                med = r.median_time_to_offer
+                med_text = "n/a" if med is None else f"{med:.0f} s"
+                print(
+                    f"sensitivity {step}: precision {100 * r.precision:.0f}%, "
+                    f"recall {100 * r.recall:.0f}%, offers {r.offers}, median {med_text}, "
+                    f"false/h {r.false_offers_per_hour:.2f}"
+                )
+            return 0
+        report = struggle_eval.run(directory, args.sensitivity)
+    except (struggle_eval.EvalError, ValueError) as e:
+        print(e)
+        return 2
+    print(report.text(verbose=args.verbose))
+    return 0 if report.passes else 1
+
+
 def _eval(args: argparse.Namespace) -> int:
     from pathlib import Path
+
+    if args.verb == "struggle":
+        return _eval_struggle(args)
 
     from ya_bro import pointing_eval
 
@@ -335,11 +366,15 @@ def main(argv: list[str] | None = None) -> int:
     pverbs.add_parser("list", help="show packs found (shipped and yours)")
     pverbs.add_parser("check", help="validate a pack directory").add_argument("dir")
     ev = sub.add_parser("eval", help="score Ya-Bro against labelled sets (ADR-0016)")
-    pt = ev.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
-        "pointing", help="pointing accuracy on evals/pointing (exit 1 below the gate)"
-    )
+    everbs = ev.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    pt = everbs.add_parser("pointing", help="pointing accuracy on evals/pointing (exit 1 below)")
     pt.add_argument("--dir", default="", help="snapshot folder (default: evals/pointing)")
     pt.add_argument("-v", "--verbose", action="store_true", help="list every miss")
+    sr = everbs.add_parser("struggle", help="replay evals/struggle through the detector")
+    sr.add_argument("--dir", default="", help="scenario folder (default: evals/struggle)")
+    sr.add_argument("-v", "--verbose", action="store_true", help="list every miss")
+    sr.add_argument("--sensitivity", type=int, default=2, help="1 (quiet) to 4 (eager)")
+    sr.add_argument("--sweep", action="store_true", help="precision and recall at every step")
     hk = sub.add_parser("hook", help="the bash hook that sees allowed commands finish (ADR-0021)")
     hverbs = hk.add_subparsers(dest="verb", required=True, metavar="<verb>")
     for verb, text in (

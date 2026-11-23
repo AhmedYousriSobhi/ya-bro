@@ -1,0 +1,50 @@
+{
+ "id": "menu-thrash-and-help",
+ "kind": "menu_thrash",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 6.2,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 8.6,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 10.0,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 12.8,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 13.4,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 16.2,
+   "kind": "help_opened"
+  },
+  {
+   "t": 18.2,
+   "kind": "idle_span",
+   "value": 8
+  }
+ ],
+ "onset": 5
+}

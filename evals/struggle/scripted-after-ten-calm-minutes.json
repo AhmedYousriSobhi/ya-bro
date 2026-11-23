@@ -1,0 +1,89 @@
+{
+ "id": "after-ten-calm-minutes",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 900,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 48.1,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 73.5,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 135.3,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 186.6,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 207.9,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 266.5,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 332.7,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 380.4,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 421.5,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 465.2,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 515.1,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 610,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 620.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 628.2,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ],
+ "onset": 610
+}

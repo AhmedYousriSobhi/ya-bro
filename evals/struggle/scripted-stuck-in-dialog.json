@@ -1,0 +1,21 @@
+{
+ "id": "stuck-in-dialog",
+ "kind": "idle_in_context",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "dialog_opened",
+   "key": "settings"
+  },
+  {
+   "t": 7,
+   "kind": "idle_span",
+   "value": 40
+  }
+ ],
+ "onset": 5
+}

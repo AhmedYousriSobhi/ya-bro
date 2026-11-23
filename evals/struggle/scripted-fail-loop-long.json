@@ -1,0 +1,41 @@
+{
+ "id": "fail-loop-long",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 400,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 46.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 95.9,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 129.4,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 158.8,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ],
+ "onset": 10
+}

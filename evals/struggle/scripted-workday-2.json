@@ -1,0 +1,232 @@
+{
+ "id": "workday-2",
+ "kind": "workday",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 1800,
+ "events": [
+  {
+   "t": 10.0,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 10.8,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 10.8,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 50.2,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 61.7,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 115.1,
+   "kind": "dialog_opened",
+   "key": "open"
+  },
+  {
+   "t": 127.5,
+   "kind": "dialog_closed",
+   "key": "open"
+  },
+  {
+   "t": 143.4,
+   "kind": "dialog_opened",
+   "key": "open"
+  },
+  {
+   "t": 159.0,
+   "kind": "dialog_closed",
+   "key": "open"
+  },
+  {
+   "t": 196.6,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 265.7,
+   "kind": "idle_span",
+   "value": 21
+  },
+  {
+   "t": 318.6,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 380.3,
+   "kind": "command_exit",
+   "key": "make"
+  },
+  {
+   "t": 446.0,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 531.5,
+   "kind": "undo"
+  },
+  {
+   "t": 593.7,
+   "kind": "idle_span",
+   "value": 53
+  },
+  {
+   "t": 679.3,
+   "kind": "dialog_opened",
+   "key": "open"
+  },
+  {
+   "t": 700.7,
+   "kind": "dialog_closed",
+   "key": "open"
+  },
+  {
+   "t": 720.6,
+   "kind": "command_exit",
+   "key": "git"
+  },
+  {
+   "t": 755.9,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 827.5,
+   "kind": "command_exit",
+   "key": "make"
+  },
+  {
+   "t": 872.9,
+   "kind": "command_exit",
+   "key": "git"
+  },
+  {
+   "t": 941.9,
+   "kind": "undo"
+  },
+  {
+   "t": 1003.1,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 1047.1,
+   "kind": "undo"
+  },
+  {
+   "t": 1082.7,
+   "kind": "command_exit",
+   "key": "ls"
+  },
+  {
+   "t": 1144.9,
+   "kind": "focus",
+   "key": "w3"
+  },
+  {
+   "t": 1181.5,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 1230.8,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 1261.6,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 1262.4,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 1262.4,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 1335.1,
+   "kind": "idle_span",
+   "value": 27
+  },
+  {
+   "t": 1368.4,
+   "kind": "dialog_opened",
+   "key": "open"
+  },
+  {
+   "t": 1387.3,
+   "kind": "dialog_closed",
+   "key": "open"
+  },
+  {
+   "t": 1410.5,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 1495.0,
+   "kind": "command_exit",
+   "key": "git"
+  },
+  {
+   "t": 1565.1,
+   "kind": "undo"
+  },
+  {
+   "t": 1598.2,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 1599.0,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 1599.0,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 1626.9,
+   "kind": "dialog_opened",
+   "key": "open"
+  },
+  {
+   "t": 1650.7,
+   "kind": "dialog_closed",
+   "key": "open"
+  },
+  {
+   "t": 1686.6,
+   "kind": "idle_span",
+   "value": 54
+  },
+  {
+   "t": 1740.6,
+   "kind": "focus",
+   "key": "w3"
+  }
+ ]
+}

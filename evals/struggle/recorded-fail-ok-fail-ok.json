@@ -1,0 +1,46 @@
+{
+ "id": "fail-ok-fail-ok",
+ "kind": "failing_commands",
+ "source": "recorded",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 35.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 1.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 0
+  },
+  {
+   "t": 2.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 3.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 0
+  },
+  {
+   "t": 4.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 5.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 0
+  }
+ ]
+}

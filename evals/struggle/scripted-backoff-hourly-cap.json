@@ -1,0 +1,127 @@
+{
+ "id": "backoff-hourly-cap",
+ "kind": "backoff",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 1200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 22.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 24,
+   "kind": "answer",
+   "key": "yes"
+  },
+  {
+   "t": 210,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 216.0,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 222.0,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 224,
+   "kind": "answer",
+   "key": "yes"
+  },
+  {
+   "t": 410,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 416.0,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 422.0,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 424,
+   "kind": "answer",
+   "key": "yes"
+  },
+  {
+   "t": 610,
+   "kind": "command_exit",
+   "key": "cargo",
+   "value": 1
+  },
+  {
+   "t": 616.0,
+   "kind": "command_exit",
+   "key": "cargo",
+   "value": 1
+  },
+  {
+   "t": 622.0,
+   "kind": "command_exit",
+   "key": "cargo",
+   "value": 1
+  },
+  {
+   "t": 624,
+   "kind": "answer",
+   "key": "yes"
+  },
+  {
+   "t": 810,
+   "kind": "command_exit",
+   "key": "npm",
+   "value": 1
+  },
+  {
+   "t": 816.0,
+   "kind": "command_exit",
+   "key": "npm",
+   "value": 1
+  },
+  {
+   "t": 822.0,
+   "kind": "command_exit",
+   "key": "npm",
+   "value": 1
+  },
+  {
+   "t": 824,
+   "kind": "answer",
+   "key": "yes"
+  }
+ ],
+ "onset": 10,
+ "expect_offers": 3
+}

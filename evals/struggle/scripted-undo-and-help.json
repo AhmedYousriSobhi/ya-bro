@@ -1,0 +1,40 @@
+{
+ "id": "undo-and-help",
+ "kind": "undo_loop",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "undo"
+  },
+  {
+   "t": 9.1,
+   "kind": "undo"
+  },
+  {
+   "t": 12.2,
+   "kind": "undo"
+  },
+  {
+   "t": 16.0,
+   "kind": "undo"
+  },
+  {
+   "t": 18.8,
+   "kind": "undo"
+  },
+  {
+   "t": 22.7,
+   "kind": "help_opened"
+  },
+  {
+   "t": 24.7,
+   "kind": "idle_span",
+   "value": 8
+  }
+ ],
+ "onset": 5
+}

@@ -1,0 +1,40 @@
+{
+ "id": "dialogs-used-normally",
+ "kind": "dialog_bounce",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 5,
+   "kind": "dialog_opened",
+   "key": "export"
+  },
+  {
+   "t": 30.1,
+   "kind": "dialog_closed",
+   "key": "export"
+  },
+  {
+   "t": 45.9,
+   "kind": "dialog_opened",
+   "key": "export"
+  },
+  {
+   "t": 75.8,
+   "kind": "dialog_closed",
+   "key": "export"
+  },
+  {
+   "t": 86.1,
+   "kind": "dialog_opened",
+   "key": "export"
+  },
+  {
+   "t": 101.3,
+   "kind": "dialog_closed",
+   "key": "export"
+  }
+ ]
+}

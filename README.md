@@ -97,6 +97,7 @@ A small **GNOME Shell extension** draws the ring and bubble and reports window p
 | `broctl struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` | The "you stuck, bro?" offers (off for every app until you enable one) |
 | `broctl hook install \| uninstall \| print \| status` | The bash hook that sees allowed commands finish (asks first) |
 | `broctl shell watch` | Print allowed commands as they finish |
+| `broctl eval struggle [--sweep]` | Replay labelled event streams through the struggle detector and score it |
 | `broctl eval pointing` | Score pointing accuracy on the labelled sets (exit 1 below the gate) |
 | `broctl pack list \| check <dir>` | List app knowledge packs; validate one |
 | `broctl point`, `broctl scope watch` | Draw the ring on the allowed window; watch scope changes |

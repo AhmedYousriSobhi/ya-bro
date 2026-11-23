@@ -1,0 +1,14 @@
+{
+ "id": "looks-up-help-once",
+ "kind": "help_seeking",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 10,
+   "kind": "help_opened"
+  }
+ ]
+}
