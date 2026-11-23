@@ -21,6 +21,7 @@ from gi.repository import Gio, GLib  # noqa: E402
 
 from ya_bro import brain as brains  # noqa: E402
 from ya_bro import config, keystore, packs, plans, privacy  # noqa: E402
+from ya_bro.platform.docked_overlay import DockedOverlay  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
     PREFIX,
@@ -43,6 +44,7 @@ async def run(
     goal: str = "",
     dry: bool = False,
     do_it: bool = False,
+    docked: bool = False,
 ) -> int:
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     plan = None
@@ -82,7 +84,7 @@ async def run(
                 print(f"{n}. [R{int(s.risk)}] {s.narration}{aim}")
             return 0
     plan = plans.rebind(plan, app)
-    overlay = GnomeOverlay(bus, bridge)
+    overlay = DockedOverlay() if docked else GnomeOverlay(bus, bridge)
 
     def log(event: str, **fields) -> None:
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
@@ -165,12 +167,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ask", default="", metavar="GOAL", help="plan from plain words instead")
     ap.add_argument("--dry", action="store_true", help="with --ask: print the plan and stop")
     ap.add_argument("--do-it", action="store_true", help="press the controls itself (R0/R1)")
+    ap.add_argument("--docked", action="store_true", help="bubble in a plain window, no ring")
     args = ap.parse_args(argv)
     if bool(args.plan) == bool(args.ask):
         ap.error("give a plan file or --ask GOAL")
     token = sys.stdin.readline().strip()
     return asyncio.run(
-        run(args.plan, args.app, token, args.ask, args.dry, args.do_it),
+        run(args.plan, args.app, token, args.ask, args.dry, args.do_it, args.docked),
         loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop,
     )
 

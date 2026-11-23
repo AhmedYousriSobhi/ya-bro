@@ -525,6 +525,7 @@ def main(argv: list[str] | None = None) -> int:
     show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
     show.add_argument("plan", help="plan file (TOML), see docs/DEVELOPMENT.md")
     show.add_argument("--app", default="", help="app id (default: the focused allowed window)")
+    show.add_argument("--docked", action="store_true", help="bubble in a plain window, no ring")
     show.add_argument(
         "--do-it", action="store_true", help="press the controls itself (needs [do_it] allowed)"
     )
@@ -647,7 +648,16 @@ def main(argv: list[str] | None = None) -> int:
         return _gnome_demo("point", args.seconds, args.text)
     if args.noun == "show":
         extra = ["--app", args.app] if args.app else []
-        return _gnome_demo("show", 0, show=[str(args.plan), *extra, *(["--do-it"] * args.do_it)])
+        return _gnome_demo(
+            "show",
+            0,
+            show=[
+                str(args.plan),
+                *extra,
+                *(["--do-it"] * args.do_it),
+                *(["--docked"] * args.docked),
+            ],
+        )
     if args.noun == "ask":
         extra = ["--app", args.app] if args.app else []
         return _gnome_demo("show", 0, show=["--ask", args.goal, *extra, *(["--dry"] * args.dry)])
