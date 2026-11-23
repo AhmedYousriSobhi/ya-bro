@@ -36,8 +36,16 @@ class CompositorBridge(Protocol):
 @runtime_checkable
 class Overlay(Protocol):
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
-    ) -> None: ...
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
+    ) -> None:
+        """mood: how the bro looks (idle, pointing, thinking, happy, teasing, quiet); "" lets the
+        overlay choose (pointing when there is a target, else idle)."""
+        ...
+
     def events(self) -> AsyncIterator[str]:
         """User choices from the bubble: next, repeat, why, stop (stop also from the stop key)."""
         ...

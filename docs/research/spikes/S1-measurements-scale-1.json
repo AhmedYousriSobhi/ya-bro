@@ -1,7 +1,7 @@
 {
   "scale": 1.0,
   "signal_unicast": {
-    "core_received": 5,
+    "core_received": 4,
     "non_peer_match_rule_received": 0
   },
   "become_monitor_sees_unicast": {
@@ -127,122 +127,10 @@
     }
   },
   "coords[gtk3_wayland]": {
-    "window": {
-      "frame": [
-        290,
-        118,
-        700,
-        597
-      ],
-      "buffer": [
-        264,
-        95,
-        752,
-        649
-      ],
-      "client": "wayland"
-    },
-    "click_samples": 12,
-    "origin_truth": [
-      264.0,
-      95.0
-    ],
-    "origin_err_frame": {
-      "n": 12,
-      "median": 34.71,
-      "p95": 34.71,
-      "max": 34.71
-    },
-    "origin_err_buffer": {
-      "n": 12,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "atspi_window_ext_vs_toolkit_bounds": {
-      "n": 20,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "end_to_end_err_frame_origin": {
-      "n": 20,
-      "median": 34.71,
-      "p95": 34.71,
-      "max": 34.71
-    },
-    "end_to_end_err_buffer_origin": {
-      "n": 20,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "atspi_screen_extents_all_zero": false,
-    "atspi_widgets_found": 20,
-    "best_origin": "buffer",
-    "hit_test": {
-      "hits": 20,
-      "of": 20
-    }
+    "error": "StopIteration: "
   },
   "coords[gtk3_xwayland]": {
-    "window": {
-      "frame": [
-        290,
-        118,
-        700,
-        597
-      ],
-      "buffer": [
-        265,
-        93,
-        750,
-        647
-      ],
-      "client": "x11"
-    },
-    "click_samples": 12,
-    "origin_truth": [
-      290.0,
-      155.0
-    ],
-    "origin_err_frame": {
-      "n": 12,
-      "median": 37.0,
-      "p95": 37.0,
-      "max": 37.0
-    },
-    "origin_err_buffer": {
-      "n": 12,
-      "median": 66.85,
-      "p95": 66.85,
-      "max": 66.85
-    },
-    "atspi_window_ext_vs_toolkit_bounds": {
-      "n": 20,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "end_to_end_err_frame_origin": {
-      "n": 20,
-      "median": 37.0,
-      "p95": 37.0,
-      "max": 37.0
-    },
-    "end_to_end_err_buffer_origin": {
-      "n": 20,
-      "median": 66.85,
-      "p95": 66.85,
-      "max": 66.85
-    },
-    "atspi_screen_extents_all_zero": false,
-    "atspi_widgets_found": 20,
-    "best_origin": "frame",
-    "hit_test": {
-      "hits": 0,
-      "of": 20
-    }
+    "error": "StopIteration: "
   },
   "monitor": {
     "logical": [
@@ -261,16 +149,16 @@
       36
     ],
     "edges_found": {
-      "top": 51,
-      "bottom": 51,
-      "left": 51,
-      "right": 51
+      "top": 68,
+      "bottom": 68,
+      "left": 68,
+      "right": 68
     },
     "edge_err_logical_px": {
       "n": 4,
-      "median": 1.5,
-      "p95": 2.0,
-      "max": 2.0
+      "median": 2.0,
+      "p95": 2.5,
+      "max": 2.5
     }
   },
   "click_through": {
@@ -294,48 +182,20 @@
   },
   "stop_key": {
     "sent": 50,
-    "received": 0,
-    "hidden": 0,
+    "received": 50,
+    "hidden": 50,
     "latency_ms": {
-      "n": 0
+      "n": 50,
+      "median": 7.09,
+      "p95": 8.23,
+      "max": 8.26
     }
   },
   "pointer_flight_lands": {
     "orange_pixels_near_target": 235
   },
   "popover_in_window_list": {
-    "new_windows": [
-      {
-        "type": 9,
-        "frame": [
-          367,
-          493,
-          138,
-          216
-        ],
-        "buffer": [
-          364,
-          491,
-          144,
-          222
-        ],
-        "transient_for": 2267649140
-      }
-    ]
-  },
-  "ring_above_popover": {
-    "rect": [
-      387,
-      499,
-      60,
-      40
-    ],
-    "edges_found": {
-      "top": 51,
-      "bottom": 51,
-      "left": 51,
-      "right": 51
-    }
+    "new_windows": []
   },
   "overview": {
     "state_overview": true,
@@ -346,10 +206,10 @@
       "right": 0
     },
     "edges_after": {
-      "top": 51,
-      "bottom": 51,
-      "left": 51,
-      "right": 51
+      "top": 68,
+      "bottom": 68,
+      "left": 68,
+      "right": 68
     }
   },
   "ring_above_maximize": {
@@ -361,10 +221,10 @@
     ],
     "fullscreen": false,
     "edges_found": {
-      "top": 51,
-      "bottom": 51,
-      "left": 51,
-      "right": 51
+      "top": 68,
+      "bottom": 68,
+      "left": 68,
+      "right": 68
     },
     "unredirect_disabled": true
   },
@@ -377,10 +237,10 @@
     ],
     "fullscreen": true,
     "edges_found": {
-      "top": 51,
-      "bottom": 51,
-      "left": 51,
-      "right": 51
+      "top": 68,
+      "bottom": 68,
+      "left": 68,
+      "right": 68
     },
     "unredirect_disabled": true
   }

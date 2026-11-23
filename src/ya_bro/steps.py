@@ -36,6 +36,7 @@ class Timing:
     poll: float = 0.3  # how often to re-check the screen
     settle: float = 0.6  # a changed screen must hold this long before we call it a wrong action
     nudge: float = 90.0  # after this long, say we are still waiting (never skips on its own)
+    done_hold: float = 0.0  # how long a happy "all done" bubble stays at the end (0: just hide)
 
 
 Log = Callable[..., object]
@@ -77,6 +78,9 @@ class StepLoop:
                     return Outcome.BLOCKED
                 if await self._present(step, app_id, index, len(plan.steps)) == "stop":
                     return Outcome.STOPPED
+            if self._timing.done_hold > 0:
+                await self._overlay.show_step(None, self._tone.done(), (), mood="happy")
+                await asyncio.sleep(self._timing.done_hold)
             return Outcome.DONE
         finally:
             pump.cancel()
@@ -129,7 +133,7 @@ class StepLoop:
 
     async def _present(self, step: Step, app_id: str, index: int, total: int) -> str:
         count = f"({index + 1}/{total})"
-        shown: tuple[Rect | None, str] | None = None
+        shown: tuple[Rect | None, str, str] | None = None
         hidden = False
         loop = asyncio.get_running_loop()
         since = loop.time()
@@ -191,9 +195,16 @@ class StepLoop:
                     if mismatch_text is None:
                         mismatch_text = self._tone.mismatch(want_text, _joined(fp))
                     text = f"{count} {mismatch_text}"
-                if (rect, text) != shown:
-                    await self._overlay.show_step(rect, text, BUTTONS)
-                    shown = (rect, text)
+                mood = "pointing"
+                if step.target is not None and rect is None:
+                    mood = "thinking"  # it cannot find the thing: it is working it out
+                if (extra or predone) and not why_is_mistake:
+                    mood = "idle"
+                if mismatch or why_is_mistake:
+                    mood = "teasing"
+                if (rect, text, mood) != shown:
+                    await self._overlay.show_step(rect, text, BUTTONS, mood=mood)
+                    shown = (rect, text, mood)
                 if not nudged and not extra and loop.time() - since > self._timing.nudge:
                     nudged, extra = True, f"{count} {self._tone.still_here()}"
             try:

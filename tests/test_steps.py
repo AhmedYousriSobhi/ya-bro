@@ -425,3 +425,60 @@ async def test_a_ring_outside_the_focused_window_is_never_drawn():
     _, rect, text = overlay.calls[0]
     assert rect is None and "can't find" in text
     task.cancel()
+
+
+# ---- how the bro looks (moods, ADR-0028) ------------------------------------------------------
+
+
+async def test_the_bro_points_while_a_step_waits_and_looks_puzzled_when_it_cannot_find_it():
+    perception, overlay, loop, plan = build({}, [step(expect=Expect("button", "Confirm"))])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    assert overlay.moods[-1] == "thinking"  # nothing to point at yet
+    perception.elements[CREATE] = Rect(5, 5, 10, 10)
+    await settle()
+    assert overlay.moods[-1] == "pointing"
+    task.cancel()
+
+
+async def test_a_wrong_action_makes_the_bro_tease():
+    perception = FakePerception(
+        {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: ""}
+    )
+    overlay = FakeOverlay()
+    loop = StepLoop(
+        perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE, tone=Tone(0)
+    )
+    task = asyncio.create_task(loop.run(Plan("g", [text_step("7")]), APP))
+    await settle()
+    assert overlay.moods[-1] == "pointing"
+    perception.texts[DISPLAY] = "5"  # the wrong key
+    await asyncio.sleep(0.3)
+    assert overlay.moods[-1] == "teasing" and "That's not what I asked for" in overlay.calls[-1][2]
+    perception.texts[DISPLAY] = ""  # undone: back to pointing
+    await asyncio.sleep(0.3)
+    assert overlay.moods[-1] == "pointing"
+    task.cancel()
+
+
+async def test_the_bro_is_happy_when_everything_is_done_and_only_if_asked_to_stay():
+    elements = {CREATE: Rect(10, 20, 80, 30)}
+    perception, overlay, loop, plan = build(elements, [step()])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    overlay.push("next")
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE
+    assert "happy" not in overlay.moods  # the default is to just leave
+    perception, overlay, loop, plan = build(
+        elements, [step()], timing=Timing(poll=0.01, nudge=30.0, done_hold=0.05)
+    )
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    overlay.push("next")
+    assert await asyncio.wait_for(task, 2) is Outcome.DONE
+    assert overlay.moods[-1] == "happy" and overlay.calls[-2] == (
+        "show_step",
+        None,
+        "That's all the steps.",
+    )
+    assert overlay.calls[-1] == ("hide",)

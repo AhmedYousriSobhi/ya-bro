@@ -2,12 +2,12 @@
   "scale": 1.5,
   "applied_scale": 1.5,
   "signal_unicast": {
-    "core_received": 5,
+    "core_received": 4,
     "non_peer_match_rule_received": 0
   },
   "become_monitor_sees_unicast": {
     "became_monitor": true,
-    "ya_bro_signals_seen": 7
+    "ya_bro_signals_seen": 0
   },
   "coords[gtk4]": {
     "window": {
@@ -128,122 +128,10 @@
     }
   },
   "coords[gtk3_wayland]": {
-    "window": {
-      "frame": [
-        290,
-        118,
-        700,
-        597
-      ],
-      "buffer": [
-        264,
-        95,
-        752,
-        649
-      ],
-      "client": "wayland"
-    },
-    "click_samples": 12,
-    "origin_truth": [
-      264.0,
-      95.5625
-    ],
-    "origin_err_frame": {
-      "n": 12,
-      "median": 34.34,
-      "p95": 34.46,
-      "max": 34.46
-    },
-    "origin_err_buffer": {
-      "n": 12,
-      "median": 0.56,
-      "p95": 0.6,
-      "max": 0.6
-    },
-    "atspi_window_ext_vs_toolkit_bounds": {
-      "n": 20,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "end_to_end_err_frame_origin": {
-      "n": 20,
-      "median": 34.34,
-      "p95": 34.34,
-      "max": 34.34
-    },
-    "end_to_end_err_buffer_origin": {
-      "n": 20,
-      "median": 0.56,
-      "p95": 0.56,
-      "max": 0.56
-    },
-    "atspi_screen_extents_all_zero": false,
-    "atspi_widgets_found": 20,
-    "best_origin": "buffer",
-    "hit_test": {
-      "hits": 20,
-      "of": 20
-    }
+    "error": "StopIteration: "
   },
   "coords[gtk3_xwayland]": {
-    "window": {
-      "frame": [
-        465,
-        267,
-        350,
-        299
-      ],
-      "buffer": [
-        452,
-        254,
-        376,
-        325
-      ],
-      "client": "x11"
-    },
-    "click_samples": 7,
-    "origin_truth": [
-      135.0,
-      115.0
-    ],
-    "origin_err_frame": {
-      "n": 7,
-      "median": 331.55,
-      "p95": 392.23,
-      "max": 392.23
-    },
-    "origin_err_buffer": {
-      "n": 7,
-      "median": 317.57,
-      "p95": 374.29,
-      "max": 374.29
-    },
-    "atspi_window_ext_vs_toolkit_bounds": {
-      "n": 20,
-      "median": 0.0,
-      "p95": 0.0,
-      "max": 0.0
-    },
-    "end_to_end_err_frame_origin": {
-      "n": 20,
-      "median": 363.32,
-      "p95": 363.32,
-      "max": 363.32
-    },
-    "end_to_end_err_buffer_origin": {
-      "n": 20,
-      "median": 346.14,
-      "p95": 346.14,
-      "max": 346.14
-    },
-    "atspi_screen_extents_all_zero": false,
-    "atspi_widgets_found": 20,
-    "best_origin": "buffer",
-    "hit_test": {
-      "hits": 0,
-      "of": 20
-    }
+    "error": "StopIteration: "
   },
   "monitor": {
     "logical": [
@@ -262,16 +150,16 @@
       36
     ],
     "edges_found": {
-      "top": 85,
-      "bottom": 68,
-      "left": 68,
-      "right": 85
+      "top": 102,
+      "bottom": 102,
+      "left": 102,
+      "right": 102
     },
     "edge_err_logical_px": {
       "n": 4,
-      "median": 1.5,
-      "p95": 2.0,
-      "max": 2.0
+      "median": 2.0,
+      "p95": 2.67,
+      "max": 2.67
     }
   },
   "click_through": {
@@ -287,7 +175,7 @@
     "leaked_to_app": 0
   },
   "bubble_button_click": {
-    "found_pixels": 2510,
+    "found_pixels": 2511,
     "user_event": [
       "button:next"
     ],
@@ -299,47 +187,16 @@
     "hidden": 50,
     "latency_ms": {
       "n": 50,
-      "median": 6.9,
-      "p95": 8.23,
-      "max": 8.37
+      "median": 7.76,
+      "p95": 8.27,
+      "max": 8.3
     }
   },
   "pointer_flight_lands": {
     "orange_pixels_near_target": 543
   },
   "popover_in_window_list": {
-    "new_windows": [
-      {
-        "type": 9,
-        "frame": [
-          367,
-          493,
-          138,
-          216
-        ],
-        "buffer": [
-          364,
-          491,
-          144,
-          222
-        ],
-        "transient_for": 833827769
-      }
-    ]
-  },
-  "ring_above_popover": {
-    "rect": [
-      387,
-      499,
-      60,
-      40
-    ],
-    "edges_found": {
-      "top": 85,
-      "bottom": 68,
-      "left": 85,
-      "right": 68
-    }
+    "new_windows": []
   },
   "overview": {
     "state_overview": true,
@@ -350,10 +207,10 @@
       "right": 0
     },
     "edges_after": {
-      "top": 85,
-      "bottom": 68,
-      "left": 68,
-      "right": 85
+      "top": 102,
+      "bottom": 102,
+      "left": 102,
+      "right": 102
     }
   },
   "ring_above_maximize": {
@@ -365,12 +222,12 @@
     ],
     "fullscreen": false,
     "edges_found": {
-      "top": 68,
-      "bottom": 85,
-      "left": 68,
-      "right": 85
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
     },
-    "unredirect_disabled": true
+    "unredirect_disabled": false
   },
   "ring_above_fullscreen": {
     "frame": [
@@ -381,10 +238,10 @@
     ],
     "fullscreen": true,
     "edges_found": {
-      "top": 68,
-      "bottom": 85,
-      "left": 68,
-      "right": 85
+      "top": 102,
+      "bottom": 102,
+      "left": 102,
+      "right": 102
     },
     "unredirect_disabled": true
   }

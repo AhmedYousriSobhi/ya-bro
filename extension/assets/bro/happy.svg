@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Palette (light / dark): head #2EC4B6 / #45D9CB, cap #2B2D42 / #3A3D5C, ink #1E1E2E,
+       halo #FFFFFF / #F0F0F5, accent #F5A524. Anchor: head bottom-centre (116,228). Faces right. -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:18;stroke-linejoin:round}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:8}
+    .cap{fill:#2B2D42;stroke:#1E1E2E;stroke-width:8;stroke-linejoin:round}
+    .ink{fill:#1E1E2E}
+    .line{fill:none;stroke:#1E1E2E;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+    .glint{fill:#FFFFFF}
+    .fx{fill:#F5A524;stroke:#1E1E2E;stroke-width:5;stroke-linejoin:round}
+    .fxl{fill:none;stroke:#1E1E2E;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.cap{fill:#3A3D5C}.halo{stroke:#F0F0F5}.fxl{stroke:#F0F0F5}}
+  </style>
+  <title>Ya-Bro (Brim): happy</title>
+  <g id="pose" transform="translate(0 -8)">
+    <circle class="halo" cx="116" cy="156" r="72"/>
+    <path class="halo" transform="rotate(-6 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <circle id="head" class="body" cx="116" cy="156" r="72"/>
+    <path id="cap" class="cap" transform="rotate(-6 116 156)" d="M44 140C44 96 76 66 116 66C156 66 186 94 188 128H214Q222 128 222 136V140Q222 148 214 148H44Z"/>
+    <g id="eyes"><path class="line" d="M93 182Q104 164 115 182"/><path class="line" d="M133 182Q144 164 155 182"/></g>
+    <path id="mouth" class="line" d="M108 200Q126 226 144 200Z"/>
+    <g id="fx"><path class="fx" d="M226 64L231 77L244 82L231 87L226 100L221 87L208 82L221 77Z"/></g>
+  </g>
+</svg>

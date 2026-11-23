@@ -47,6 +47,7 @@ The set 0002–0023 was produced for issue #13 on 2026-11-20. The same day the m
 | [0025](0025-pack-scoped-targets.md) | Pack-scoped targets | Accepted (web part) | A target (web origins + CLI command names) is the unit of consent for tools like workbench, so the browser and terminal are never allowed whole. Open: how the extension learns the active tab origin. |
 | [0026](0026-show-me-step-loop.md) | Show-me step loop | Accepted (scripted loop) | Core `StepLoop` over the interfaces; plans as TOML; verify by reading AT-SPI text and advance by itself; Next asks before skipping; a wrong action is named and Why? explains it; the perceiver enforces scope itself; playful `tone.py` behind `humour`. |
 | [0027](0027-pack-format-v1.md) | Pack format v1 and loader | Accepted | TOML tasks (plan format), exact matchers, `knowledge.md` cap, shipped then user search order, broken packs skipped, data only. |
+| [0028](0028-the-bros-look.md) | The bro's look | Accepted (look provisional) | Brim is the provisional look; the extension draws six SVG moods; `ShowStep` takes a `mood`; the loop sets pointing, thinking, teasing, idle and a happy finish. |
 
 ## MVP build plan
 

@@ -1,11 +1,11 @@
 # The bro's identity: five candidates and a recommendation
 
-- Status: Proposal (the maintainer makes the final call)
+- Status: Proposal. **Maintainer feedback, 2026-11-23: Yaya (the worm) and Fenn (the rabbit-like fox) are rejected; their artwork is removed.** Brim is the provisional look (README, demo GIF, extension) until the maintainer chooses; Pip and Orbit remain.
 - Issue: #96
 - Artwork: [`docs/assets/identity/`](../assets/identity/) (SVG), previews in [`docs/assets/identity/preview/`](../assets/identity/preview/)
 - Reads with: [SPEC.md](../../SPEC.md) §2, §4, [ADR-0006](../adr/0006-overlay-rendering.md) (overlay), [ADR-0013](../adr/0013-personality-tone-and-humor.md) (tone and humour), [ADR-0019](../adr/0019-internationalization-and-rtl.md) (bidi), [ADR-0023](../adr/0023-gnome-shell-extension-bridge.md) (GNOME extension)
 
-![The five candidates on light and dark, with real 32 px renders](../assets/identity/preview/candidates-overview.png)
+The remaining candidates are in [`docs/assets/identity/`](../assets/identity/): [Pip](../assets/identity/candidate-1-pip.svg), [Orbit](../assets/identity/candidate-3-orbit.svg) and [Brim](../assets/identity/candidate-4-brim.svg). The analysis of the two rejected ones is kept below for the record, without artwork.
 
 ## 1. Design principles
 
@@ -93,8 +93,7 @@ Body vs white is why the ink outline is mandatory. Cap vs dark page is 1.3:1, wh
 
 **Humour.** 0 to 2. It looks odd being cheeky at level 3.
 
-### Candidate 2: Yaya, the word يا as a figure
-![Yaya](../assets/identity/candidate-2-yaya.svg)
+### Candidate 2: Yaya, the word يا as a figure (rejected by the maintainer, artwork removed)
 
 **Concept.** The word يا is drawn so that the final alif is the bro's body (with a face), the joining stroke is its base, and the initial ya's tooth is a raised hand calling "Ya!". The two dots stay under the tooth.
 
@@ -252,8 +251,7 @@ Body vs white is why the ink outline is mandatory. Cap vs dark page is 1.3:1, wh
 
 **Humour.** 0 to 3. At humour 0 the teasing frame is never used: a wrong press shows *pointing* toward the right target with a plain line instead.
 
-### Candidate 5: Fenn, a big-eared fox kit
-![Fenn](../assets/identity/candidate-5-fenn.svg)
+### Candidate 5: Fenn, a big-eared fox kit (rejected by the maintainer, artwork removed)
 
 **Concept.** A round fox-kit face with oversized ears. The ears are the expressive part.
 
@@ -349,15 +347,15 @@ Source: [`bro-states.svg`](../assets/identity/bro-states.svg). Frames: [`states/
 
 1. **Brim (candidate 4).** It is the only candidate whose silhouette survives 16 px *and* whose shape points at the target by itself: the visor is a built-in arrow that still reads as a character. It also gives five distinct states from one rigid part, so it is cheap to build with St transforms over six SVG frames, and it mirrors for RTL.
 2. **Pip (candidate 1).** It is the fallback if the cap reads as too "bro" in testing. It is the friendliest and least likely to annoy. It needs a stronger signature than the tuft before it can be a brand: today it reads as a teal fruit.
-3. **Yaya (candidate 2), as the wordmark, not the sidekick.** Set "يا" in this rounded stroke style next to the Brim mark in the README header and the about dialog. That keeps the cultural grounding without asking the script to do a cartoon's job.
+3. ~~Yaya as the wordmark~~: rejected by the maintainer (it reads as a worm). The README header uses plain type next to the Brim mark.
 
 Not recommended:
-- **Fenn**: frame cost, fox-mark proximity, too cute for a work tool.
+- **Fenn**: frame cost, fox-mark proximity, too cute for a work tool (and rejected by the maintainer: it reads as a rabbit).
 - **Orbit**: closest to the forbidden reference, fails at 32 px.
 
 **What the maintainer should decide.**
 1. Brim or Pip as the character.
-2. Whether Yaya becomes the wordmark. This needs a native-reader check of the letterforms.
+2. ~~Yaya wordmark~~: decided, no.
 3. The overlay avatar size: 48 px is recommended.
 4. Whether the cap flip is allowed at humour 1, or only at 2 and above.
 5. Sign-off on every Arabic line in this note. ADR-0013 assigns Egyptian Arabic review to the maintainer; these lines are drafts.
@@ -408,18 +406,17 @@ Not recommended:
 - Don't animate while idle, blink-loop, bounce on a timer or flash.
 - Don't show teasing at humour 0, during errors, on R2/R3 confirmations, or after repeated failures.
 - Don't add props: no turbans, lamps, camels, desert scenes, flags or wings.
-- Don't mirror the Yaya wordmark, or move the dots of ي.
 - Don't scale the hero frames to favicon size. Use `bro-mark.svg`.
 
 ## 8. Files
 
 | File | What |
 |---|---|
-| `docs/assets/identity/candidate-1-pip.svg` … `candidate-5-fenn.svg` | the five heroes, 256×256 |
+| `docs/assets/identity/candidate-{1-pip,3-orbit,4-brim}.svg` | the three remaining heroes, 256×256 |
 | `docs/assets/identity/bro-states.svg` | Brim's six states with labels |
 | `docs/assets/identity/states/{idle,pointing,thinking,happy,teasing,quiet}.svg` | Brim frames, same structure, facing right |
 | `docs/assets/identity/bro-mark.svg` | favicon mark, 32×32 grid |
-| `docs/assets/identity/preview/*.png` | review renders: each candidate on light, dark, mid-grey and busy backgrounds at 160, 32 and 16 px; the overview; the states sheet in light and dark; raw 32 px renders |
+| `docs/assets/identity/preview/*.png` | review renders: each candidate on light, dark, mid-grey and busy backgrounds at 160, 32 and 16 px; the states sheet in light and dark; raw 32 px renders; `bro-{idle,pointing,happy,teasing}-240.png` are transparent renders of Brim for the demo GIF (made with cairosvg) |
 
 The Brim frames, the states sheet and the Brim hero were generated by a throwaway script that was not committed. The committed SVGs are the source of truth: edit them directly and keep the frame contract in §5.
 

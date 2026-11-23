@@ -8,7 +8,7 @@ Builders who use many apps often can't learn them from written guides or video t
 ## 2. Vision
 A Navi-style sidekick that **hovers on screen**. Ask in voice or text: *"Ya bro, how do I export this as PNG in GIMP?"* The bro shows the **next single step**, pointing at the real control, explaining briefly, and either waits for you to do it or does it itself while you watch. Then the next step. Like pair-programming, but for using apps.
 
-See [how it works](docs/assets/how-it-works.svg) for the loop and the [Show-me demo](docs/assets/show-me-calculator.gif) for what runs today. The bro's own look (avatar, shape) is not decided yet, so no artwork shows one; the earlier concept sketch with a mascot was removed for that reason.
+See [how it works](docs/assets/how-it-works.svg) for the loop and the [Show-me demo](docs/assets/show-me-calculator.gif) for what runs today. The bro's look is **provisional**: a round teal head with a cap ("Brim") from the [identity study](docs/design/BRO_IDENTITY.md), drawn by the extension in six moods ([ADR-0028](docs/adr/0028-the-bros-look.md)); the maintainer makes the final choice.
 
 ## 3. Users
 Primary: the maintainer — an app builder who struggles with guides/tutorials and learns best by doing with a guide present. Secondary: anyone onboarding to unfamiliar software on Linux.

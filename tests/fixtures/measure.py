@@ -319,7 +319,7 @@ def measure_overlay(sh):
     # Avatar click must produce UserEvent and not reach the app.
     n_before = len(app.events("click"))
     ev_before = len(sh.events)
-    avatar_pt = (t10[0] - 40 + 16, t10[1] + 70 + 16)
+    avatar_pt = (t10[0] - 56 + 24, t10[1] + 70 + 24)
     sh.click(*avatar_pt)
     pump(0.5)
     got = [e for e in sh.events[ev_before:] if e[1] == "UserEvent" and e[2][0] == "avatar_click"]
@@ -330,7 +330,10 @@ def measure_overlay(sh):
 
     # Bubble button: find its pixels, click, expect UserEvent button:next and no leak.
     pb = sh.grab()
-    bb = find_pixels(pb, BUTTON_BG, 6)
+    # Only the bubble: the bro is drawn left of it and has dark colours of its own (ADR-0028).
+    bb = find_pixels(
+        pb, BUTTON_BG, 6, cols=range(int(sh.state()["bubble"][0] * factor), pb.get_width())
+    )
     if bb:
         bx = sum(p[0] for p in bb) / len(bb) / factor
         by = sum(p[1] for p in bb) / len(bb) / factor

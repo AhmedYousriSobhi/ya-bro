@@ -84,7 +84,11 @@ class GnomeOverlay:
         return next((w["id"] for w in wins if w["focused"]), 0)
 
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
     ) -> None:
         self.last_target = target
         args = {
@@ -94,6 +98,8 @@ class GnomeOverlay:
             "follow_window": GLib.Variant("t", self._window_for(target)),
             "avatar": GLib.Variant("b", self._avatar),
         }
+        if mood:
+            args["mood"] = GLib.Variant("s", mood)
         if target:
             args["target"] = GLib.Variant("(iiii)", (target.x, target.y, target.w, target.h))
         else:
