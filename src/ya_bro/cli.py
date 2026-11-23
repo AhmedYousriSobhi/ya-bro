@@ -519,7 +519,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
     ask = sub.add_parser("ask", help="say what you want to do; Bro plans it and walks you through")
-    ask.add_argument("goal", help="in your own words, e.g. 'multiply 7 by 6'")
+    ask.add_argument(
+        "goal",
+        nargs="?",
+        default="",
+        help="in your own words, e.g. 'multiply 7 by 6'; omit to type it in a window",
+    )
     ask.add_argument("--app", default="", help="app id (default: the focused allowed window)")
     ask.add_argument("--dry", action="store_true", help="print the plan and stop")
     show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
