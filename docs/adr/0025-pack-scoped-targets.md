@@ -1,6 +1,6 @@
 # ADR-0025: Pack-scoped targets (tools with a web UI and a CLI)
 
-- Status: Accepted for the web part (built in #61, verified with a real browser and the real workbench page); the CLI part stays Proposed until the shell hook (#21)
+- Status: Accepted for the web part (built in #61, verified with a real browser and the real workbench page); the CLI part is built for bash (#21: the hook only records commands listed in `commands`, core re-checks on read; zsh and fish are not built)
 - Date: 2026-11-22
 - Issue: #47
 - Depends on: ADR-0012, ADR-0021, ADR-0023, #43 (per-app allowlist)

@@ -12,12 +12,17 @@ Legend: done · in progress · todo
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
-| M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21, #31 |
+| M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #21 shell hook and terminal reading (bash)
+Done: `shell/ya-bro.bash` (name, exit code, duration, tty per allowed command; allowlist in the hook; silent without core), `shell_spool` (private files, strict validation, partial lines, truncation), `terminal` (VTE text over AT-SPI, redacted; pack fix-it for `CODE: message | fix: COMMAND`; rc-file block), `broctl hook ...` and `broctl shell watch`, 40 tests. Real runs: interactive bash on a pty (100 commands exact, under 5 ms per command, silent without core, existing DEBUG trap and PROMPT_COMMAND kept) and a real VTE terminal in the isolated shell (spool, AT-SPI text, redaction, fix-it, scope).
+Findings: `trap -p DEBUG` is empty inside a sourced file or function, so the hook reads it at the first prompt; Ptyxis cannot spawn its shell in the isolated session (no systemd user bus), so the real test uses a bare VTE window; the first key after a window opens is eaten (again).
+Not done: zsh and fish, OSC 133 and OSC 7, typing a suggestion into the terminal (R2), kitty, WezTerm and Konsole adapters, generic fix-it rules, the S9 end to end with the real `benchctl`, inotify (polls at 0.2 s), Ptyxis itself and GNOME Terminal not exercised, `broctl hook install` was only run against a temporary HOME.
+
 ### 2026-11-23: #19 pointing eval harness
 Done: `grounding.point` (high, medium, none; names normalised for case, spacing, Arabic letter variants and diacritics; ring centre must be inside the focused window), used by the step loop (medium gets a hedged bubble), `pointing_eval`, `broctl eval pointing`, 300 synthetic cases, and **real recordings** from GNOME Calculator (36 elements), Files (5) and Settings (22) with 219 cases. Real checks, isolated headless shell (`tests/test_gnome_pointing.py`, repeated runs): Calculator 10/10 digit keys pointed High and a click in the ring types that digit; 7 × 6 = 42 by pointing at each key; Settings 3/3 and Files 3/3 pointed rows open their page when clicked. Eval over everything: 519 cases, 98.8% pointed-correct, 0.0% confidently wrong, medium precision 94.2%; the 6 misses are all synthetic (twins, one close sibling).
 Findings: GNOME Text Editor exposes no buttons in its tree (0 usable elements), so nothing can be pointed at by name there; Files' sidebar rows are `list item`, Settings' are `button`; the first press after a window opens is spent on activating it, so a harness must click the title bar first; GTK4 rows need the pointer over them before the press.

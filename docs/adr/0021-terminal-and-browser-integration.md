@@ -1,6 +1,6 @@
 # ADR-0021: Terminal and browser integration
 
-- Status: Proposed
+- Status: Proposed (bash hook, spool and VTE text reading implemented in #21; see "Implemented")
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0005, ADR-0010, ADR-0012, ADR-0014
@@ -95,6 +95,17 @@
    - **Reads:** URL, title, element rects in CSS pixels plus `devicePixelRatio` and viewport offset, and the page-state hooks a site opts into (the workbench `postMessage` proposal in ADR-0012).
    - **Writes:** highlight scroll-into-view only. No form filling and no clicking via the extension; Do-it uses ADR-0009 like every other app.
 8. **No CDP or WebDriver** in the product. They may be used in tests only.
+
+## Implemented (#21, 2026-11-23)
+Bash only. Differences from the text above, and what real runs showed:
+- **One record per command, at completion:** `{v, ts, argv0, exit, ms, tty}`. No start record, no `cwd_hash` or `cmd_hash` (hashing needs a process per command, and only allowed commands are recorded anyway).
+- **Allowlist in the hook:** core writes `$XDG_RUNTIME_DIR/ya-bro/commands` from the allowed targets (ADR-0025); the hook records nothing for any other command, so it never reaches the spool. Core checks again on read. The hook writes only if core's `shell.spool` exists, and prints nothing.
+- **No bash-preexec:** a small DEBUG trap marks the first command after a prompt and `PROMPT_COMMAND` reads `$?`. An existing DEBUG trap is kept and chained; it can only be read from the top level at the first prompt, because `trap -p DEBUG` shows nothing inside a sourced file or a function. The user's own `PROMPT_COMMAND` (string or array) still sees the command's real `$?`. A compound line (`a && b`) is recorded as its first command.
+- **Core polls the spool every 0.2 s** (the stdlib has no inotify); only core truncates it.
+- **Reading the terminal:** `ya_bro.terminal.last_output` reads the VTE buffer through AT-SPI Text after the user accepts help, bounded and redacted; `explain` matches a `CODE: message | fix: COMMAND` line against the owning pack's `fixits.toml`. `broctl hook install|uninstall|print|status` edits `~/.bashrc` only after a yes; `broctl shell watch` prints what the hook reports.
+- **Measured** (real interactive bash on a pty, `tests/test_shell_hook.py`): 100 commands recorded with exact exit codes, the overhead is under 5 ms per command, no output and no files without core, no arguments or other commands in the spool. **Real VTE** (`tests/test_gnome_terminal.py`, isolated shell): exit codes seen, the terminal text read over AT-SPI with a secret redacted, the workbench pack's fix-it found for the error, and another app's terminal unreadable.
+- **Found:** Ptyxis cannot start its shell in the isolated test session (its agent needs a systemd user bus), so the real test uses a bare VTE 2.91 window (`tests/fixtures/apps/vte_fixture.py`, the widget Ptyxis draws with); Ptyxis itself was only checked to expose a `terminal` role in AT-SPI.
+- **Not built:** zsh and fish hooks (neither installed here), OSC 133/7, typing a suggested command into the terminal (R2), the terminal adapters for kitty, WezTerm and Konsole, generic fix-it rules (command not found, permission denied), the hook's `fc`-based history read, and the spike-S9 end to end with the real `benchctl`.
 
 ## Consequences
 - **Positive:**

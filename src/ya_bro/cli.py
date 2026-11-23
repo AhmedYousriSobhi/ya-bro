@@ -86,6 +86,63 @@ def _pack(args: argparse.Namespace) -> int:
     return 0
 
 
+HOOK_SCRIPT_REL = "shell/ya-bro.bash"
+
+
+def _hook(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from ya_bro import terminal
+
+    script = Path(__file__).resolve().parents[2] / HOOK_SCRIPT_REL
+    rc = Path.home() / ".bashrc"
+    if args.verb == "print":
+        print(terminal.hook_block(script), end="")
+        return 0
+    if args.verb == "status":
+        has = rc.exists() and terminal.BEGIN in rc.read_text()
+        print(f"hook script: {script} ({'found' if script.is_file() else 'MISSING'})")
+        print(f"{rc}: {'hook installed' if has else 'hook not installed'}")
+        return 0
+    if args.verb == "uninstall":
+        print("removed from ~/.bashrc" if terminal.remove_block(rc) else "it was not installed")
+        return 0
+    print(f"This adds three lines to {rc} so new bash shells record, for the commands you allowed")
+    print("with `broctl targets allow --command`, only their name, exit code and duration.")
+    print("It never records arguments or output, and does nothing while Ya-Bro is not running.")
+    if input("Add it? [y/N] ").strip().lower() != "y":
+        print("not changed")
+        return 1
+    print("added; open a new terminal" if terminal.install_block(rc, script) else "already there")
+    return 0
+
+
+def _shell_watch(args: argparse.Namespace) -> int:
+    import time
+
+    from ya_bro import targets
+    from ya_bro.shell_spool import ShellSpool
+
+    commands = sorted({c for t in targets.load_all() for c in t.commands})
+    if not commands:
+        print("no allowed commands: run `broctl targets allow NAME --command COMMAND` first")
+        return 1
+    spool = ShellSpool()
+    spool.open(commands)
+    print(f"watching {', '.join(commands)} for {args.seconds} s (exit codes only)")
+    try:
+        end = time.monotonic() + args.seconds
+        while time.monotonic() < end:
+            for e in spool.poll():
+                print(f"{e['argv0']} exit {e['exit']} in {e['ms']} ms ({e['tty']})", flush=True)
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        spool.close()
+    return 0
+
+
 def _eval(args: argparse.Namespace) -> int:
     from pathlib import Path
 
@@ -220,8 +277,25 @@ def main(argv: list[str] | None = None) -> int:
     )
     pt.add_argument("--dir", default="", help="snapshot folder (default: evals/pointing)")
     pt.add_argument("-v", "--verbose", action="store_true", help="list every miss")
+    hk = sub.add_parser("hook", help="the bash hook that sees allowed commands finish (ADR-0021)")
+    hverbs = hk.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    for verb, text in (
+        ("print", "show what install would add to ~/.bashrc"),
+        ("install", "add the hook to ~/.bashrc (asks first)"),
+        ("uninstall", "remove it again"),
+        ("status", "is it installed?"),
+    ):
+        hverbs.add_parser(verb, help=text)
+    shw = sub.add_parser("shell", help="what the shell hook reports")
+    shw.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
+        "watch", help="print allowed commands as they finish"
+    ).add_argument("--seconds", type=int, default=60)
     args = parser.parse_args(argv)
 
+    if args.noun == "hook":
+        return _hook(args)
+    if args.noun == "shell":
+        return _shell_watch(args)
     if args.noun == "eval":
         return _eval(args)
     if args.noun == "pack":
