@@ -478,6 +478,18 @@ requires = ["name"]
 text = "أدوس على «{name}» دلوقتي؟"
 
 [[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "هكتب «{want}» في «{name}» بدالك. ماشي؟"
+
+[[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "أكتب «{want}» في «{name}» دلوقتي؟"
+
+[[line]]
 moment = "act_failed"
 humour = 0
 text = "ماشتغلتش، فدي عليك: هشاورلك وإنت دوس."

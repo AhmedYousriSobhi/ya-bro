@@ -23,6 +23,7 @@ from ya_bro import shell_command
 from ya_bro.types import ElementRef, Expect, Plan, Risk, Step
 
 MAX_STEPS = 50
+MAX_TEXT = 200
 
 
 class PlanError(ValueError):
@@ -74,6 +75,17 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
             raise PlanError(
                 f"{where}: command must be one printable line of at most 200 characters"
             )
+        text = s.get("text", "")
+        if text and (
+            not isinstance(text, str)
+            or target is None
+            or len(text) > MAX_TEXT
+            or not text.isprintable()
+        ):
+            raise PlanError(
+                f"{where}: text needs a target and must be one printable line of at most "
+                f"{MAX_TEXT} characters"
+            )
         try:
             risk = Risk(int(s.get("risk", 0)))
         except ValueError as e:
@@ -88,6 +100,7 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
                 expect=expect,
                 why=str(s.get("why", "")),
                 command=command,
+                text=text,
             )
         )
     keywords = [k.lower() for k in head.get("keywords", []) if isinstance(k, str)]

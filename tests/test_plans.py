@@ -91,3 +91,19 @@ def test_expect_can_match_on_text_and_needs_a_name_or_text(tmp_path):
         text = f'[plan]\ngoal = "g"\n[[step]]\nnarration = "x"\nexpect = {bad}'
         with pytest.raises(plans.PlanError):
             plans.load(write(tmp_path, text, "b.toml"))
+
+
+def test_a_step_text_needs_a_target_and_one_printable_line(tmp_path):
+    base = 'narration = "Name it."\ntarget = {role = "text", name = "Name"}\n'
+    ok = write(tmp_path, f'[plan]\ngoal = "g"\napp = "a"\n[[step]]\n{base}text = "Project X"\n')
+    plan, _, _ = plans.load(ok)
+    assert plan.steps[0].text == "Project X"
+    for bad in ('text = "two\\nlines"', "text = 5", f'text = "{"x" * 201}"'):
+        p = write(tmp_path, f'[plan]\ngoal = "g"\napp = "a"\n[[step]]\n{base}{bad}\n', "b.toml")
+        with pytest.raises(plans.PlanError):
+            plans.load(p)
+    no_target = write(
+        tmp_path, '[plan]\ngoal = "g"\napp = "a"\n[[step]]\nnarration = "n"\ntext = "x"\n', "c.toml"
+    )
+    with pytest.raises(plans.PlanError, match="target"):
+        plans.load(no_target)

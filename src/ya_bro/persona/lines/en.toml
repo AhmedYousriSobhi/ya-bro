@@ -478,6 +478,18 @@ requires = ["name"]
 text = "Press “{name}” for you now?"
 
 [[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "I'll type “{want}” into “{name}” for you. OK?"
+
+[[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "Type “{want}” in “{name}” now?"
+
+[[line]]
 moment = "act_failed"
 humour = 0
 text = "That didn't work, so it's yours: I'll point and you press it."

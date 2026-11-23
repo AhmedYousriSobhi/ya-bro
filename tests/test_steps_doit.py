@@ -170,3 +170,46 @@ async def test_a_screen_that_already_shows_the_result_is_trusted_after_one_press
     presser.perception.elements[DONE] = Rect(0, 0, 1, 1)  # cannot tell before from after
     assert await asyncio.wait_for(loop.run(plan, APP), 3) is Outcome.DONE
     assert len(presser.pressed) == 1
+
+
+# ---- text entry (#27): the bro types into an empty field after the user says OK ----
+
+
+async def test_typing_shows_the_exact_text_asks_first_and_types_only_after_ok():
+    overlay, presser, loop, plan = build([step(text="Project X")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await asyncio.sleep(0.2)
+    assert presser.pressed == []
+    assert overlay.buttons[0] == ("next", "stop") and "Project X" in texts(overlay)[0]
+    overlay.push("next")
+    assert await asyncio.wait_for(task, 3) is Outcome.DONE
+    assert [s.text for s in presser.pressed] == ["Project X"]
+
+
+async def test_stop_at_the_typing_question_types_nothing():
+    overlay, presser, loop, plan = build([step(text="Project X")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await asyncio.sleep(0.2)
+    overlay.push("stop")
+    assert await asyncio.wait_for(task, 3) is Outcome.STOPPED
+    assert presser.pressed == []
+
+
+async def test_text_that_looks_like_a_secret_is_never_typed_the_user_does_it():
+    overlay, presser, loop, plan = build([step(text="password=hunter2hunter2")])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await asyncio.sleep(0.3)
+    assert presser.pressed == []  # Show-me waits for the user instead
+    overlay.push("stop")
+    await asyncio.wait_for(task, 3)
+
+
+async def test_an_actuator_that_cannot_type_hands_the_step_back():
+    overlay, presser, loop, plan = build([step(text="Project X", expect=None)], works=False)
+    task = asyncio.create_task(loop.run(plan, APP))
+    await asyncio.sleep(0.2)
+    overlay.push("next")  # OK to type
+    await asyncio.sleep(0.8)
+    assert len(presser.pressed) == 2  # one retry, then back to the user
+    overlay.push("stop")
+    await asyncio.wait_for(task, 3)

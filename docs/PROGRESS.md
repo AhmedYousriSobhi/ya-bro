@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #27 Do-it text entry
+Done: `Step.text`, validation, R2 confirm that shows the text, secret and password refusal, `EditableText` entry that never overwrites; unit tests and a real GTK4 run with a mutation.
+Not done: portal + libei, multi-line and rich text, Arabic in a real app, undo offer, live desktop.
+
 ### 2026-11-23: #115 terminal companion
 Done: plan `command`, snippet and Copy/Write it buttons (extension, GNOME and docked overlays), hook idle marker and `bind -x` insert, guarded `TerminalWriter`, `CommandWatch` auto-advance, hover beside an allowed terminal, background companion; 7 real-pty tests with mutations, 7 loop tests, and a real VTE run in the isolated shell with screenshots.
 Not done: the live desktop (needs `broctl load` for the new extension), zsh and fish, Ptyxis and Console, scoping the bubble by terminal title (ADR-0029 open question), typing without the hook, a mutation run of the real-frame test, Write it with two idle terminals.

@@ -204,7 +204,12 @@ class StepLoop:
                 return ""  # never press on a guess
             if decision.needs_confirmation and attempt == 0:
                 self._tone.set_sensitive(True)
-                text = f"{count} {self._tone.act_confirm(step.target.name)} {step.narration}"
+                ask = (
+                    self._tone.act_type_confirm(step.target.name, step.text)
+                    if step.text
+                    else self._tone.act_confirm(step.target.name)
+                )
+                text = f"{count} {ask} {step.narration}"
                 self._tone.set_sensitive(False)
                 await self._overlay.show_step(rect, text, ("next", "stop"), mood="pointing")
                 while (event := await self._events.get()) not in ("next", "stop"):

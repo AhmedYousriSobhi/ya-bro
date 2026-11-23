@@ -48,6 +48,9 @@ sensitive = true
 [moments.act_confirm]      # Do-it, R2: ask before pressing it for the user
 max_humour = 0
 sensitive = true
+[moments.act_type_confirm] # Do-it, typing: shows the exact text and asks before entering it
+max_humour = 0
+sensitive = true
 [moments.act_failed]       # Do-it did not work twice: handing the step back
 max_humour = 0
 [moments.copied]          # Copy was pressed
