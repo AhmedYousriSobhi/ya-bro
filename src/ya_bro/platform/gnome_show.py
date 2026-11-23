@@ -26,7 +26,8 @@ from ya_bro import (  # noqa: E402
     packs,
     plans,
     privacy,
-    shell_command,  # noqa: E402
+    shell_command,
+    token_server,
 )
 from ya_bro.command_watch import CommandWatch  # noqa: E402
 from ya_bro.platform.docked_overlay import DockedOverlay  # noqa: E402
@@ -165,9 +166,10 @@ class _NoBridge:
         return self._win
 
 
-async def _hover():
-    """The bubble beside an allowed terminal window when the extension shows one, else a plain
-    window. Returns (overlay, bridge, hovering)."""
+async def _hover(token: str = "", writer: TerminalWriter | None = None):
+    """The bubble beside a terminal window the extension reports, else a plain window. The window is
+    reported when its app is allowed, or, with a token, while a hooked shell shows it in the title
+    (ADR-0029 §8). Returns (overlay, bridge, hovering)."""
     try:
         bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(
@@ -175,8 +177,14 @@ async def _hover():
         )
         await asyncio.sleep(0.5)  # let the extension notice the new owner
         bridge = GnomeBridge(bus)
-        if bridge.raw_windows():
-            return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True
+        if token:
+            _call(bus, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", ([token],)))
+            if writer is not None:
+                await asyncio.to_thread(writer.announce)
+        for _ in range(8 if token else 1):
+            if bridge.raw_windows():
+                return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True
+            await asyncio.sleep(0.5)
     except GLib.Error:
         pass
     return DockedOverlay(), _NoBridge(), False
@@ -206,13 +214,26 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
         return 1
     cfg = config.load(pack_id)
     hovering = False
-    if overlay is None:
-        overlay, bridge, hovering = await _hover()
-    else:
-        bridge = _NoBridge()
-    # The hook records only the commands this plan shows, and only while this run lasts.
+    # The hook records only the commands this plan shows, and only while this run lasts. Its title
+    # token scopes the terminal to this run, so the terminal app itself need not be allowed.
     spool = ShellSpool()
     spool.open(sorted({shell_command.argv0(s.command) for s in plan.steps if s.command}))
+    writer = TerminalWriter()
+    try:
+        if overlay is None:
+            token = token_server.new_token()
+            spool.set_scope_token(token)
+            overlay, bridge, hovering = await _hover(token, writer)
+        else:
+            bridge = _NoBridge()
+        return await _walk(plan, pack, pack_id, cfg, overlay, bridge, hovering, spool, writer)
+    finally:
+        spool.close()
+
+
+async def _walk(  # noqa: PLR0913
+    plan: Plan, pack, pack_id: str, cfg, overlay, bridge, hovering: bool, spool, writer
+) -> int:
     loop = StepLoop(
         _NoPerception(),
         overlay,
@@ -221,15 +242,12 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
         Timing(done_hold=1.5),
         log=lambda event, **f: print(event, *(f"{k}={v}" for k, v in f.items()), flush=True),
         tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
-        writer=TerminalWriter(),
+        writer=writer,
         commands=CommandWatch(spool),
     )
     where = "beside your terminal" if hovering else "in a window"
     print(f"{len(plan.steps)} steps for {pack.name}, shown {where}. Stop or Esc ends it.")
-    try:
-        print(f"finished: {await loop.run(plan, pack_id)}")
-    finally:
-        spool.close()
+    print(f"finished: {await loop.run(plan, pack_id)}")
     return 0
 
 

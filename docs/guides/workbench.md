@@ -20,7 +20,6 @@ One-time setup (needs the extension loaded, see getting started; **the extension
 
 ```bash
 uv run broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
-uv run broctl apps allow <your terminal's id>   # e.g. org.gnome.Ptyxis; lets Bro place its bubble beside it
 ```
 
 Then, in that terminal:

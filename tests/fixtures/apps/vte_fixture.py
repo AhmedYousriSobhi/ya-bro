@@ -23,6 +23,8 @@ def on_activate(app):
         Vte.PtyFlags.DEFAULT, None, argv, None, GLib.SpawnFlags.DEFAULT, None, None, -1, None, None
     )
     term.connect("child-exited", lambda *_: app.quit())
+    # A terminal app shows OSC 2 in its window title; the bare widget only reports it.
+    term.connect("window-title-changed", lambda t: win.set_title(t.get_window_title() or ""))
 
     # Ptyxis binds Ctrl+Shift+V to paste; the bare widget does not, so the tests ask for it here.
     def on_key(_w, ev):

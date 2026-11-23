@@ -2,8 +2,8 @@
 command; Copy puts it on the clipboard (pasted back with Ctrl+Shift+V), Write it puts it at the
 bash prompt without running it, Enter runs it and the plan moves on by itself.
 
-Run in headless-shell.sh with YB_ALLOWED=["io.github.ahmedyousrisobhi.YaBroVte"]; YB_SHOTS=dir keeps
-screenshots.
+Run in headless-shell.sh without YB_ALLOWED: the terminal's app is not allowed, so it is in scope
+only through the title token the hook sets (#117); YB_SHOTS=dir keeps screenshots.
 """
 
 import asyncio
@@ -98,29 +98,26 @@ async def main():
     sh = Shell()
     sh.start_input()
     perception = AtspiPerception(GnomeBridge(sh.conn))
-    win = None
-    for _ in range(60):
-        win = next((w for w in sh.windows() if w["app_id"] == APP), None)
-        if win:
-            break
-        await asyncio.sleep(0.5)
-    check("the terminal window opened", win is not None)
-    await asyncio.sleep(4)
-    fx, fy, fw, fh = win["frame"]
-    for _ in range(20):
-        sh.click(fx + fw // 2, fy + fh // 2)
-        await asyncio.sleep(0.4)
-        if any(w["focused"] and w["app_id"] == APP for w in sh.windows()):
-            break
+    check("no window is reported before Bro runs", not sh.windows())
+    await asyncio.sleep(5)  # the terminal's first prompt
 
     out = io.StringIO()
 
     async def shown():
-        return bool(sh.state()["visible"]) and len(buttons(sh)) >= 4
+        if not sh.state()["visible"]:
+            type_line(sh, "")  # a prompt: the hook marks the terminal idle and sets the title
+            return False
+        return len(buttons(sh)) >= 4
 
     with contextlib.redirect_stdout(out):
         task = asyncio.create_task(run_pack("workbench", "start the cluster"))
-        check("the bubble appears beside the terminal", await until(shown, 30))
+        check(
+            "the bubble appears beside the terminal",
+            await until(shown, 40),
+            out.getvalue()[-300:].replace("\n", " | "),
+        )
+        win = next((w for w in sh.windows() if w["app_id"] == APP), None)
+        check("the terminal is in scope by its title token alone", win is not None)
         for _ in range(3):  # a fresh prompt, so the hook marks this terminal idle
             type_line(sh, "")
             await asyncio.sleep(1)

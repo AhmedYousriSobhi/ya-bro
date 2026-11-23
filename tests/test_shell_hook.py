@@ -386,3 +386,77 @@ def test_the_real_terminal_is_never_written_under_pytest(tmp_path, runtime, spoo
         assert "\x1b[5n" not in _drain(sh)
     finally:
         sh.close()
+
+
+# ---- scope token in the terminal title (ADR-0029 §8) ----
+
+TOKEN = "yb-" + "ab12" * 8
+
+
+def test_the_hook_puts_the_scope_token_in_the_title_at_each_prompt(tmp_path, runtime, spool):
+    spool.set_scope_token(TOKEN)
+    sh = Bash(tmp_path, runtime)
+    try:
+        out = sh.run("true")
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in out
+    finally:
+        sh.close()
+
+
+def test_no_token_file_means_the_title_is_left_alone(tmp_path, runtime, spool):
+    sh = Bash(tmp_path, runtime)
+    try:
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_a_token_file_that_is_not_a_token_is_never_echoed_into_the_title(tmp_path, runtime, spool):
+    (runtime / "ya-bro" / "scope-token").write_text("evil\x1b]0;x\x07\n")
+    sh = Bash(tmp_path, runtime)
+    try:
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_the_title_goes_when_core_stops(tmp_path, runtime, spool):
+    spool.set_scope_token(TOKEN)
+    sh = Bash(tmp_path, runtime)
+    try:
+        spool.close()
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_announce_makes_an_idle_terminal_set_the_title_now_and_changes_nothing_else(
+    tmp_path, runtime, spool
+):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from ya_bro.terminal_write import TerminalWriter
+
+    spool.set_scope_token(TOKEN)
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")  # a fresh prompt so the hook marks the terminal idle
+        writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY))
+        with ThreadPoolExecutor(1) as ex:
+            fut = ex.submit(writer.announce)
+            seen = _answer(sh, None, 3.0)
+            assert fut.result(5) is True
+        seen += _drain(sh)
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in seen
+        tty = _tty_of(sh).split("/")[-1]
+        assert not (runtime / "ya-bro" / f"suggest.pts_{tty}").exists()
+        assert (runtime / "ya-bro" / f"suggest.pts_{tty}.result").read_text().strip() == "nothing"
+    finally:
+        sh.close()
+
+
+def test_announce_does_nothing_without_exactly_one_idle_terminal(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: 1 / 0)
+    assert writer.announce() is False  # no hook, no idle marker: nothing is opened
