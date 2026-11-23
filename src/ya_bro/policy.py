@@ -11,6 +11,7 @@ import re
 from collections.abc import Iterable
 
 from ya_bro.packs import Pack
+from ya_bro.redact import redact
 from ya_bro.types import Mode, PolicyDecision, Risk, Step
 
 # Whole words (lower-case, Arabic letters folded): exact forms, not stems, so `Payload` and
@@ -74,6 +75,8 @@ def command_risk(command: str) -> Risk:
 
 def effective_risk(step: Step, pack_risk: Risk = Risk.R0, command: str = "") -> Risk:
     risk = max(step.risk, pack_risk, command_risk(command))
+    if step.text:
+        risk = max(risk, Risk.R2)  # typing into the user's app is confirmed in this step (#27)
     if step.target is not None:
         risk = max(risk, name_risk(step.target.role, step.target.name))
     return Risk(risk)
@@ -103,8 +106,10 @@ class LocalPolicy:
     def check(self, step: Step, mode: Mode) -> PolicyDecision:
         pack_risk, pack_secret = self._from_packs(step)
         risk = effective_risk(step, Risk.R3 if pack_secret else pack_risk)
-        secret = pack_secret or (
-            step.target is not None and step.target.role.lower() in _SECRET_ROLES
+        secret = (
+            pack_secret
+            or (step.target is not None and step.target.role.lower() in _SECRET_ROLES)
+            or redact(step.text).changed  # a key or password is never typed for the user
         )
         if mode is Mode.SHOW_ME:
             if risk is Risk.R3:

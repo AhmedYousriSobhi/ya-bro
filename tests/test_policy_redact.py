@@ -266,3 +266,17 @@ def test_echoed_screen_text_is_redacted_before_it_is_cut():
     secret = "ghp_" + "a1B2c3D4e5F6g7H8i9J0" * 2
     out = snippet(f"token {secret} end")
     assert secret[:8] not in out and "ghp_" not in out
+
+
+def test_typing_is_r2_confirmed_and_a_secret_looking_text_is_refused():
+    field = ElementRef("app", "text", "Name")
+    ok = LocalPolicy(do_it=True).check(Step("i", "n", field, text="Project X"), Mode.DO_IT)
+    assert ok.allowed and ok.needs_confirmation
+    bad = LocalPolicy(do_it=True).check(
+        Step("i", "n", field, text="password=hunter2hunter2"), Mode.DO_IT
+    )
+    assert not bad.allowed
+    pw = LocalPolicy(do_it=True).check(
+        Step("i", "n", ElementRef("app", "password text", "Pw"), text="abc"), Mode.DO_IT
+    )
+    assert not pw.allowed

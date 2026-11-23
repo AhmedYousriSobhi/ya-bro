@@ -330,9 +330,36 @@ class AtspiActuator:
         except GLib.Error:
             return False
 
+    def _type(self, step) -> bool:
+        """Enter step.text into the target field: only an editable, non-password field that is
+        empty (the user's own text is never overwritten), and only if it reads back exactly."""
+        t = step.target
+        if t is None or t.role.lower() in NEVER_ACT_ROLES:
+            return False
+        refs = self._perception._find(t.app_id, t.role, t.name, "")
+        if len(refs) != 1:
+            return False
+        found = self._perception._resolve(refs[0])
+        if found is None:
+            return False
+        node = found[1]
+        try:
+            if node.get_role_name() in NEVER_ACT_ROLES or self._aborted:
+                return False
+            if not node.get_state_set().contains(Atspi.StateType.EDITABLE):
+                return False
+            if Atspi.Text.get_character_count(node) != 0:
+                return False
+            if not Atspi.EditableText.insert_text(node, 0, step.text, len(step.text.encode())):
+                return False
+            count = Atspi.Text.get_character_count(node)
+            return Atspi.Text.get_text(node, 0, count) == step.text
+        except GLib.Error:
+            return False
+
     async def act(self, step) -> bool:
         self._aborted = False
-        return await asyncio.to_thread(self._press, step)
+        return await asyncio.to_thread(self._type if step.text else self._press, step)
 
     async def abort(self) -> None:
         self._aborted = True

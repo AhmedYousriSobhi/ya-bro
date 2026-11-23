@@ -84,6 +84,10 @@ class Tone:
         """Before pressing an R2 control for the user (Do-it): asks, never jokes."""
         return self.persona.say("act_confirm", name=snippet(name))
 
+    def act_type_confirm(self, name: str, text: str) -> str:
+        """Before typing text into a field for the user (Do-it): shows exactly what, asks."""
+        return self.persona.say("act_type_confirm", name=snippet(name), want=snippet(text))
+
     def act_failed(self) -> str:
         return self.persona.say("act_failed")
 

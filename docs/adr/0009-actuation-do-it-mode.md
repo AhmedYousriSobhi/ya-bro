@@ -1,6 +1,6 @@
 # ADR-0009: Actuation (Do-it mode)
 
-- Status: Proposed (AT-SPI backend and the Do-it step loop built in #27, `broctl show --do-it`; the portal + libei path and text entry are not)
+- Status: Proposed (AT-SPI backend and the Do-it step loop built in #27, `broctl show --do-it`; the portal + libei path are not; text entry through `EditableText` is built, #27)
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0002, ADR-0003, ADR-0007, ADR-0014
@@ -71,6 +71,7 @@ In Do-it mode the bro performs one step while the user watches. Every action mus
 4. **Text entry.**
    - Prefer `EditableText` or the clipboard (with an explicit, visible "pasting…") over key synthesis, especially for Arabic and other non-layout characters.
    - Never type into fields with role `password text` or with a pack-declared secret flag.
+   - **Built (#27):** a step's `text` (one printable line, at most 200 characters, needs a target) is entered with AT-SPI `EditableText.insert_text`, no key synthesis and no clipboard. It is R2: the bubble shows the exact text and asks first. Refused, and handed back to the user: a password role, a pack secret, text that `redact` finds secret-shaped, a field that is not editable, and a field that already holds text (the user's own text is never overwritten). The result must read back exactly. Arabic works the same way (no layout involved); not yet run against an Arabic string in a real app.
 5. **Risk tiers and confirmation.** The local `Policy` engine applies these; the LLM only proposes ([ADR-0014](0014-privacy-security-trust-model.md)).
 
    | Tier | Examples | Policy |

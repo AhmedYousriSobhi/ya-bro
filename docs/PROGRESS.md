@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #27 Do-it text entry
+Done: `Step.text`, validation, R2 confirm that shows the text, secret and password refusal, `EditableText` entry that never overwrites; unit tests and a real GTK4 run with a mutation.
+Not done: portal + libei, multi-line and rich text, Arabic in a real app, undo offer, live desktop.
+
 ### 2026-11-23: #117 terminal scoped by a title token
 Done: the hook puts a per-run token in the terminal title, core pushes it to the extension and nudges the idle terminal, so the bubble hovers with no `apps allow` for the terminal; pty tests and a real-frame run with no app allowed.
 Not done: Ptyxis honouring OSC 2 for the window title (unverified), zsh and fish, the live desktop.
