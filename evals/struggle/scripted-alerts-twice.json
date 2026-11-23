@@ -1,0 +1,21 @@
+{
+ "id": "alerts-twice",
+ "kind": "error_loop",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "alert",
+   "key": "e1"
+  },
+  {
+   "t": 51.3,
+   "kind": "alert",
+   "key": "e2"
+  }
+ ],
+ "onset": 10
+}

@@ -20,6 +20,15 @@ from ya_bro.policy import ShowMePolicy  # noqa: E402
 from ya_bro.steps import Outcome, StepLoop, Timing  # noqa: E402
 
 BUTTON_BG = (0x3A, 0x3A, 0x52)  # .yabro-button in extension/stylesheet.css
+
+
+def bubble_buttons(sh):
+    """The button-coloured pixels of the bubble only: the bro (ADR-0028) sits left of it."""
+    bx = sh.state()["bubble"][0]
+    pb = sh.grab()
+    return find_pixels(pb, BUTTON_BG, 6, cols=range(int(bx * sh.ratio), pb.get_width()))
+
+
 ALLOWED = "io.github.ahmedyousrisobhi.YaBroSteps"
 OTHER = "io.github.ahmedyousrisobhi.YaBroOther"
 results = []
@@ -88,9 +97,9 @@ async def main():
     texts = []
 
     class Recording(GnomeOverlay):
-        async def show_step(self, target, bubble_text, buttons=()):
+        async def show_step(self, target, bubble_text, buttons=(), mood=""):
             texts.append(bubble_text)
-            await super().show_step(target, bubble_text, buttons)
+            await super().show_step(target, bubble_text, buttons, mood)
 
     overlay = Recording(sh.conn, bridge)
     loop = StepLoop(perception, overlay, bridge, ShowMePolicy(), Timing(poll=0.2))
@@ -100,7 +109,7 @@ async def main():
     t1 = overlay.last_target
     check("overlay visible", sh.state()["visible"] is True)
     # Next before doing the step: the bro asks instead of skipping.
-    px = find_pixels(sh.grab(), BUTTON_BG, 6)
+    px = bubble_buttons(sh)
     left = min(p[0] for p in px)
     ys = [p[1] for p in px if p[0] < left + 6]
     sh.click((left + 20) / sh.ratio, sum(ys) / len(ys) / sh.ratio)
@@ -132,7 +141,7 @@ async def main():
     check("bubble-only step shown", await until(lambda: sh.state()["visible"] is True, 10))
     # The buttons sit side by side (Next, Repeat, Why, Stop): click just inside the right edge of the row.
     await asyncio.sleep(1.0)
-    px = find_pixels(sh.grab(), BUTTON_BG, 6)
+    px = bubble_buttons(sh)
     check("bubble buttons are drawn", len(px) > 200, str(len(px)))
     if px:
         right = max(p[0] for p in px)

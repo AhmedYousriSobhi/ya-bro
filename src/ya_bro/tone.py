@@ -1,67 +1,102 @@
-"""What the bro says (SPEC persona, #23): plain at humour 0, playful from 1 up.
+"""What the bro says while it walks you through a plan: a thin face over the persona (ADR-0013).
 
 Lines are templates over short facts (a step number, an expected value, what the screen shows),
-never over free text read off the screen beyond a short, cut-down snippet.
+never over free text read off the screen beyond a short, cut-down snippet. The words, the languages
+and the humour rules live in `ya_bro.persona`; this class only shapes the facts and keeps the
+step loop's calls the same.
 """
 
 from __future__ import annotations
+
+from ya_bro.persona import Persona
+from ya_bro.redact import redact
 
 SNIPPET = 24  # the most characters of screen text we echo back
 
 
 def snippet(text: str) -> str:
-    one = " ".join(text.split())
+    # Redact before cutting: a cut could leave half a secret that no pattern recognises.
+    one = " ".join(redact(text).text.split())
     return one if len(one) <= SNIPPET else one[: SNIPPET - 1] + "…"
 
 
 class Tone:
-    def __init__(self, humour: int = 1) -> None:
-        self.humour = max(0, min(3, humour))
-        self._mismatches = 0
+    def __init__(self, humour: int = 1, locale: str = "en", less_chatty: bool = False) -> None:
+        self.persona = Persona(humour=humour, locale=locale, less_chatty=less_chatty)
+
+    @property
+    def humour(self) -> int:
+        return self.persona.humour
+
+    # ---- the task's state, kept by the step loop --------------------------------------------
+
+    def begin_task(self) -> None:
+        self.persona.begin_task()
+
+    def note_progress(self) -> None:
+        self.persona.note_progress()
+
+    def set_sensitive(self, on: bool) -> None:
+        """A risky or private step: no humour at all while it is on screen."""
+        self.persona.sensitive = on
+
+    def can_tease(self) -> bool:
+        """The teasing face (and its lines) only when humour allows it right now."""
+        return self.persona.effective_humour("mismatch") >= 1
+
+    # ---- lines -----------------------------------------------------------------------------
 
     def cant_find(self, name: str) -> str:
-        if not self.humour:
-            return f"I can't find “{name}” here yet. Open the right screen and I'll point at it."
-        return f"Where's “{name}” hiding, bro? Open the right screen and I'll point at it."
+        return self.persona.say("cant_find", name=name)
+
+    def unsure(self, name: str) -> str:
+        return self.persona.say("unsure", name=name)
 
     def not_yet(self) -> str:
-        if not self.humour:
-            return "I don't see that yet. Do it and I'll move on. Next again skips."
-        return "Nice try, bro, but I don't see it yet. Do it and I'll move on. Next again skips."
+        return self.persona.say("not_yet")
 
     def pre_done(self) -> str:
-        if not self.humour:
-            return "This already looks done. Press Next to continue."
-        return "Already done? Show-off. Press Next to continue."
+        return self.persona.say("pre_done")
+
+    def done(self) -> str:
+        return self.persona.say("task_done")
+
+    def plan_preview(self, count: int, first: str) -> str:
+        return self.persona.say("plan_preview", count=str(count), first=first[:90])
+
+    def replanning(self) -> str:
+        return self.persona.say("replanning")
 
     def still_here(self) -> str:
-        if not self.humour:
-            return "Still here. Press Next when you've done it."
-        return "Still here, bro. Take your time. Press Next when you've done it."
+        return self.persona.say("still_here")
+
+    def greeting(self) -> str:
+        return self.persona.say("greeting")
+
+    def step_done(self) -> str:
+        return self.persona.say("step_done")
+
+    def risky(self, name: str = "") -> str:
+        """Before a step the user must take themselves (R3): never humorous."""
+        return self.persona.say("risk_confirm", name=snippet(name))
 
     def mismatch(self, want: str, got: str) -> str:
-        want, got = snippet(want), snippet(got)
-        self._mismatches += 1
-        if not self.humour:
-            return (
-                f"That's not what I asked for. I expected “{want}” on screen. "
-                "Undo it, or press Next to go on."
-            )
-        shown = f" and you gave me “{got}”" if got else ""
-        lines = [
-            f"See?! That's not it, bro. I warned you. I wanted “{want}”{shown}. "
-            "Undo it, or press Next to go on.",
-            f"Bro... I said “{want}”{shown}. Undo it, or press Next if you're feeling lucky.",
-            f"Ha! Wrong one. I wanted “{want}”{shown}. Undo it, then try again.",
-        ]
-        return lines[(self._mismatches - 1) % len(lines)]
+        self.persona.note_mismatch()
+        return self.persona.say("mismatch", want=snippet(want), got=snippet(got))
 
     def why_mismatch(self, want: str, got: str, why: str) -> str:
-        want, got = snippet(want), snippet(got)
-        seen = f"The screen shows “{got}”" if got else "The screen shows something else"
-        head = f"{seen}, but this step needs “{want}”."
-        tail = f" {why}" if why else ""
-        fix = " Undo it (C or Undo), then press the key I'm pointing at."
-        if self.humour:
-            head = f"{seen}, bro, but I need “{want}”. That's the mistake."
-        return head + tail + fix
+        return self.persona.say("why_mismatch", want=snippet(want), got=snippet(got), why=why)
+
+    # ---- the struggle offer (ADR-0010 §4) ----------------------------------------------------
+
+    def offer(self, app: str) -> str:
+        return self.persona.say("offer_stuck", app=app)
+
+    def declined(self) -> str:
+        return self.persona.say("offer_declined")
+
+    def back_off(self) -> str:
+        return self.persona.say("back_off_long")
+
+    def recovered(self) -> str:
+        return self.persona.say("error_recovered")

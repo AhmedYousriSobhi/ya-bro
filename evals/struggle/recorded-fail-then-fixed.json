@@ -1,0 +1,28 @@
+{
+ "id": "fail-then-fixed",
+ "kind": "failing_commands",
+ "source": "recorded",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 32.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 1.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 2.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 0
+  }
+ ]
+}

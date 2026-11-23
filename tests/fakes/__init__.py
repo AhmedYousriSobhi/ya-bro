@@ -6,7 +6,17 @@ import asyncio
 from collections.abc import AsyncIterator
 from pathlib import Path
 
-from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Risk, Step, WindowInfo
+from ya_bro.types import (
+    ElementRef,
+    Mode,
+    Plan,
+    PolicyDecision,
+    Rect,
+    Risk,
+    Step,
+    UiEvent,
+    WindowInfo,
+)
 
 
 class FakePerception:
@@ -51,13 +61,19 @@ class FakeOverlay:
     def __init__(self) -> None:
         self.calls: list[tuple] = []
         self.buttons: list[tuple[str, ...]] = []
+        self.moods: list[str] = []
         self._events: asyncio.Queue[str] = asyncio.Queue()
 
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
     ) -> None:
         self.calls.append(("show_step", target, bubble_text))
         self.buttons.append(buttons)
+        self.moods.append(mood)
 
     def push(self, event: str) -> None:
         self._events.put_nowait(event)
@@ -115,6 +131,15 @@ class FakeShellHook:
         self.queued = list(queued or [])
 
     async def events(self) -> AsyncIterator[dict[str, int | str]]:
+        for e in self.queued:
+            yield e
+
+
+class FakeUiEvents:
+    def __init__(self, queued: list[UiEvent] | None = None) -> None:
+        self.queued = list(queued or [])
+
+    async def events(self) -> AsyncIterator[UiEvent]:
         for e in self.queued:
             yield e
 

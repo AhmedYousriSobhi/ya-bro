@@ -1,0 +1,29 @@
+{
+ "id": "fail-three-with-noise",
+ "kind": "failing_commands",
+ "source": "recorded",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 34.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 2.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 4.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  }
+ ],
+ "onset": 0.0
+}

@@ -1,0 +1,28 @@
+{
+ "id": "copy-then-paste-wait",
+ "kind": "mixed",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 5,
+   "kind": "focus",
+   "key": "w1"
+  },
+  {
+   "t": 10,
+   "kind": "focus",
+   "key": "w2"
+  },
+  {
+   "t": 18,
+   "kind": "undo"
+  },
+  {
+   "t": 38,
+   "kind": "help_opened"
+  }
+ ]
+}

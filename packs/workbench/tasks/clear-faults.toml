@@ -1,0 +1,16 @@
+[plan]
+goal = "clear workbench faults"
+keywords = ["clear", "faults", "fault", "reset", "workbench", "benchctl"]
+
+[[step]]
+narration = "Run: ./scripts/benchctl get faults"
+why = "Look at what is wrong before you clear it."
+
+[[step]]
+narration = "Run: ./scripts/benchctl clear faults"
+why = "It clears every injected node fault at once, like Clear faults in the web page."
+risk = 2
+
+[[step]]
+narration = "Run: ./scripts/benchctl get faults again."
+why = "It should now list nothing."

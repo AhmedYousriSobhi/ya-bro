@@ -57,7 +57,7 @@ def test_setup_requires_explicit_yes(tmp_path):
 
 def test_setup_enables_a11y_on_yes():
     runner = fake({"set org.gnome.desktop.interface": (0, "")})
-    answers = iter(["", "y", "n"])
+    answers = iter(["", "", "y", "n"])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=lambda _: None, apps=[])
     assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
 
@@ -114,7 +114,7 @@ def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
     runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
     out = []
     gimp = desktop_apps.DesktopApp("org.gimp.GIMP", "GIMP", "")
-    answers = iter(["gimp", "1", "n", "y"])
+    answers = iter(["", "gimp", "1", "n", "y"])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[gimp])
     assert any("see: org.gimp.GIMP" in x for x in out)
 

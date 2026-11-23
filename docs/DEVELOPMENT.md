@@ -15,6 +15,9 @@ scripts/check.sh --fast   # skip the integration test
 ## GNOME extension
 `scripts/dev/headless-shell.sh <cmd>` runs `<cmd>` inside an isolated headless `gnome-shell` with the extension enabled: private bus, config, data and runtime dirs, its own PipeWire, WirePlumber and (with `YB_X11=1`) Xwayland. It never uses your `DISPLAY`. WirePlumber runs with video, audio and Bluetooth off inside a `bwrap` namespace that masks `/dev/video*` and `/dev/media*`, so the harness cannot touch the camera; it refuses to start without `bwrap`. `YB_DEVKIT=1` runs a nested shell in a `mutter-devkit` window on your real desktop instead (needs `sudo apt install mutter-dev-bin`; a window opens, nothing else on the real desktop is touched). Env: `YB_X11`, `YB_SCALE`, `YB_MONITOR`, `YB_GDK`, `YB_DEBUG`. `pytest -m gnome` runs the fast contract test; `pytest -m gnome_measure` runs the S1 measurements (about 5 minutes, writes `docs/research/spikes/S1-measurements-scale-*.json`; not part of `scripts/check.sh`). Do not reload the extension in your live session; the ADR-0023 nested `--devkit` loop (needs `mutter-dev-bin`) is for visual checks.
 
+## Secret Service tests
+`pytest -m keyring` (part of `scripts/check.sh`, skipped with a reason when `bwrap`, `dbus-run-session` or `gnome-keyring-daemon` are missing) runs a real gnome-keyring-daemon on a private session bus with a private HOME, inside a bwrap namespace that hides `/run/user` and with a scrubbed environment: `gnome-keyring-daemon` looks for a running daemon at `/run/user/<uid>/keyring` whatever `XDG_RUNTIME_DIR` says, so without the namespace it can reach your own keyring. Never run that daemon by hand against your real session while developing. Under pytest the real backend refuses to run outside such a session.
+
 ## CI
 The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so PRs into `dev` are validated locally with `scripts/check.sh`); it is not active until copied to `.github/workflows/` (needs a token with `workflow` scope). See docs/PROGRESS.md.
 
@@ -24,7 +27,7 @@ The workflow draft is `docs/ci/ci.yml` and triggers on pushes to `main` only (so
 | `src/ya_bro/interfaces/` | Component Protocols (provisional) |
 | `src/ya_bro/types.py` | Shared value types |
 | `src/ya_bro/ipc/` | Versioned D-Bus names and the adapter Protocol |
-| `src/ya_bro/steps.py`, `plans.py`, `tone.py`, `policy.py` | The Show-me loop, TOML plans, the bro's lines, Show-me policy ([ADR-0026](adr/0026-show-me-step-loop.md)) |
+| `src/ya_bro/steps.py`, `plans.py`, `tone.py`, `persona/`, `policy.py` | The Show-me loop, TOML plans, the bro's lines (`persona/` holds the words, `tone.py` is its face for the loop), Show-me policy ([ADR-0026](adr/0026-show-me-step-loop.md)) |
 | `src/ya_bro/platform/` | The only place for OS and toolkit imports (GNOME adapters, setup, demo runners) |
 | `examples/plans/` | Runnable Show-me plans |
 | `extension/` | The GNOME Shell extension (GJS, ADR-0023) |

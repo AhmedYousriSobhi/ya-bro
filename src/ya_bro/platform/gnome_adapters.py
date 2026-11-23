@@ -16,6 +16,7 @@ gi.require_version("Gio", "2.0")
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi, Gio, GLib  # noqa: E402
 
+from ya_bro.persona import is_rtl  # noqa: E402
 from ya_bro.types import ElementRef, Rect, WindowInfo  # noqa: E402
 
 PREFIX = "io.github.ahmedyousrisobhi.YaBro"
@@ -51,6 +52,14 @@ class GnomeBridge:
         return next((w for w in await self.windows() if w.focused), None)
 
 
+def own_perceiver(bus: Gio.DBusConnection) -> int:
+    """Claim the read-only Perceiver role, so a watcher may list the allowed windows without owning
+    Core (which the extension reserves for whoever draws). Returns the id to hand to unown."""
+    return Gio.bus_own_name_on_connection(
+        bus, f"{PREFIX}.Perceiver", Gio.BusNameOwnerFlags.NONE, None, None
+    )
+
+
 class GnomeOverlay:
     """Overlay1 over D-Bus. Pings every 2 s (the extension hides after ~6 s of silence)."""
 
@@ -58,6 +67,7 @@ class GnomeOverlay:
         self._bus = bus
         self._bridge = bridge
         self._avatar = avatar
+        self.indicators: tuple[str, ...] = ("watching",)  # reading the allowed app, always shown
         self._queue: asyncio.Queue[str] = asyncio.Queue()
         self._serial = 0
         self._ping: asyncio.Task | None = None
@@ -84,7 +94,11 @@ class GnomeOverlay:
         return next((w["id"] for w in wins if w["focused"]), 0)
 
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
     ) -> None:
         self.last_target = target
         args = {
@@ -93,7 +107,11 @@ class GnomeOverlay:
             "buttons": GLib.Variant("as", list(buttons)),
             "follow_window": GLib.Variant("t", self._window_for(target)),
             "avatar": GLib.Variant("b", self._avatar),
+            "dir": GLib.Variant("s", "rtl" if is_rtl(bubble_text) else "ltr"),
+            "indicators": GLib.Variant("as", list(self.indicators)),
         }
+        if mood:
+            args["mood"] = GLib.Variant("s", mood)
         if target:
             args["target"] = GLib.Variant("(iiii)", (target.x, target.y, target.w, target.h))
         else:
@@ -105,6 +123,11 @@ class GnomeOverlay:
         _call(self._bus, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", (args,)))
         if self._ping is None:
             self._ping = asyncio.get_running_loop().create_task(self._keepalive())
+
+    async def set_indicators(self, names: tuple[str, ...]) -> None:
+        """What the bro is doing, shown as dots under it (ADR-0014 §3); the next step keeps them."""
+        self.indicators = names
+        _call(self._bus, OVERLAY, "SetIndicators", GLib.Variant("(as)", (list(names),)))
 
     async def _keepalive(self) -> None:
         while True:
@@ -186,7 +209,13 @@ class AtspiPerception:
                 return
             budget[0] -= 1
             if depth and _matches(node, role, name, text):
-                found.append(ElementRef(app_id, role, name, f"{pid}:" + "/".join(map(str, trail))))
+                # The element's own name (equal to `name` when one was asked for), so a caller
+                # that lists a whole role can tell the elements apart.
+                try:
+                    own = node.get_name() or ""
+                except GLib.Error:
+                    own = name
+                found.append(ElementRef(app_id, role, own, f"{pid}:" + "/".join(map(str, trail))))
             try:
                 count = node.get_child_count()
             except GLib.Error:

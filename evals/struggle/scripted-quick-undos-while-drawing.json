@@ -1,0 +1,34 @@
+{
+ "id": "quick-undos-while-drawing",
+ "kind": "undo_loop",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 90,
+ "events": [
+  {
+   "t": 5,
+   "kind": "undo"
+  },
+  {
+   "t": 8.1,
+   "kind": "undo"
+  },
+  {
+   "t": 11.7,
+   "kind": "undo"
+  },
+  {
+   "t": 14.6,
+   "kind": "undo"
+  },
+  {
+   "t": 19.0,
+   "kind": "undo"
+  },
+  {
+   "t": 21.9,
+   "kind": "undo"
+  }
+ ]
+}

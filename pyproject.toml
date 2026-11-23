@@ -1,6 +1,6 @@
 [project]
 name = "ya-bro"
-version = "0.1.0"
+version = "0.2.0"
 description = "Voice + text sidekick that walks you through real apps on Linux, one step at a time."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -41,6 +41,8 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
   "atspi: needs system PyGObject, AT-SPI and dbus-run-session",
   "gnome: needs gnome-shell 50 (runs an isolated headless shell, ~1 min)",
+  "keyring: needs bwrap, dbus-run-session and gnome-keyring-daemon (isolated private Secret Service)",
+  "live: calls the real Anthropic API; needs ANTHROPIC_API_KEY, costs a little, never in check.sh",
   "gnome_measure: S1 measurements, slow (minutes), excluded from scripts/check.sh",
 ]
 

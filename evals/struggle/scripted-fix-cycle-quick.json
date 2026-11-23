@@ -1,0 +1,33 @@
+{
+ "id": "fix-cycle-quick",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 29.1,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 42.8,
+   "kind": "command_exit",
+   "key": "make",
+   "value": 1
+  },
+  {
+   "t": 56.2,
+   "kind": "command_exit",
+   "key": "make"
+  }
+ ]
+}

@@ -1,0 +1,130 @@
+{
+ "id": "menu-used-normally",
+ "kind": "menu_thrash",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 5,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 5.9,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 5.9,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 11.0,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 11.8,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 11.8,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 15.0,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 16.2,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 16.2,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 21.0,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 21.7,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 21.7,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 27.8,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 28.8,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 28.8,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 33.9,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 35.0,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 35.0,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 40.7,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 41.7,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 41.7,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 46.3,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 47.1,
+   "kind": "menu_activated",
+   "key": "File"
+  },
+  {
+   "t": 47.1,
+   "kind": "menu_hidden",
+   "key": "File"
+  }
+ ]
+}

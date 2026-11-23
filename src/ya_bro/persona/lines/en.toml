@@ -1,0 +1,466 @@
+# English lines (ADR-0013). Placeholders: {name} {want} {got} {why} {app}. humour = the lowest setting that may use the line.
+# bro = true marks a line that says "bro" (allowed once per task).
+
+[[line]]
+moment = "greeting"
+humour = 0
+text = "Hi. Tell me what you want to do and I'll point at it."
+
+[[line]]
+moment = "greeting"
+humour = 1
+bro = true
+text = "Ya bro! What are we doing today?"
+
+[[line]]
+moment = "greeting"
+humour = 1
+text = "Hey. What are we figuring out?"
+
+[[line]]
+moment = "greeting"
+humour = 1
+text = "Hi there. Pick an app and I'll walk you through it."
+
+[[line]]
+moment = "greeting"
+humour = 2
+bro = true
+text = "Ya bro! Show me the app and I'll show you the way."
+
+[[line]]
+moment = "step_done"
+humour = 0
+text = "That step is done."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "Nice. Next."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "That's one down."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "Good. On to the next one."
+
+[[line]]
+moment = "step_done"
+humour = 2
+text = "Smooth. Like you've done this before."
+
+[[line]]
+moment = "task_done"
+humour = 0
+text = "That's all the steps."
+
+[[line]]
+moment = "task_done"
+humour = 1
+bro = true
+text = "Done, bro. Told you it'd be easy."
+
+[[line]]
+moment = "task_done"
+humour = 1
+text = "All done. That went well."
+
+[[line]]
+moment = "task_done"
+humour = 1
+text = "That's everything. Nicely done."
+
+[[line]]
+moment = "task_done"
+humour = 2
+text = "Nailed it. A coffee would not be refused."
+
+[[line]]
+moment = "task_done"
+humour = 2
+text = "Done. I'd high-five you but I have no hands."
+
+[[line]]
+moment = "cant_find"
+humour = 0
+text = "I can't find “{name}” here yet. Open the right screen and I'll point at it."
+
+[[line]]
+moment = "cant_find"
+humour = 0
+text = "I don't see “{name}” on this screen yet. Open the right one and I'll point at it."
+
+[[line]]
+moment = "unsure"
+humour = 0
+text = "I think it's this one, “{name}”:"
+
+[[line]]
+moment = "unsure"
+humour = 0
+text = "This looks like “{name}”, but I'm not certain:"
+
+[[line]]
+moment = "not_yet"
+humour = 0
+text = "I don't see that yet. Do it and I'll move on. Next again skips."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+bro = true
+text = "Nice try, bro, but I don't see it yet. Do it and I'll move on. Next again skips."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+text = "Almost. I don't see it yet. Do it and I'll move on. Next again skips."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+text = "Not quite yet. Do it and I'll move on. Next again skips."
+
+[[line]]
+moment = "not_yet"
+humour = 2
+text = "Pressing Next doesn't count as doing it. I'll move on when I see it. Next again skips."
+
+[[line]]
+moment = "pre_done"
+humour = 0
+text = "This already looks done. Press Next to continue."
+
+[[line]]
+moment = "pre_done"
+humour = 1
+text = "Already done? Show-off. Press Next to continue."
+
+[[line]]
+moment = "pre_done"
+humour = 1
+text = "Looks like you beat me to it. Press Next to continue."
+
+[[line]]
+moment = "pre_done"
+humour = 2
+text = "Already done. Are you sure you need me? Press Next to continue."
+
+[[line]]
+moment = "still_here"
+humour = 0
+text = "Still here. Press Next when you've done it."
+
+[[line]]
+moment = "still_here"
+humour = 1
+bro = true
+text = "Still here, bro. Take your time. Press Next when you've done it."
+
+[[line]]
+moment = "still_here"
+humour = 1
+text = "No rush. I'm not going anywhere. Press Next when you've done it."
+
+[[line]]
+moment = "still_here"
+humour = 1
+text = "Take your time. Press Next when you've done it."
+
+[[line]]
+moment = "still_here"
+humour = 2
+text = "Take your time. I have all day, literally. Press Next when you've done it."
+
+[[line]]
+moment = "offer_stuck"
+humour = 0
+text = "Need a hand with {app}?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 0
+text = "Looks like {app} is giving you trouble. Want a hand?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+bro = true
+text = "You stuck, bro?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+text = "{app} fighting back? Want a hand?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+text = "Hey, want a hand with {app}?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 2
+bro = true
+text = "You stuck, bro? I'm good at this."
+
+[[line]]
+moment = "offer_stuck"
+humour = 2
+text = "That looked painful. Want a hand?"
+
+[[line]]
+moment = "offer_stuck"
+humour = 3
+bro = true
+text = "Bro. I saw that. Let me help before {app} wins."
+
+[[line]]
+moment = "offer_declined"
+humour = 0
+text = "Okay. I'll stay out of the way."
+
+[[line]]
+moment = "offer_declined"
+humour = 1
+text = "No problem. I'm here if you need me."
+
+[[line]]
+moment = "offer_declined"
+humour = 1
+text = "No worries. Just say if you want me."
+
+[[line]]
+moment = "offer_declined"
+humour = 2
+text = "I don't think so, but I'm here."
+
+[[line]]
+moment = "offer_declined"
+humour = 3
+text = "Fine, fine. I'll be over here. Being helpful. Silently."
+
+[[line]]
+moment = "back_off_long"
+humour = 0
+text = "Okay, I'll stay quiet for a while."
+
+[[line]]
+moment = "back_off_long"
+humour = 1
+text = "Got it. I'll leave you to it for a bit."
+
+[[line]]
+moment = "back_off_long"
+humour = 1
+text = "Understood. I won't bother you for a while."
+
+[[line]]
+moment = "back_off_long"
+humour = 2
+text = "Quiet mode. Lips sealed. Whistle if you need me."
+
+[[line]]
+moment = "error_recovered"
+humour = 0
+text = "That worked. Moving on."
+
+[[line]]
+moment = "error_recovered"
+humour = 0
+text = "All good now. Moving on."
+
+[[line]]
+moment = "mismatch"
+humour = 0
+text = "That's not what I asked for. I expected “{want}” on screen. Undo it, or press Next to go on."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "See?! That's not it, bro. I warned you. I wanted “{want}” and you gave me “{got}”. Undo it, or press Next to go on."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "See?! That's not it, bro. I warned you. I wanted “{want}”. Undo it, or press Next to go on."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "Bro... I said “{want}” and you gave me “{got}”. Undo it, or press Next if you're feeling lucky."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "Bro... I said “{want}”. Undo it, or press Next if you're feeling lucky."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "Ha! Wrong one. I wanted “{want}” and you gave me “{got}”. Undo it, then try again."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "Ha! Wrong one. I wanted “{want}”. Undo it, then try again."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "Hmm. Not that one. I wanted “{want}” and you pressed “{got}”. Undo it, then try again."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "Hmm. Not that one. I wanted “{want}”. Undo it, then try again."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "Close, but no. I need “{want}”, not “{got}”. Undo it and have another go."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "Close, but no. I need “{want}”. Undo it and have another go."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "Oops, that's “{got}”. I was after “{want}”. Undo it, or press Next to go on."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "Oops, wrong one. I was after “{want}”. Undo it, or press Next to go on."
+
+[[line]]
+moment = "mismatch"
+humour = 2
+requires = ["got"]
+text = "Bold choice. Wrong, but bold. I wanted “{want}” and you gave me “{got}”. Undo it, or press Next."
+
+[[line]]
+moment = "mismatch"
+humour = 2
+forbids = ["got"]
+text = "Bold choice. Wrong, but bold. I wanted “{want}”. Undo it, or press Next."
+
+[[line]]
+moment = "mismatch"
+humour = 3
+requires = ["got"]
+text = "I have seen things. I have never seen “{got}” where “{want}” should be. Undo it, then try again."
+
+[[line]]
+moment = "mismatch"
+humour = 3
+forbids = ["got"]
+text = "I have seen things. I have never seen that where “{want}” should be. Undo it, then try again."
+
+[[line]]
+moment = "why_mismatch"
+humour = 0
+requires = ["got"]
+text = "The screen shows “{got}”, but this step needs “{want}”.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "why_mismatch"
+humour = 0
+forbids = ["got"]
+text = "The screen shows something else, but this step needs “{want}”.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "The screen shows “{got}”, bro, but I need “{want}”. That's the mistake.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "The screen shows something else, bro, but I need “{want}”. That's the mistake.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+requires = ["got"]
+text = "The screen shows “{got}”, but I need “{want}”. That's the mistake.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+forbids = ["got"]
+text = "The screen shows something else, but I need “{want}”. That's the mistake.{why} Undo it (C or Undo), then press the key I'm pointing at."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+text = "This one is your call: I'll point, you press it yourself."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+text = "I won't do this one for you. It's yours to press."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+requires = ["name"]
+text = "I'll point at “{name}”, but you press it yourself."
+
+
+[[line]]
+moment = "plan_preview"
+humour = 0
+text = "Here is the plan: {count} steps, starting with: {first} Press Next to begin or Stop to cancel."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "I have a plan, {count} steps. First up: {first} Next to start, Stop if you'd rather not."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+bro = true
+text = "Got a plan, bro: {count} steps. First: {first} Next to go, Stop to bail."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "Plan's ready, {count} steps. Starting with: {first} Press Next, or Stop to cancel."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "That control isn't on this screen. Give me a moment to work out another way."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "I can't find that one here. Let me look again and make a new plan."

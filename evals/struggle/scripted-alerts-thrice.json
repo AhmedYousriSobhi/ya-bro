@@ -1,0 +1,26 @@
+{
+ "id": "alerts-thrice",
+ "kind": "error_loop",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "alert",
+   "key": "e1"
+  },
+  {
+   "t": 48.3,
+   "kind": "alert",
+   "key": "e2"
+  },
+  {
+   "t": 70.1,
+   "kind": "alert",
+   "key": "e3"
+  }
+ ],
+ "onset": 10
+}

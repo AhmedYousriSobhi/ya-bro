@@ -1,0 +1,35 @@
+{
+ "id": "undo-alone",
+ "kind": "undo_loop",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 90,
+ "events": [
+  {
+   "t": 5,
+   "kind": "undo"
+  },
+  {
+   "t": 8.0,
+   "kind": "undo"
+  },
+  {
+   "t": 11.3,
+   "kind": "undo"
+  },
+  {
+   "t": 13.8,
+   "kind": "undo"
+  },
+  {
+   "t": 16.9,
+   "kind": "undo"
+  },
+  {
+   "t": 19.2,
+   "kind": "undo"
+  }
+ ],
+ "onset": 5
+}

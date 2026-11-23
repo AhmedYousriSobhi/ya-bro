@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Ya-Bro mark (Brim)</title>
+  <!-- Favicon-safe mark, drawn on the 32 px grid. Head #2EC4B6 / #45D9CB, cap #2B2D42 / #3A3D5C,
+       ink #1E1E2E, halo #FFFFFF / #F0F0F5. No mouth, no glints, no fx: they do not survive 16 px. -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:3;stroke-linejoin:round}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:1.5}
+    .cap{fill:#2B2D42;stroke:#1E1E2E;stroke-width:1.5;stroke-linejoin:round}
+    .ink{fill:#1E1E2E}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.cap{fill:#3A3D5C}.halo{stroke:#F0F0F5}}
+  </style>
+  <circle class="halo" cx="14" cy="19" r="10.5"/>
+  <path class="halo" d="M3.5 17C3.5 10.5 8 7 14 7C19.5 7 23.5 10.5 24 15H29.5V18.5H3.5Z"/>
+  <circle class="body" cx="14" cy="19" r="10.5"/>
+  <path class="cap" d="M3.5 17C3.5 10.5 8 7 14 7C19.5 7 23.5 10.5 24 15H29.5V18.5H3.5Z"/>
+  <circle class="ink" cx="13" cy="22.5" r="2"/>
+  <circle class="ink" cx="19" cy="22.5" r="2"/>
+</svg>

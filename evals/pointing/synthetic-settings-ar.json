@@ -1,0 +1,591 @@
+{
+ "app": "settings",
+ "locale": "ar",
+ "source": "synthetic",
+ "elements": [
+  {
+   "id": "e0",
+   "role": "button",
+   "name": "جديد",
+   "rect": [
+    10,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e1",
+   "role": "menu item",
+   "name": "إعادة تسمية",
+   "rect": [
+    130,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e2",
+   "role": "check box",
+   "name": "الطبقات",
+   "rect": [
+    250,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e3",
+   "role": "page tab",
+   "name": "تدوير",
+   "rect": [
+    370,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e4",
+   "role": "button",
+   "name": "إخفاء",
+   "rect": [
+    490,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e5",
+   "role": "menu item",
+   "name": "عرض",
+   "rect": [
+    610,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e6",
+   "role": "check box",
+   "name": "اقتصاص",
+   "rect": [
+    10,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e7",
+   "role": "page tab",
+   "name": "الشاشة",
+   "rect": [
+    130,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e8",
+   "role": "button",
+   "name": "إنشاء",
+   "rect": [
+    250,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e9",
+   "role": "menu item",
+   "name": "تسطير",
+   "rect": [
+    370,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e10",
+   "role": "check box",
+   "name": "تحديد الكل",
+   "rect": [
+    490,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e11",
+   "role": "page tab",
+   "name": "طباعة",
+   "rect": [
+    610,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e12",
+   "role": "button",
+   "name": "مساعدة",
+   "rect": [
+    10,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e13",
+   "role": "menu item",
+   "name": "إضافة",
+   "rect": [
+    130,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e14",
+   "role": "check box",
+   "name": "تراجع",
+   "rect": [
+    250,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e15",
+   "role": "page tab",
+   "name": "الصوت العام",
+   "rect": [
+    370,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e16",
+   "role": "button",
+   "name": "بحث",
+   "rect": [
+    490,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e17",
+   "role": "menu item",
+   "name": "استيراد…",
+   "rect": [
+    610,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e18",
+   "role": "check box",
+   "name": "بدء",
+   "rect": [
+    10,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e19",
+   "role": "page tab",
+   "name": "استبدال",
+   "rect": [
+    130,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e20",
+   "role": "button",
+   "name": "الطاقة",
+   "rect": [
+    250,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e21",
+   "role": "menu item",
+   "name": "تحديث",
+   "rect": [
+    370,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e22",
+   "role": "check box",
+   "name": "إظهار",
+   "rect": [
+    490,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e23",
+   "role": "page tab",
+   "name": "تصغير",
+   "rect": [
+    610,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e24",
+   "role": "button",
+   "name": "حفظ",
+   "rect": [
+    10,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e25",
+   "role": "menu item",
+   "name": "إدراج",
+   "rect": [
+    130,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e26",
+   "role": "check box",
+   "name": "الصوت",
+   "rect": [
+    250,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e27",
+   "role": "page tab",
+   "name": "تطبيق",
+   "rect": [
+    370,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e28",
+   "role": "button",
+   "name": "حد",
+   "rect": [
+    490,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e29",
+   "role": "menu item",
+   "name": "تحرير",
+   "rect": [
+    610,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e30",
+   "role": "check box",
+   "name": "نافذة",
+   "rect": [
+    10,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e31",
+   "role": "page tab",
+   "name": "فرشاة",
+   "rect": [
+    130,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e32",
+   "role": "button",
+   "name": "الفأرة",
+   "rect": [
+    250,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e33",
+   "role": "menu item",
+   "name": "إلغاء",
+   "rect": [
+    370,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e34",
+   "role": "check box",
+   "name": "لصق",
+   "rect": [
+    490,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e35",
+   "role": "page tab",
+   "name": "إغلاق",
+   "rect": [
+    610,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "twin",
+   "role": "check box",
+   "name": "اقتصاص",
+   "rect": [
+    10,
+    500,
+    110,
+    36
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "drift",
+   "role": "check box",
+   "name": "اقتصا",
+   "truth": "e6"
+  },
+  {
+   "id": "c1",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "إدراج",
+   "truth": "e25"
+  },
+  {
+   "id": "c2",
+   "kind": "exact",
+   "role": "button",
+   "name": "إنشاء",
+   "truth": "e8"
+  },
+  {
+   "id": "c3",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  الطاقة  ",
+   "truth": "e20"
+  },
+  {
+   "id": "c4",
+   "kind": "drift",
+   "role": "menu item",
+   "name": "عر",
+   "truth": "e5"
+  },
+  {
+   "id": "c5",
+   "kind": "spelling",
+   "role": "page tab",
+   "name": "  تصغير  ",
+   "truth": "e23"
+  },
+  {
+   "id": "c6",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "إضافة",
+   "truth": "e13"
+  },
+  {
+   "id": "c7",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "عرض",
+   "truth": "e5"
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "تسطير",
+   "truth": "e9"
+  },
+  {
+   "id": "c9",
+   "kind": "exact",
+   "role": "button",
+   "name": "حفظ",
+   "truth": "e24"
+  },
+  {
+   "id": "c10",
+   "kind": "exact",
+   "role": "check box",
+   "name": "إظهار",
+   "truth": "e22"
+  },
+  {
+   "id": "c11",
+   "kind": "spelling",
+   "role": "menu item",
+   "name": "الغاء",
+   "truth": "e33"
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "check box",
+   "name": "تحديد الكل",
+   "truth": "e10"
+  },
+  {
+   "id": "c13",
+   "kind": "drift",
+   "role": "check box",
+   "name": "تراج",
+   "truth": "e14"
+  },
+  {
+   "id": "c14",
+   "kind": "missing",
+   "role": "button",
+   "name": "أدوات",
+   "truth": null
+  },
+  {
+   "id": "c15",
+   "kind": "missing",
+   "role": "button",
+   "name": "إيقاف",
+   "truth": null
+  },
+  {
+   "id": "c16",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "طباعة",
+   "truth": "e11"
+  },
+  {
+   "id": "c17",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "تدوير",
+   "truth": "e3"
+  },
+  {
+   "id": "c18",
+   "kind": "exact",
+   "role": "check box",
+   "name": "نافذة",
+   "truth": "e30"
+  },
+  {
+   "id": "c19",
+   "kind": "exact",
+   "role": "check box",
+   "name": "الصوت",
+   "truth": "e26"
+  },
+  {
+   "id": "c20",
+   "kind": "duplicate",
+   "role": "check box",
+   "name": "اقتصاص",
+   "truth": "e6"
+  },
+  {
+   "id": "c21",
+   "kind": "drift",
+   "role": "menu item",
+   "name": "استيراد",
+   "truth": "e17"
+  },
+  {
+   "id": "c22",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "تطبيق",
+   "truth": "e27"
+  },
+  {
+   "id": "c23",
+   "kind": "exact",
+   "role": "button",
+   "name": "الطاقة",
+   "truth": "e20"
+  },
+  {
+   "id": "c24",
+   "kind": "missing",
+   "role": "button",
+   "name": "موافق",
+   "truth": null
+  }
+ ]
+}

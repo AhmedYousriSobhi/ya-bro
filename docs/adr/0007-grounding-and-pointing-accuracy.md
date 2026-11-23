@@ -90,6 +90,8 @@ On the Claude side:
   - tokens per step.
 - Runs per commit on recorded fixtures, with no LLM calls for tiers 1–4 and LLM responses cached for 5–6. Live LLM runs nightly.
 
+**Implemented (#19):** `ya_bro.grounding` (AT-SPI tiers only, used by the Show-me loop) and `broctl eval pointing` over `evals/pointing/`: 300 synthetic cases plus 219 from recorded trees of Calculator, Files and Settings, and click-through checks on those real apps (`tests/test_gnome_pointing.py`). Still open: GIMP, Inkscape, LibreOffice, Firefox/workbench and Ptyxis recordings, vision and OCR tiers, threshold tuning. Text Editor exposes no buttons to AT-SPI, so it cannot be pointed at by name.
+
 **Go/no-go for MVP:** a confidently-wrong rate above 5% blocks release, whatever the overall accuracy.
 
 ## Revisit if

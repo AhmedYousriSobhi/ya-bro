@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ya-Bro candidate 3: Orbit (abstract orb with a moon)</title>
+  <!-- Palette (light / dark): body #2EC4B6 / #45D9CB, ink #1E1E2E, halo #FFFFFF / #F0F0F5, accent #F5A524 -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:18}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:8}
+    .path{fill:none;stroke:#1E1E2E;stroke-width:5;stroke-dasharray:2 12;stroke-linecap:round}
+    .moon{fill:#F5A524;stroke:#1E1E2E;stroke-width:7}
+    .ink{fill:#1E1E2E}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.halo{stroke:#F0F0F5}.path{stroke:#F0F0F5}}
+  </style>
+  <g id="bro">
+    <ellipse class="path" cx="128" cy="140" rx="108" ry="40" transform="rotate(-18 128 140)"/>
+    <circle class="halo" cx="122" cy="140" r="66"/>
+    <circle class="body" cx="122" cy="140" r="66"/>
+    <g id="eyes">
+      <circle class="ink" cx="104" cy="136" r="11"/>
+      <circle class="ink" cx="144" cy="136" r="11"/>
+    </g>
+    <circle class="halo" cx="222" cy="98" r="18" style="stroke-width:12"/>
+    <circle id="moon" class="moon" cx="222" cy="98" r="18"/>
+  </g>
+</svg>

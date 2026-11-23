@@ -1,0 +1,33 @@
+{
+ "id": "error-code-twice",
+ "kind": "app_error_code",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 10,
+   "kind": "error_code",
+   "key": "WB-REFUSED-MEMORY"
+  },
+  {
+   "t": 41.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 41.0,
+   "kind": "error_code",
+   "key": "WB-REFUSED-MEMORY"
+  }
+ ],
+ "onset": 10
+}

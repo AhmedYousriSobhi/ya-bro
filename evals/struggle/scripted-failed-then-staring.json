@@ -1,0 +1,28 @@
+{
+ "id": "failed-then-staring",
+ "kind": "idle_in_context",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 150,
+ "events": [
+  {
+   "t": 5,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 11.5,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.5,
+   "kind": "idle_span",
+   "value": 45
+  }
+ ],
+ "onset": 5
+}

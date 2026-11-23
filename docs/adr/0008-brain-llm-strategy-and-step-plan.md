@@ -1,6 +1,6 @@
 # ADR-0008: Brain: LLM strategy, step-plan representation, re-planning, budgets
 
-- Status: Proposed
+- Status: Proposed (partly built in #5: one `plan` route over plain HTTPS instead of the SDK, see PROGRESS)
 - Date: 2026-11-20
 - Issue: #13 (implements #5)
 - Depends on: ADR-0003, ADR-0005, ADR-0007, ADR-0012
@@ -104,6 +104,7 @@ All three have a 1M-token context.
 
    Free-form planning needs a backend. Later, a `LocalBrain` speaking the OpenAI-compatible API (llama.cpp / Ollama) can plug into the same interface. Not in the MVP.
 9. **Key handling.** The API key comes from the Secret Service (libsecret) or `ANTHROPIC_API_KEY` in `.env` (ADR-0014). It is never logged.
+   *As built (#5):* order is environment, then the keyring, then `.env`; `broctl key set|status|clear` manage the stored key (hidden prompt, never argv). The keyring is reached through a helper run by the system python3 (libsecret), so the core has no new dependency; see the API-key row of ADR-0014's threat table.
 
 ## Consequences
 - **Positive:**

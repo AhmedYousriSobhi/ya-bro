@@ -42,7 +42,7 @@ for name, (tx, ty) in cases.items():
     )
     pump(0.3)
     bx, by, bw, bh = sh.state()["bubble"]
-    inside = bx - 40 >= mx and by >= my and bx + bw <= mx + mw and by + bh <= my + mh
+    inside = bx - 56 >= mx and by >= my and bx + bw <= mx + mw and by + bh <= my + mh
     check(f"{name}: bubble and avatar inside the monitor", inside, f"bubble={(bx, by, bw, bh)}")
     apart = bx + bw <= tx or bx >= tx + TS or by + bh <= ty or by >= ty + TS
     check(f"{name}: bubble does not cover the target", apart, f"target={(tx, ty, TS, TS)}")

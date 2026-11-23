@@ -16,7 +16,7 @@ export default class YaBroExtension extends Extension {
         const connection = Gio.DBus.session;
         this._settings = this.getSettings();
         this._peers = new Peers(connection);
-        this._overlay = new Overlay(connection, this._peers);
+        this._overlay = new Overlay(connection, this._peers, this.path);
         this._bridge = new Bridge(connection, this._peers, this._overlay,
             this._settings, PACKAGE_VERSION, this.metadata['version-name'] ?? '');
         this._ownName = Gio.bus_own_name_on_connection(connection,

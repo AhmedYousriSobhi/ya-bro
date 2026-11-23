@@ -10,7 +10,16 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
-from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Step, WindowInfo
+from ya_bro.types import (
+    ElementRef,
+    Mode,
+    Plan,
+    PolicyDecision,
+    Rect,
+    Step,
+    UiEvent,
+    WindowInfo,
+)
 
 
 @runtime_checkable
@@ -36,8 +45,16 @@ class CompositorBridge(Protocol):
 @runtime_checkable
 class Overlay(Protocol):
     async def show_step(
-        self, target: Rect | None, bubble_text: str, buttons: tuple[str, ...] = ()
-    ) -> None: ...
+        self,
+        target: Rect | None,
+        bubble_text: str,
+        buttons: tuple[str, ...] = (),
+        mood: str = "",
+    ) -> None:
+        """mood: how the bro looks (idle, pointing, thinking, happy, teasing, quiet); "" lets the
+        overlay choose (pointing when there is a target, else idle)."""
+        ...
+
     def events(self) -> AsyncIterator[str]:
         """User choices from the bubble: next, repeat, why, stop (stop also from the stop key)."""
         ...
@@ -60,6 +77,13 @@ class Capture(Protocol):
 @runtime_checkable
 class IdleSource(Protocol):
     async def idle_seconds(self) -> float: ...
+
+
+@runtime_checkable
+class UiEventSource(Protocol):
+    def events(self) -> AsyncIterator[UiEvent]:
+        """Content-free UI events (menu, dialog, alert, undo, typing) of the apps it may watch."""
+        ...
 
 
 @runtime_checkable

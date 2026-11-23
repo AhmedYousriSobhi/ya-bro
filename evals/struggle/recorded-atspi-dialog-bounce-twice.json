@@ -1,0 +1,56 @@
+{
+ "id": "atspi-dialog-bounce-twice",
+ "kind": "dialog_bounce",
+ "source": "recorded",
+ "label": "struggle",
+ "app": "gtk-fixture",
+ "duration": 35.4,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "menu_shown",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 1.0,
+   "kind": "dialog_opened",
+   "key": "k7a50b79ddb"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_activated",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_hidden",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 2.1,
+   "kind": "dialog_cancelled",
+   "key": "k7a50b79ddb"
+  },
+  {
+   "t": 3.3,
+   "kind": "menu_shown",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 4.2,
+   "kind": "dialog_opened",
+   "key": "k7a50b79ddb"
+  },
+  {
+   "t": 4.3,
+   "kind": "menu_hidden",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 5.4,
+   "kind": "dialog_cancelled",
+   "key": "k7a50b79ddb"
+  }
+ ],
+ "onset": 0.0
+}

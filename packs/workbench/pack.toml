@@ -1,0 +1,17 @@
+[pack]
+id = "workbench"
+name = "workbench"
+version = "0.1.0"
+license = "MIT"
+locales = ["en"]
+
+# Terminal use only for now. The web UI is scoped separately as a target (ADR-0025) and its
+# selectors wait for the selector format.
+[match]
+argv0 = ["benchctl", "./scripts/benchctl"]
+
+[sources]
+agents_md = "https://github.com/AhmedYousriSobhi/workbench/blob/main/AGENTS.md"
+llms_txt = "https://github.com/AhmedYousriSobhi/workbench/blob/main/llms.txt"
+error_codes = "https://github.com/AhmedYousriSobhi/workbench/blob/main/docs/agents/ERROR-CODES.md"
+mcp = ["benchctl", "serve", "mcp"]

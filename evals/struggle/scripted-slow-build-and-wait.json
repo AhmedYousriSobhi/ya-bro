@@ -1,0 +1,20 @@
+{
+ "id": "slow-build-and-wait",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 5,
+   "kind": "command_exit",
+   "key": "make"
+  },
+  {
+   "t": 35,
+   "kind": "idle_span",
+   "value": 100
+  }
+ ]
+}

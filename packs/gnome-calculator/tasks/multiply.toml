@@ -1,0 +1,31 @@
+# Press C first so the display is empty. Steps advance by themselves when the display shows the result.
+# Try it: broctl apps allow org.gnome.Calculator ; gnome-calculator & ; broctl show examples/plans/calculator.toml
+[plan]
+goal = "multiply 7 by 6"
+app = "org.gnome.Calculator"
+keywords = ["multiply", "calculate", "7", "6"]
+# GNOME Calculator (GTK 4.22) reports key extents 12 px right and down of where they are drawn (S9).
+extents_offset = [-12, -12]
+
+[[step]]
+narration = "Press 7."
+target = {role = "button", name = "7"}
+expect = {role = "text", text = "7"}          # the display shows it: the bro moves on by itself
+why = "7 is the first number."
+
+[[step]]
+narration = "Press the multiply button."
+target = {role = "button", name = "×"}
+expect = {role = "text", text = "7×"}
+why = "× multiplies the two numbers."
+
+[[step]]
+narration = "Press 6."
+target = {role = "button", name = "6"}
+expect = {role = "text", text = "7×6"}
+
+[[step]]
+narration = "Press = to see the answer."
+target = {role = "button", name = "="}
+expect = {role = "text", text = "42"}
+why = "= calculates the result."

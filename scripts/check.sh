@@ -8,9 +8,11 @@ step() { printf '\n== %s\n' "$*"; }
 
 step "ruff check";          uv run ruff check .
 step "ruff format --check"; uv run ruff format --check .
-step "unit tests";          uv run pytest -m "not atspi and not gnome and not gnome_measure" -q
+step "licence gate";       uv run python scripts/check_licences.py
+step "unit tests";          uv run pytest -m "not atspi and not gnome and not gnome_measure and not live and not keyring" -q
 if [[ "${1:-}" != "--fast" ]]; then
   step "integration (AT-SPI)"; uv run pytest -m atspi -q -rs
+  step "integration (Secret Service, isolated)"; uv run pytest -m keyring -q -rs
   step "integration (GNOME extension, headless shell)"; uv run pytest -m gnome -q -rs
 fi
 step "OK"

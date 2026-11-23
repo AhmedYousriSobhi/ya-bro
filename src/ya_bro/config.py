@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import tomllib
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
@@ -13,6 +14,7 @@ from ya_bro import dirs
 log = logging.getLogger(__name__)
 
 SENSITIVITIES = ("low", "normal", "high")
+LANGUAGES = ("auto", "en", "ar")
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,17 +34,32 @@ class DoIt:
 
 
 @dataclass(frozen=True, slots=True)
+class Brain:
+    model: str = "claude-opus-5-5"  # ADR-0008: IDs live in config, never in code paths
+    max_calls: int = 30  # per task
+
+
+@dataclass(frozen=True, slots=True)
 class Config:
     proactive: Proactive = field(default_factory=Proactive)
     capture: Capture = field(default_factory=Capture)
     do_it: DoIt = field(default_factory=DoIt)
+    brain: Brain = field(default_factory=Brain)
     humour: int = 1  # 0 = off .. 3 = chatty
+    language: str = "auto"  # auto (English until the user writes Arabic), en or ar
+    less_chatty: bool = False  # mute optional lines and all humour
 
 
 def _check(section: str, key: str, value: Any, default: Any) -> bool:
     ok = type(value) is type(default)  # bool is not an int here
     if ok and key == "sensitivity":
         ok = value in SENSITIVITIES
+    if ok and key == "language":
+        ok = value in LANGUAGES
+    if ok and key == "model":
+        ok = bool(re.fullmatch(r"[a-z0-9][a-z0-9.-]{2,63}", value))
+    if ok and key == "max_calls":
+        ok = 1 <= value <= 200
     if ok and section == "" and key == "humour":
         ok = 0 <= value <= 3
     if not ok:

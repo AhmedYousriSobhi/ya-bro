@@ -1,0 +1,40 @@
+{
+ "id": "backoff-cooldown",
+ "kind": "backoff",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 22.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 60,
+   "kind": "alert",
+   "key": "e1"
+  },
+  {
+   "t": 70,
+   "kind": "alert",
+   "key": "e2"
+  }
+ ],
+ "onset": 10,
+ "expect_offers": 1
+}

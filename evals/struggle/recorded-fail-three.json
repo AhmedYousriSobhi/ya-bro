@@ -1,0 +1,29 @@
+{
+ "id": "fail-three",
+ "kind": "failing_commands",
+ "source": "recorded",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 32.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 1.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 1
+  },
+  {
+   "t": 2.0,
+   "kind": "command_exit",
+   "key": "fakectl",
+   "value": 2
+  }
+ ],
+ "onset": 0.0
+}

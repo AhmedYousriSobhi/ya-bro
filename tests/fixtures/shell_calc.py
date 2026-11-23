@@ -62,9 +62,9 @@ async def main():
     texts = []
 
     class Recording(GnomeOverlay):
-        async def show_step(self, target, bubble_text, buttons=()):
+        async def show_step(self, target, bubble_text, buttons=(), mood=""):
             texts.append(bubble_text)
-            await super().show_step(target, bubble_text, buttons)
+            await super().show_step(target, bubble_text, buttons, mood)
 
     overlay = Recording(sh.conn, bridge)
     loop = StepLoop(perception, overlay, bridge, ShowMePolicy(), Timing(poll=0.2, settle=0.8))
