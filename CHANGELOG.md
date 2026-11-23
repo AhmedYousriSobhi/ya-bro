@@ -5,6 +5,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 ## [Unreleased]
 
 ### Added
+- Local policy engine and redaction (#20, ADR-0014 §4): `LocalPolicy` takes the highest of the step's risk, a pack risk and local heuristics (bilingual deny-list on the element name, destructive-command patterns, password fields are R3); Show-me marks R3 steps as the user's own click, Do-it (still off) shows R3 and never acts, confirms R2, and never touches a password field. `ya_bro.redact` replaces private keys, JWTs, AWS, GitHub, Slack and API keys, bearer tokens, `password=`-style values and URL passwords with `[redacted:kind]`.
 - App knowledge pack format v1 and loader (#8, ADR-0027): `packs/<id>/pack.toml` + `knowledge.md` + `tasks/*.toml`, exact app matchers, validated at load, broken packs skipped; `broctl pack list|check`; first pack `packs/gnome-calculator`.
 - Workbench pack (#22): `packs/workbench` for `benchctl` (vocabulary, rules and common mistakes from AGENTS.md, four terminal tasks, 32 error-code explanations in `fixits.toml`). Pack format gained `fixits.toml` (ADR-0027); a suggested command must be one of the pack's own.
 

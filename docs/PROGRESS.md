@@ -11,13 +11,17 @@ Legend: done · in progress · todo
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
-| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 |
+| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21, #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #20 policy engine and redaction
+Done: `policy.py` (`effective_risk` = max of planner, pack and heuristics; `LocalPolicy` for Show-me and a switched-off Do-it; `command_risk`), `redact.py` (9 secret shapes, counts per kind, the value never kept), 45 unit tests including a no-R3-without-confirmation property over every mode.
+Not done: nothing calls `redact` yet (no LLM request exists; the bubble's echoed screen text is not redacted); the deny-list is stem-based so it over-flags (`Payload` is R3) and misses synonyms; the ADR's 200+ action table and 50-page injection eval; pack-declared risk and secret flags (no pack field yet); terminal commands reach `command_risk` only once #21 exists; the `Policy` protocol has no `pack_risk` argument.
+
 ### 2026-11-23: #22 workbench pack
 Done: `packs/workbench` (match on `benchctl`, knowledge from AGENTS.md, four narration-only terminal tasks, 32 `fixits.toml` rows copied from ERROR-CODES.md contract 2.5); loader reads and checks `fixits.toml`; 8 new tests.
 Not done: web-UI selectors and `signals.toml` (no format yet; signals need #9), `hooks.toml` and the `/api/state` hook (#31), tasks cannot point at or verify anything in a terminal until #21, no GIMP pack, no English/Arabic phrase-matching eval, Arabic text; fixits were copied by hand-run script and will drift from workbench's file; depends on PR #89.
