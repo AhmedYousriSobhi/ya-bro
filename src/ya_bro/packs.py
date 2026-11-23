@@ -5,6 +5,7 @@ packs/<id>/
   knowledge.md  vocabulary, mental model, common mistakes (kept small: it rides in every prompt)
   tasks/*.toml  Show-me plans (the plans.py format) for common goals
   [[element]]   in pack.toml: role, name ("" = any), risk 0-3 and/or secret = true
+  signals.toml  [weights] and [counts.signal] (count, window): bounded tuning of the detector
   fixits.toml   [[fixit]] code, meaning, suggest (a command to offer) or hint (plain words)
 The core only reads packs; nothing in one is imported or executed.
 """
@@ -18,6 +19,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 
 from ya_bro import dirs, plans
+from ya_bro.struggle import Signal
 from ya_bro.types import Risk
 
 PACK_FORMAT = 1
@@ -74,6 +76,8 @@ class Pack:
     tasks: dict[str, Path] = field(default_factory=dict)
     fixits: dict[str, Fixit] = field(default_factory=dict)
     elements: tuple[PackElement, ...] = ()
+    signal_weights: dict[str, float] = field(default_factory=dict)
+    signal_counts: dict[str, tuple[int, float]] = field(default_factory=dict)
 
     def risk_of(self, role: str, name: str) -> Risk:
         return Risk(max((e.risk for e in self.elements if e.covers(role, name)), default=Risk.R0))
@@ -154,6 +158,38 @@ def _elements(rows: object) -> tuple[PackElement, ...]:
     return tuple(out)
 
 
+def _signals(root: Path) -> tuple[dict[str, float], dict[str, tuple[int, float]]]:
+    path = root / "signals.toml"
+    if not path.is_file():
+        return {}, {}
+    try:
+        data = tomllib.loads(path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        raise PackError(f"cannot read signals.toml: {e}") from e
+    names = {s.value for s in Signal}
+    weights: dict[str, float] = {}
+    for name, w in data.get("weights", {}).items():
+        if name not in names or isinstance(w, bool) or not isinstance(w, (int, float)):
+            raise PackError(f"signals.toml: weights.{name} must be a number for a known signal")
+        if not 0 <= w <= 3:
+            raise PackError(f"signals.toml: weights.{name} must be 0 to 3")
+        weights[name] = float(w)
+    counts: dict[str, tuple[int, float]] = {}
+    for name, row in data.get("counts", {}).items():
+        count, window = (
+            row.get("count") if isinstance(row, dict) else None,
+            row.get("window") if isinstance(row, dict) else None,
+        )
+        ok = isinstance(count, int) and not isinstance(count, bool) and 2 <= count <= 50
+        ok = ok and isinstance(window, (int, float)) and 1 <= window <= 3600
+        if name not in names or not ok:
+            raise PackError(
+                f"signals.toml: counts.{name} needs a count of 2 to 50 and a window of 1 to 3600 s"
+            )
+        counts[name] = (count, float(window))
+    return weights, counts
+
+
 def load(root: Path) -> Pack:
     """One pack directory. Raises PackError on anything malformed, tasks included."""
     root = Path(root)
@@ -208,9 +244,11 @@ def load(root: Path) -> Pack:
         tasks[path.stem] = path
     fixits = _fixits(root, match.get("argv0", ()))
     elements = _elements(data.get("element", []))
+    weights, counts = _signals(root)
     return Pack(
-        pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits, elements
-    )
+        pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits,
+        elements, weights, counts,
+    )  # fmt: skip
 
 
 def roots(extra: list[Path] | None = None) -> list[Path]:

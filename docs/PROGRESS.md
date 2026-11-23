@@ -13,11 +13,15 @@ Legend: done · in progress · todo
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
-| M6 Struggle + persona | todo | #9, #23, #24 |
+| M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #9 struggle detector
+Done: `struggle.py` (observations without content, nine signals, decaying score, context gate, breakpoints, the full back-off policy, opt-in per app, sensitivity, private state file), `struggle_host.py` (shell hook plus idle into the detector), `platform/gnome_idle.py`, pack `signals.toml` (bounded; workbench ships one), `broctl struggle ...`, 50 tests. Real runs: real bash with the hook, the real spool and host (3 failures give one offer with a plain reason; a success or an un-allowed command gives none; a "no" keeps it quiet); real Mutter idle in the isolated shell (0.5 s after a key, 4.5 s after 4 s, a real pause after a failure is one idle signal with one offer). The real run found a re-arm bug, fixed with a regression test.
+Not done: AT-SPI sources (menu thrash, dialog bounce, error dialogs, undo, help, typing; S5b open), focus ping-pong from the bridge, fullscreen and do-not-disturb inputs, the offer bubble and its persona line (#23), "why did you offer?" in the UI, the learned gate, the replay eval set (#24, so precision and recall are unmeasured), persisting the quiet timers and the hour and day caps, `broctl struggle watch` prints offers but never gets an answer. Thresholds, weights and cooldowns are the ADR's starting values, untuned.
+
 ### 2026-11-23: #21 shell hook and terminal reading (bash)
 Done: `shell/ya-bro.bash` (name, exit code, duration, tty per allowed command; allowlist in the hook; silent without core), `shell_spool` (private files, strict validation, partial lines, truncation), `terminal` (VTE text over AT-SPI, redacted; pack fix-it for `CODE: message | fix: COMMAND`; rc-file block), `broctl hook ...` and `broctl shell watch`, 40 tests. Real runs: interactive bash on a pty (100 commands exact, under 5 ms per command, silent without core, existing DEBUG trap and PROMPT_COMMAND kept) and a real VTE terminal in the isolated shell (spool, AT-SPI text, redaction, fix-it, scope).
 Findings: `trap -p DEBUG` is empty inside a sourced file or function, so the hook reads it at the first prompt; Ptyxis cannot spawn its shell in the isolated session (no systemd user bus), so the real test uses a bare VTE window; the first key after a window opens is eaten (again).

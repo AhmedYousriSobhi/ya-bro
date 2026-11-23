@@ -1,0 +1,10 @@
+# Struggle detector tuning (ADR-0010, ADR-0012): bounded by the core, never code.
+# Three non-zero benchctl exits within five minutes are a failing-command loop; the same
+# WB- error code twice (from the app's state hook, #31) is an error loop.
+[counts.failing_commands]
+count = 3
+window = 300
+
+[counts.app_error_code]
+count = 2
+window = 300
