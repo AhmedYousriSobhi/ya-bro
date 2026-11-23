@@ -4,7 +4,7 @@
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0003 and every component ADR
-- Implementation status (#16): fakes for all 12 interfaces in `tests/fakes/`, one GTK4 AT-SPI fixture under `dbus-run-session`, `scripts/check.sh` and a CI workflow draft in `docs/ci/ci.yml` (not active, never run). Not yet built: GTK3/Qt6 fixtures, record/replay, `evals/`, headless GNOME job.
+- Implementation status (#16): fakes for all 12 interfaces in `tests/fakes/`, one GTK4 AT-SPI fixture under `dbus-run-session`, `scripts/check.sh` and a CI workflow draft in `docs/ci/ci.yml` (not active, never run). Since built: `evals/pointing/` and `evals/struggle/` with `broctl eval pointing|struggle` (#19, #24) and the headless GNOME tests. Not yet built: GTK3/Qt6 fixtures, LLM cassettes, the other eval sets.
 
 > **Amended for GNOME-first (2026-11-20).**
 > - The headless **GNOME** row becomes the primary compositor integration test.

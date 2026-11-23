@@ -1,0 +1,53 @@
+{
+ "id": "backoff-yes-then-loop",
+ "kind": "backoff",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 700,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 22.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 24,
+   "kind": "answer",
+   "key": "yes"
+  },
+  {
+   "t": 300,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 306.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 312.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ],
+ "onset": 10,
+ "expect_offers": 2
+}

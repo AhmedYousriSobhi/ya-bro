@@ -1,0 +1,34 @@
+{
+ "id": "loop-and-staring",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 5,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 29.3,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 39.3,
+   "kind": "idle_span",
+   "value": 40
+  }
+ ],
+ "onset": 5
+}

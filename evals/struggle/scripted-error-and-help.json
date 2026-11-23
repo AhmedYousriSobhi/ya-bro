@@ -1,0 +1,25 @@
+{
+ "id": "error-and-help",
+ "kind": "error_loop",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 150,
+ "events": [
+  {
+   "t": 5,
+   "kind": "alert",
+   "key": "e1"
+  },
+  {
+   "t": 15,
+   "kind": "help_opened"
+  },
+  {
+   "t": 35,
+   "kind": "alert",
+   "key": "e2"
+  }
+ ],
+ "onset": 5
+}

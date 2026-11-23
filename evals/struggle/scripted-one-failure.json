@@ -1,0 +1,21 @@
+{
+ "id": "one-failure",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 25,
+   "kind": "command_exit",
+   "key": "benchctl"
+  }
+ ]
+}

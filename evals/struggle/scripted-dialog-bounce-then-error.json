@@ -1,0 +1,36 @@
+{
+ "id": "dialog-bounce-then-error",
+ "kind": "dialog_bounce",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 10,
+   "kind": "dialog_opened",
+   "key": "export"
+  },
+  {
+   "t": 11.7,
+   "kind": "dialog_cancelled",
+   "key": "export"
+  },
+  {
+   "t": 14.3,
+   "kind": "dialog_opened",
+   "key": "export"
+  },
+  {
+   "t": 15.9,
+   "kind": "dialog_cancelled",
+   "key": "export"
+  },
+  {
+   "t": 20.7,
+   "kind": "alert",
+   "key": "failed"
+  }
+ ],
+ "onset": 10
+}

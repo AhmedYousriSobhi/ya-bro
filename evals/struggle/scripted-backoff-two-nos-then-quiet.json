@@ -1,0 +1,86 @@
+{
+ "id": "backoff-two-nos-then-quiet",
+ "kind": "backoff",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 1500,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 16.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 22.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 24,
+   "kind": "answer",
+   "key": "no"
+  },
+  {
+   "t": 100,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 200,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 206.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 212.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 214,
+   "kind": "answer",
+   "key": "no"
+  },
+  {
+   "t": 300,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 600,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 606.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 612.0,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ],
+ "onset": 10,
+ "expect_offers": 2
+}

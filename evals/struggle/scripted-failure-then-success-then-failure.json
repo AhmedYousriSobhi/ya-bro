@@ -1,0 +1,33 @@
+{
+ "id": "failure-then-success-then-failure",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 200,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 20,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 30,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 45,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{
+ "id": "one-alert",
+ "kind": "error_loop",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 120,
+ "events": [
+  {
+   "t": 10,
+   "kind": "alert",
+   "key": "e1"
+  }
+ ]
+}

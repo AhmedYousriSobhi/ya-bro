@@ -1,0 +1,28 @@
+{
+ "id": "failures-spread-out",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 1500,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 382.4,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 825.9,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  }
+ ]
+}

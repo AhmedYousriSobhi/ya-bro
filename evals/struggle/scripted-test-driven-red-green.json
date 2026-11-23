@@ -1,0 +1,32 @@
+{
+ "id": "test-driven-red-green",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "pytest",
+   "value": 1
+  },
+  {
+   "t": 55.2,
+   "kind": "command_exit",
+   "key": "pytest"
+  },
+  {
+   "t": 90.0,
+   "kind": "command_exit",
+   "key": "pytest",
+   "value": 1
+  },
+  {
+   "t": 138.5,
+   "kind": "command_exit",
+   "key": "pytest"
+  }
+ ]
+}

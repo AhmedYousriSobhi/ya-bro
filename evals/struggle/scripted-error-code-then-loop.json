@@ -1,0 +1,44 @@
+{
+ "id": "error-code-then-loop",
+ "kind": "app_error_code",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 10,
+   "kind": "error_code",
+   "key": "WB-REFUSED-MEMORY"
+  },
+  {
+   "t": 30.9,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 30.9,
+   "kind": "error_code",
+   "key": "WB-REFUSED-MEMORY"
+  },
+  {
+   "t": 57.1,
+   "kind": "command_exit",
+   "key": "benchctl",
+   "value": 1
+  },
+  {
+   "t": 57.1,
+   "kind": "error_code",
+   "key": "WB-REFUSED-MEMORY"
+  }
+ ],
+ "onset": 10
+}

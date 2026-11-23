@@ -1,0 +1,51 @@
+{
+ "id": "menu-thrash-alone",
+ "kind": "menu_thrash",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 90,
+ "events": [
+  {
+   "t": 5,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 6.0,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 9.0,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 9.6,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 12.2,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 12.9,
+   "kind": "menu_hidden",
+   "key": "File"
+  },
+  {
+   "t": 15.4,
+   "kind": "menu_shown",
+   "key": "File"
+  },
+  {
+   "t": 16.5,
+   "kind": "menu_hidden",
+   "key": "File"
+  }
+ ],
+ "onset": 5
+}

@@ -1,0 +1,20 @@
+{
+ "id": "pause-after-success",
+ "kind": "idle_in_context",
+ "source": "scripted",
+ "label": "not_struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 5,
+   "kind": "command_exit",
+   "key": "benchctl"
+  },
+  {
+   "t": 10,
+   "kind": "idle_span",
+   "value": 120
+  }
+ ]
+}

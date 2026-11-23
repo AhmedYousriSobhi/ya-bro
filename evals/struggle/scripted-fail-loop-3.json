@@ -1,0 +1,29 @@
+{
+ "id": "fail-loop-3",
+ "kind": "failing_commands",
+ "source": "scripted",
+ "label": "struggle",
+ "app": "workbench",
+ "duration": 300,
+ "events": [
+  {
+   "t": 10,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 47.1,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  },
+  {
+   "t": 86.7,
+   "kind": "command_exit",
+   "key": "git",
+   "value": 1
+  }
+ ],
+ "onset": 10
+}
