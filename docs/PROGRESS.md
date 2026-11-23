@@ -14,10 +14,14 @@ Legend: done · in progress · todo
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23, #24 (replay eval done: 62 scenarios, passes the gates) |
-| M7 MVP hardening | todo | #25, #26 |
+| M7 MVP hardening | in progress | #25, #26 (licence gate done) |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #26 licence gate
+Done: `scripts/check_licences.py` (project, packs, the uv.lock closure with extras and dev tools, forbidden names, installed-metadata cross-check, copyleft imports under `src/`), the policy `docs/licences.toml`, `docs/LICENCES.md` (table checked for drift), a `licence-gate` job in the CI draft, a step in `scripts/check.sh`, pack `license` field, 34 tests that break a small project tree every way the gate guards against. The real project passes (11 packages, none at runtime). A test caught that free-text licence names ("GNU General Public License v3") were not recognised; fixed.
+Not done: model register (no model yet), SPDX headers, DCO enforcement, CODE_OF_CONDUCT, SECURITY and CONTRIBUTING files, checking the built wheel, system packages; CI is not active so the job has never run.
+
 ### 2026-11-23: #24 struggle replay eval
 Done: `struggle_eval` (second-by-second replay on a fake clock, 8 s bubble fade, answers, idle spans; precision, recall, time to offer, false offers per hour of calm, back-off conformance, by kind and source), `broctl eval struggle [-v] [--sensitivity] [--sweep]`, 62 scenarios (54 scripted, 8 recorded from a real bash with the hook), and 32 tests that include breaking the back-off or the threshold and seeing the eval fail. Default sensitivity: precision 97%, recall 74%, median time to offer 20 s (p90 57 s), 0.31 false offers per hour, back-off 7/7; sweep: sensitivity 1 recall 6%, 3 and 4 recall 91% at 0.62 false offers per hour.
 Found: a first version of the hourly-cap scenario answered after the bubble had faded (so the eval counted a soft "no") and the mutation test caught that it proved nothing; fixed. Misses are single weak signals (dialog bounce, menu thrash, focus ping-pong, undo, an idle pause); the one false offer is three quick failures that then succeed.

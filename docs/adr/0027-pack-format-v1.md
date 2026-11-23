@@ -18,6 +18,7 @@ ADR-0012 designed packs; this records what v1 actually is.
 - **`fixits.toml`** (added with the workbench pack, #22): `[[fixit]]` rows of `code` (like `WB-REFUSED-MEMORY`), `meaning`, and either `suggest` or `hint`. `suggest` must start with one of the pack's own `argv0` commands (checked at load) and is only ever offered to the user, never run (R2, ADR-0009); anything else is a `hint` in plain words.
 - **`[[element]]` in `pack.toml`** (added with #20): `role`, optional `name` (empty means any), `risk` 1 to 3 and/or `secret = true`. `LocalPolicy` takes the highest of the planner's tier, the pack's and the heuristics, so a pack can raise an element's risk or mark it secret and can never lower either (ADR-0012 §9). A secret element is treated like a password field: Show-me points at it as the user's own click, Do-it never acts on it. A pack applies only to its own app.
 - **`signals.toml`** (added with #9): `[weights] signal = 0..3` and `[counts.signal] count, window` tune the struggle detector for that app, bounded at load; the detector re-checks the bounds. A pack tunes, it cannot force an offer (the threshold, caps and back-off stay in core).
+- **`license`** (added with #26): an optional SPDX identifier or expression in `[pack]`; shipped packs must say `MIT`, checked by `scripts/check_licences.py`. A third-party pack declares its own.
 - **Data only:** core reads packs and never imports or executes anything in one. `trust = "hooks"` parses but no hook is read yet.
 
 ## Not in v1
