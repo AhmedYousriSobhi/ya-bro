@@ -11,13 +11,17 @@ Legend: done · in progress · todo
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
-| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 (engine and redaction done, not yet wired to any LLM request) |
+| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21, #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #19 pointing eval harness
+Done: `grounding.point` (AT-SPI tiers: high, medium, none; names normalised for case, spacing, Arabic letter variants and diacritics), `pointing_eval` (snapshot format, scoring, gates, report), `broctl eval pointing`, a 300-case synthetic corpus (6 made-up apps x EN and AR) and its generator; 18 tests including one that the committed corpus equals its generator's output. Current result: 98.0% pointed-correct, 0.0% confidently wrong, medium precision 90.5%; all 6 misses are twins (the same name twice, nothing tells them apart) or a close sibling, and were shown as medium.
+Not done: **no recorded snapshots from real apps** (GIMP, Inkscape, LibreOffice, GNOME Settings, Firefox/workbench, Ptyxis), so the gate says nothing yet about real accuracy; the synthetic cases are ones we imagined and mostly easy by design; tiers low (vision) and OCR do not exist; the loop does not use `grounding.point` yet (it still takes the first `find` hit); the ADR-0004 sanity checks (rect inside the window) and the sibling-near-miss "disagreement" rule are not applied; no tokens, no LLM cassettes, no nightly run; ADR-0007's confidence thresholds are untuned.
+
 ### 2026-11-23: #20 policy engine and redaction
 Done: `policy.py` (`effective_risk` = max of planner, pack and heuristics; whole-word EN and AR deny-list, so `Payload` is R0; `LocalPolicy` for Show-me and a switched-off Do-it; `command_risk`), pack-declared element risk and secrets (`[[element]]`, ADR-0027), `redact.py` (9 secret shapes, counts per kind, the value never kept) applied to the echoed screen text in `tone.snippet`, the ADR-0014 tables: 177 names x 2 modes and 50 injected texts, and a no-R3-without-confirmation check over every mode.
 Not done: no LLM request exists, so nothing else calls `redact` (log records are already free-text-free); the deny-list is a word list and still misses synonyms and phrases ("place order"); the injection eval covers the policy and redaction only, not model behaviour or real pages and terminals; terminal commands reach `command_risk` only once #21 exists; no pack ships `[[element]]` rows yet; the 177 names and 50 texts are written by us, not an independent corpus.

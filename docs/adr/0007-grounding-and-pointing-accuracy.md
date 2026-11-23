@@ -90,6 +90,8 @@ On the Claude side:
   - tokens per step.
 - Runs per commit on recorded fixtures, with no LLM calls for tiers 1–4 and LLM responses cached for 5–6. Live LLM runs nightly.
 
+**Implemented (#19):** `ya_bro.grounding` (AT-SPI tiers only) and `broctl eval pointing` over `evals/pointing/`. The shipped corpus is synthetic (300 cases, 6 made-up apps, EN and AR); recorded snapshots from the real apps above are still to come, and until they exist the gate does not measure real accuracy.
+
 **Go/no-go for MVP:** a confidently-wrong rate above 5% blocks release, whatever the overall accuracy.
 
 ## Revisit if

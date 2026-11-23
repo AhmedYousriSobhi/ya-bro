@@ -86,6 +86,23 @@ def _pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from ya_bro import pointing_eval
+
+    directory = (
+        Path(args.dir) if args.dir else Path(__file__).resolve().parents[2] / "evals/pointing"
+    )
+    try:
+        report = pointing_eval.run(directory)
+    except pointing_eval.EvalError as e:
+        print(e)
+        return 2
+    print(report.text(verbose=args.verbose))
+    return 0 if report.passes else 1
+
+
 def _gnome_demo(cmd: str, seconds: int, text: str = "", show: list[str] | None = None) -> int:
     import shutil
     import subprocess
@@ -197,8 +214,16 @@ def main(argv: list[str] | None = None) -> int:
     pverbs = pk.add_subparsers(dest="verb", required=True, metavar="<verb>")
     pverbs.add_parser("list", help="show packs found (shipped and yours)")
     pverbs.add_parser("check", help="validate a pack directory").add_argument("dir")
+    ev = sub.add_parser("eval", help="score Ya-Bro against labelled sets (ADR-0016)")
+    pt = ev.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
+        "pointing", help="pointing accuracy on evals/pointing (exit 1 below the gate)"
+    )
+    pt.add_argument("--dir", default="", help="snapshot folder (default: evals/pointing)")
+    pt.add_argument("-v", "--verbose", action="store_true", help="list every miss")
     args = parser.parse_args(argv)
 
+    if args.noun == "eval":
+        return _eval(args)
     if args.noun == "pack":
         return _pack(args)
     if args.noun == "version":
