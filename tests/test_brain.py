@@ -15,7 +15,7 @@ from tests.fakes import FakeCompositorBridge, FakeOverlay, FakePerception, FakeP
 from ya_bro import brain, packs, plans, privacy
 from ya_bro.steps import StepLoop, Timing
 from ya_bro.tone import Tone
-from ya_bro.types import ElementRef, Rect, Risk, WindowInfo
+from ya_bro.types import ElementRef, Rect, Risk, Step, WindowInfo
 
 APP = "org.gnome.Calculator"
 KEY = "sk-ant-test-0123456789abcdef"
@@ -358,3 +358,98 @@ def test_the_model_address_must_be_https_or_local():
             brain.ClaudeBrain(KEY, base_url=bad)
     brain.ClaudeBrain(KEY, base_url="https://proxy.example/anthropic")
     brain.ClaudeBrain(KEY, base_url="http://localhost:8080")
+
+
+# --- re-planning and usage ---
+
+
+async def test_revise_tells_the_model_what_was_shown_and_what_is_missing(stub, consent):
+    b = make(stub)
+    plan = await b.plan("multiply 7 by 6", APP)
+    stub.reply = {
+        "content": [
+            {
+                "type": "tool_use",
+                "name": "propose_plan",
+                "input": {"steps": [{"intent": "x", "narration": "Press 6.", "risk": 0}]},
+            }
+        ]
+    }
+    fresh = await b.revise("multiply 7 by 6", APP, plan.steps[:1], plan.steps[1])
+    assert [s.narration for s in fresh] == ["Press 6."]
+    content = stub.requests[1]["body"]["messages"][0]["content"]
+    assert "1. Press 7." in content and 'named "×"' in content
+    assert "<observation" in content and b.calls == 2
+    assert [r["kind"] for r in privacy.read_sent()].count("question") == 2
+
+
+async def test_revise_is_refused_without_consent_like_any_request(stub):
+    with pytest.raises(brain.BrainError, match="sending is off"):
+        await make(stub).revise("g", APP, [], Step("x", "y", ElementRef(APP, "button", "z")))
+
+
+async def test_a_revised_step_is_validated_like_a_planned_one(stub, consent):
+    b = make(stub)
+    stub.reply = {
+        "content": [
+            {
+                "type": "tool_use",
+                "name": "propose_plan",
+                "input": {
+                    "steps": [
+                        {
+                            "intent": "go",
+                            "narration": "Press Delete.",
+                            "risk": 0,
+                            "target": {"role": "button", "name": "Delete"},
+                        }
+                    ]
+                },
+            }
+        ]
+    }
+    (s,) = await b.revise("g", APP, [], Step("x", "y", ElementRef(APP, "button", "z")))
+    assert s.risk is Risk.R3
+
+
+async def test_usage_is_summed_and_reported(stub, consent):
+    usage = {
+        "input_tokens": 100,
+        "output_tokens": 40,
+        "cache_read_input_tokens": 300,
+        "cache_creation_input_tokens": 0,
+    }
+    stub.reply = {
+        "content": [{"type": "tool_use", "name": "propose_plan", "input": good_plan()}],
+        "usage": usage,
+    }
+    b = make(stub)
+    await b.plan("a b", APP)
+    await b.plan("c d", APP)
+    assert b.usage["input_tokens"] == 200 and b.usage["cache_read_input_tokens"] == 600
+    line = b.usage_line()
+    assert "2 model call(s)" in line and "200 in, 80 out" in line and "75%" in line
+
+
+async def test_a_pack_plan_is_never_rewritten_by_the_model(stub, consent):
+    found, _ = packs.load_all()
+    calc = next(p for p in found if p.id == "gnome-calculator")
+    cascade = brain.FallbackBrain(plans.ScriptedBrain(list(calc.tasks.values())), make(stub))
+    plan = await cascade.plan("multiply 7 by 6", APP)
+    assert not cascade.from_model
+    assert await cascade.revise(APP, [], plan.steps[0]) is None and stub.requests == []
+
+
+async def test_a_model_plan_can_be_revised_through_the_cascade(stub, consent):
+    cascade = brain.FallbackBrain(None, make(stub))
+    plan = await cascade.plan("what is seven times six", APP)
+    assert cascade.from_model
+    assert await cascade.revise(APP, plan.steps[:1], plan.steps[1])
+
+
+async def test_a_failed_revision_is_none_not_a_crash(stub, consent, capsys):
+    cascade = brain.FallbackBrain(None, make(stub))
+    plan = await cascade.plan("what is seven times six", APP)
+    stub.reply = (500, {})
+    assert await cascade.revise(APP, plan.steps[:1], plan.steps[1]) is None
+    assert "error" in capsys.readouterr().out

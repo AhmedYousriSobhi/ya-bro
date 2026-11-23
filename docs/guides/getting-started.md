@@ -95,7 +95,7 @@ uv run broctl ask "multiply 7 by 6" --dry   # print the plan only
 uv run broctl ask "what is seven times six"  # walk through it
 ```
 
-Bro first looks for a matching task in the app's knowledge pack (nothing is sent anywhere). If none fits, and you said yes to sending during `broctl setup`, it asks Claude. Each request carries your question, the names of the controls in the allowed app's window (secrets scrubbed), and the pack's notes, never a screenshot; `broctl sent` lists every request. Without a key or without your yes, only pack tasks answer. Anything risky is marked as yours to press.
+Bro first looks for a matching task in the app's knowledge pack (nothing is sent anywhere). If none fits, and you said yes to sending during `broctl setup`, it asks Claude. Each request carries your question, the names of the controls in the allowed app's window (secrets scrubbed), and the pack's notes, never a screenshot; `broctl sent` lists every request. Without a key or without your yes, only pack tasks answer. A plan Claude wrote is shown first (how many steps, and the first one): press **Next** to start or **Stop** to cancel. If a control it counted on is not there, Bro asks Claude again for the remaining steps. Anything risky is marked as yours to press.
 
 ## 7. Write your own plan
 

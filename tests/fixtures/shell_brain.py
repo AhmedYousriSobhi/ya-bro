@@ -19,15 +19,23 @@ sys.path[:0] = [HERE, os.path.join(HERE, "..", "..", "src")]
 cfg = tempfile.mkdtemp()
 os.environ.update(XDG_CONFIG_HOME=cfg, XDG_STATE_HOME=cfg + "/state", XDG_CACHE_HOME=cfg + "/cache")
 
-from shellkit import Shell  # noqa: E402
+from shellkit import Shell, find_pixels  # noqa: E402
 
 from ya_bro import privacy  # noqa: E402
 from ya_bro.platform import gnome_show  # noqa: E402
-from ya_bro.platform.gnome_adapters import AtspiPerception, GnomeBridge  # noqa: E402
+from ya_bro.platform.gnome_adapters import (  # noqa: E402
+    AtspiPerception,
+    GnomeBridge,
+    GnomeOverlay,
+)
+from ya_bro.policy import ShowMePolicy  # noqa: E402
+from ya_bro.steps import StepLoop, Timing  # noqa: E402
 
 APP = "org.gnome.Calculator"
 requests = []
+script = []  # canned answers served first, in order; PLAN after that
 results = []
+BUTTON_BG = (0x3A, 0x3A, 0x52)
 PLAN = {
     "steps": [
         {
@@ -50,8 +58,9 @@ class Model(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers["content-length"])
         requests.append(json.loads(self.rfile.read(n)))
+        plan = script.pop(0) if script else PLAN
         out = json.dumps(
-            {"content": [{"type": "tool_use", "name": "propose_plan", "input": PLAN}]}
+            {"content": [{"type": "tool_use", "name": "propose_plan", "input": plan}]}
         ).encode()
         self.send_response(200)
         self.send_header("content-length", str(len(out)))
@@ -97,7 +106,7 @@ async def main():
             check("without consent the model is not asked", not requests, str(e))
         privacy.save_consent(privacy.Consent(privacy.CONSENT_VERSION, True, False))
 
-        plan = await gnome_show.ask("what is seven times six", APP, bridge)
+        _, plan = await gnome_show.ask("what is seven times six", APP, bridge)
         check("a plan comes back from the model", len(plan.steps) == 2 and len(requests) == 1)
         content = requests[0]["messages"][0]["content"] if requests else ""
         check("the model was told what is really on screen", "button: 7" in content, content[:80])
@@ -117,11 +126,82 @@ async def main():
             check(f"the model's target {s.target.name!r} is a real control", rect is not None)
 
         before = len(requests)
-        mult = await gnome_show.ask("multiply 7 by 6", APP, bridge)
+        _, mult = await gnome_show.ask("multiply 7 by 6", APP, bridge)
         check(
             "a pack task answers without asking the model",
             len(requests) == before and len(mult.steps) > 2,
         )
+
+        # The whole chain on screen: preview, Next, a missing control, a revised plan, a real ring.
+        missing = {
+            "steps": [
+                {
+                    "intent": "press missing",
+                    "narration": "Press Missing.",
+                    "risk": 0,
+                    "target": {"role": "button", "name": "Missing control"},
+                },
+                PLAN["steps"][1],
+            ]
+        }
+        script[:] = [missing, PLAN]
+        cascade, plan = await gnome_show.ask("what is seven times six", APP, bridge)
+        texts = []
+
+        class Recording(GnomeOverlay):
+            async def show_step(self, target, bubble_text, buttons=(), mood=""):
+                texts.append(bubble_text)
+                await super().show_step(target, bubble_text, buttons, mood)
+
+        overlay = Recording(sh.conn, bridge)
+
+        async def replan(done, stuck):
+            return await cascade.revise(APP, done, stuck)
+
+        loop = StepLoop(
+            AtspiPerception(bridge),
+            overlay,
+            bridge,
+            ShowMePolicy(),
+            Timing(poll=0.2, lost=2.0),
+            replan=replan,
+        )
+        task = asyncio.create_task(loop.run(plan, APP, preview=True))
+        await asyncio.sleep(2)
+        check(
+            "a model plan is previewed first",
+            texts[:1] and "2 steps" in texts[0] and overlay.last_target is None,
+            str(texts[:1]),
+        )
+        bx = sh.state()["bubble"][0]
+        px = find_pixels(
+            sh.grab(), BUTTON_BG, 6, cols=range(int(bx * sh.ratio), sh.grab().get_width())
+        )
+        left = min(p[0] for p in px)
+        ys = [p[1] for p in px if p[0] < left + 6]
+        sh.click((left + 20) / sh.ratio, sum(ys) / len(ys) / sh.ratio)  # Next
+        for _ in range(60):
+            if len(requests) >= 3 and overlay.last_target is not None:
+                break
+            await asyncio.sleep(0.25)
+        check("the missing control is noticed and the model is asked again", len(requests) == 3)
+        asked = requests[-1]["messages"][0]["content"] if requests else ""
+        check(
+            "it was told what was missing",
+            'named "Missing control"' in asked and "<observation" in asked,
+            asked[-200:],
+        )
+        check(
+            "the user was told it is re-planning",
+            any("another way" in t or "new plan" in t for t in texts),
+        )
+        refs = await AtspiPerception(bridge).find(APP, "button", "7")
+        check(
+            "the revised plan's ring lands on the real 7 key",
+            overlay.last_target is not None and bool(refs),
+            str(overlay.last_target),
+        )
+        task.cancel()
     finally:
         calc.terminate()
         server.shutdown()

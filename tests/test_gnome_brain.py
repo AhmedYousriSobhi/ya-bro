@@ -28,4 +28,4 @@ def test_plain_words_become_a_plan_on_real_controls():
     lines = [ln for ln in r.stdout.splitlines() if ln.startswith(("PASS", "FAIL"))]
     assert lines, f"no checks ran:\n{r.stdout[-1500:]}\n{r.stderr[-1500:]}"
     assert r.returncode == 0, "\n".join(ln for ln in lines if ln.startswith("FAIL"))
-    assert len(lines) >= 9
+    assert len(lines) >= 14

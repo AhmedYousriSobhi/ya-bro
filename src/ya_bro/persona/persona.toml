@@ -30,6 +30,10 @@ max_humour = 2
 max_humour = 3
 [moments.why_mismatch]     # an explanation: clarity first
 max_humour = 1
+[moments.plan_preview]     # a plan Claude wrote, shown for approval before anything is pointed at
+max_humour = 1
+[moments.replanning]       # a control the plan counted on is not there: working out another way
+max_humour = 0
 [moments.offer_stuck]
 max_humour = 3
 [moments.offer_declined]

@@ -32,6 +32,7 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
 from ya_bro.policy import ShowMePolicy  # noqa: E402
 from ya_bro.steps import StepLoop, Timing  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
+from ya_bro.types import Plan  # noqa: E402
 
 
 async def run(
@@ -39,6 +40,7 @@ async def run(
 ) -> int:
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     plan = None
+    cascade = None
     app = app_override
     if plan_path is not None:
         try:
@@ -64,7 +66,7 @@ async def run(
         return 1
     if plan is None:
         try:
-            plan = await ask(goal, app, bridge)
+            cascade, plan = await ask(goal, app, bridge)
         except brains.BrainError as e:
             print(e)
             return 1
@@ -80,6 +82,12 @@ async def run(
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
 
     cfg = config.load(app)
+    replan = None
+    if cascade is not None:
+
+        async def replan(done, stuck):
+            return await cascade.revise(app, done, stuck)
+
     loop = StepLoop(
         AtspiPerception(bridge, plan.extents_offset),
         overlay,
@@ -88,14 +96,17 @@ async def run(
         Timing(done_hold=1.5),
         log=log,
         tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
+        replan=replan,
     )
     print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
-    outcome = await loop.run(plan, app)
+    outcome = await loop.run(plan, app, preview=cascade is not None and cascade.from_model)
     print(f"finished: {outcome}")
+    if cascade is not None:
+        print(cascade.usage_line())
     return 0
 
 
-async def ask(goal: str, app: str, bridge: GnomeBridge):
+async def ask(goal: str, app: str, bridge: GnomeBridge) -> tuple[brains.FallbackBrain, Plan]:
     """Plan from plain words: a pack task if one matches, else Claude (ADR-0008 §4)."""
     found, _problems = packs.load_all()
     mine = packs.resolve(found, app_id=app, window_class=app)
@@ -124,7 +135,8 @@ async def ask(goal: str, app: str, bridge: GnomeBridge):
     )
     if model is None and not privacy.load_consent().given:
         print("no API key and no consent yet: only pack tasks can answer (see `broctl setup`)")
-    return await brains.FallbackBrain(scripted, model).plan(goal, app)
+    cascade = brains.FallbackBrain(scripted, model)
+    return cascade, await cascade.plan(goal, app)
 
 
 # What the model is told is on screen: the roles a person can act on, nothing else.

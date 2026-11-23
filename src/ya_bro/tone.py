@@ -61,6 +61,12 @@ class Tone:
     def done(self) -> str:
         return self.persona.say("task_done")
 
+    def plan_preview(self, count: int, first: str) -> str:
+        return self.persona.say("plan_preview", count=str(count), first=first[:90])
+
+    def replanning(self) -> str:
+        return self.persona.say("replanning")
+
     def still_here(self) -> str:
         return self.persona.say("still_here")
 

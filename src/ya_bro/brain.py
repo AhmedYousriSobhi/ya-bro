@@ -35,6 +35,12 @@ MAX_ELEMENTS = 150  # listed to the model per request
 MAX_NAME = 60
 MAX_GOAL = 500
 MAX_TOKENS = 2048
+USAGE_KEYS = (
+    "input_tokens",
+    "output_tokens",
+    "cache_read_input_tokens",
+    "cache_creation_input_tokens",
+)
 LOCAL_HOSTS = ("127.0.0.1", "localhost", "::1")  # plain http only here, for tests and proxies
 
 Observe = Callable[[str], Awaitable[list[tuple[str, str]]]]  # app id -> (role, name) pairs
@@ -258,6 +264,7 @@ class ClaudeBrain:
         self._say = say or persona.Persona()
         self._sleep = sleep
         self.calls = 0
+        self.usage: dict[str, int] = {}
 
     def _scrub(self, text: str) -> str:
         return text.replace(self._key, "[key]") if self._key else text
@@ -275,6 +282,20 @@ class ClaudeBrain:
         return blocks
 
     async def plan(self, goal: str, app_id: str) -> Plan:
+        return await self._ask(goal, app_id, "")
+
+    async def revise(self, goal: str, app_id: str, done: list[Step], stuck: Step) -> list[Step]:
+        """New steps from here on, after a control the plan counted on was not on screen."""
+        shown = "\n".join(f"{n}. {_clean(s.narration)}" for n, s in enumerate(done, 1))
+        gone = _clean(stuck.target.name) if stuck.target else ""
+        extra = (
+            f"\n\nSteps already shown to the person:\n{shown or '(none)'}\n"
+            f'The next step needed the control named "{gone}" but it is not on the screen now. '
+            "Plan only the steps still to do from here, using the controls listed."
+        )
+        return (await self._ask(goal, app_id, extra)).steps
+
+    async def _ask(self, goal: str, app_id: str, extra: str) -> Plan:
         goal = " ".join(goal.split())[:MAX_GOAL]
         if not goal:
             raise BrainError("say what you want to do")
@@ -294,7 +315,7 @@ class ClaudeBrain:
             "system": system,
             "tools": [PLAN_TOOL],
             "tool_choice": {"type": "auto"},  # forced tool_choice is rejected on the 5.5 models
-            "messages": [{"role": "user", "content": f"{question}\n\n{obs}"}],
+            "messages": [{"role": "user", "content": f"{question}{extra}\n\n{obs}"}],
         }
         # The ledger is written before the request leaves, so a failed or killed call still shows.
         privacy.record_sent("question", len(question.encode()), "anthropic")
@@ -303,7 +324,26 @@ class ClaudeBrain:
         if len(system) > 1:
             privacy.record_sent("pack", len(system[1]["text"].encode()), "anthropic")
         reply = await self._send(body)
+        self._count(reply)
         return parse_plan(_tool_input(reply), goal, app_id, self._say, self._packs)
+
+    def _count(self, reply: dict) -> None:
+        """Token use, summed over the task, so the cost and cache hit rate can be read off."""
+        used = reply.get("usage") if isinstance(reply, dict) else None
+        if isinstance(used, dict):
+            for key in USAGE_KEYS:
+                if isinstance(used.get(key), int):
+                    self.usage[key] = self.usage.get(key, 0) + used[key]
+
+    def usage_line(self) -> str:
+        u = self.usage
+        read, fresh = u.get("cache_read_input_tokens", 0), u.get("input_tokens", 0)
+        total = read + fresh + u.get("cache_creation_input_tokens", 0)
+        hit = f", {100 * read // total}% of the input from cache" if total else ""
+        return (
+            f"{self.calls} model call(s): {u.get('input_tokens', 0)} in, "
+            f"{u.get('output_tokens', 0)} out{hit}"
+        )
 
     async def _send(self, body: dict) -> dict:
         headers = {
@@ -346,8 +386,10 @@ class FallbackBrain:
 
     def __init__(self, scripted: plans.ScriptedBrain | None, model: ClaudeBrain | None) -> None:
         self._scripted, self._model = scripted, model
+        self.from_model = False  # the last plan was written by the model, so it needs approval
 
     async def plan(self, goal: str, app_id: str) -> Plan:
+        self.from_model = False
         if self._scripted:
             try:
                 return await self._scripted.plan(goal, app_id)
@@ -355,4 +397,21 @@ class FallbackBrain:
                 pass
         if self._model is None:
             raise BrainError("no matching pack task, and no model is set up")
-        return await self._model.plan(goal, app_id)
+        plan = await self._model.plan(goal, app_id)
+        self.from_model = True
+        self.goal = plan.goal
+        return plan
+
+    async def revise(self, app_id: str, done: list[Step], stuck: Step) -> list[Step] | None:
+        """Fresh steps after a missing control; None when no model wrote this plan (a pack's own
+        steps are never rewritten by one) or the model could not help."""
+        if not (self.from_model and self._model):
+            return None
+        try:
+            return await self._model.revise(self.goal, app_id, done, stuck)
+        except BrainError as e:
+            print(e)
+            return None
+
+    def usage_line(self) -> str:
+        return self._model.usage_line() if self._model else "no model calls"

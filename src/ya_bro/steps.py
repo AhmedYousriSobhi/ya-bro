@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -17,6 +17,8 @@ from ya_bro.grounding import Tier
 from ya_bro.interfaces import CompositorBridge, Overlay, Perception, Policy
 from ya_bro.tone import Tone
 from ya_bro.types import Mode, Plan, Rect, Step
+
+MAX_REPLANS = 2  # per task; a plan that keeps missing is the user's cue to rephrase
 
 BUTTONS = ("next", "repeat", "why", "stop")
 
@@ -36,10 +38,13 @@ class Timing:
     poll: float = 0.3  # how often to re-check the screen
     settle: float = 0.6  # a changed screen must hold this long before we call it a wrong action
     nudge: float = 90.0  # after this long, say we are still waiting (never skips on its own)
+    lost: float = 4.0  # a target missing this long counts as a plan that no longer fits the screen
     done_hold: float = 0.0  # how long a happy "all done" bubble stays at the end (0: just hide)
 
 
 Log = Callable[..., object]
+# (steps already done, the step whose target is gone) -> the steps to use from here, or None
+Replan = Callable[[list[Step], Step], Awaitable[list[Step] | None]]
 
 
 class StepLoop:
@@ -52,7 +57,10 @@ class StepLoop:
         timing: Timing | None = None,
         log: Log | None = None,
         tone: Tone | None = None,
+        replan: Replan | None = None,
     ) -> None:
+        self._replan = replan
+        self._replans = 0
         self._tone = tone or Tone()
         self._perception = perception
         self._overlay = overlay
@@ -67,11 +75,28 @@ class StepLoop:
         with contextlib.suppress(Exception):
             self._sink(name, **fields)
 
-    async def run(self, plan: Plan, app_id: str) -> Outcome:
+    async def _preview(self, plan: Plan) -> bool:
+        """Show a model-written plan and wait: True to go on, False when the user stopped."""
+        text = self._tone.plan_preview(len(plan.steps), plan.steps[0].narration)
+        await self._overlay.show_step(None, text, ("next", "stop"), mood="idle")
+        while True:
+            event = await self._events.get()
+            if event in ("next", "stop"):
+                self._log("plan_preview", kind=event)
+                return event == "next"
+
+    async def run(self, plan: Plan, app_id: str, preview: bool = False) -> Outcome:
         pump = asyncio.create_task(self._pump_events())
         self._tone.begin_task()
+        steps = list(plan.steps)
+        self._replans = 0
         try:
-            for index, step in enumerate(plan.steps):
+            if preview and steps and not await self._preview(plan):
+                return Outcome.STOPPED
+            index = 0
+            can_replan = True
+            while index < len(steps):
+                step = steps[index]
                 decision = self._policy.check(step, Mode.SHOW_ME)
                 if not decision.allowed:
                     await self._overlay.show_step(None, "I can't help with this step.", ())
@@ -81,13 +106,34 @@ class StepLoop:
                 self._tone.set_sensitive(decision.needs_confirmation)
                 try:
                     result = await self._present(
-                        step, app_id, index, len(plan.steps), decision.needs_confirmation
+                        step,
+                        app_id,
+                        index,
+                        len(steps),
+                        decision.needs_confirmation,
+                        can_replan=can_replan
+                        and self._replan is not None
+                        and self._replans < MAX_REPLANS,
                     )
                 finally:
                     self._tone.set_sensitive(False)
                 if result == "stop":
                     return Outcome.STOPPED
+                if result == "replan":
+                    await self._overlay.show_step(
+                        None, self._tone.replanning(), ("stop",), mood="thinking"
+                    )
+                    self._replans += 1
+                    fresh = await self._replan(steps[:index], step) if self._replan else None
+                    self._log("replan", step=index, ok=int(bool(fresh)))
+                    if fresh:
+                        steps[index:] = fresh
+                    else:
+                        can_replan = False  # keep waiting for the user on this step
+                    continue
+                can_replan = True
                 self._tone.note_progress()
+                index += 1
             if self._timing.done_hold > 0:
                 await self._overlay.show_step(None, self._tone.done(), (), mood="happy")
                 await asyncio.sleep(self._timing.done_hold)
@@ -151,7 +197,13 @@ class StepLoop:
         return await self._bridge.focused_window() is not None
 
     async def _present(
-        self, step: Step, app_id: str, index: int, total: int, confirm: bool = False
+        self,
+        step: Step,
+        app_id: str,
+        index: int,
+        total: int,
+        confirm: bool = False,
+        can_replan: bool = False,
     ) -> str:
         count = f"({index + 1}/{total})"
         shown: tuple[Rect | None, str, str] | None = None
@@ -169,6 +221,7 @@ class StepLoop:
         changed_since: float | None = None
         mismatch = False
         why_is_mistake = False
+        lost_since: float | None = None
         mismatch_text: str | None = None  # picked once per mismatch so the line does not flicker
         fp: tuple[str, ...] | None = None
         want_text = step.expect.text if step.expect else ""
@@ -209,6 +262,13 @@ class StepLoop:
                     if why_is_mistake:  # the mistake was undone: its explanation no longer applies
                         extra, shown, why_is_mistake = "", None, False
                 rect, tier = await self._locate(step, app_id)
+                if step.target is not None and rect is None:
+                    lost_since = lost_since if lost_since is not None else loop.time()
+                    if can_replan and loop.time() - lost_since >= self._timing.lost:
+                        self._log("step_lost", step=index)
+                        return "replan"
+                else:
+                    lost_since = None
                 text = extra or self._text(step, rect, count, tier, confirm)
                 if predone and not extra:
                     text = f"{count} {self._tone.pre_done()}"
