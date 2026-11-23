@@ -85,7 +85,7 @@ What you can do while it runs:
 | **Repeat** | Shows the step again |
 | **Stop**, or **Super+Shift+Esc** | Ends the walkthrough and hides everything at once |
 
-Try pressing a wrong key on purpose: the bro teases you and waits for you to undo it. Put `humour = 0` in `~/.config/ya-bro/config.toml` for plain lines.
+Try pressing a wrong key on purpose: the bro teases you and waits for you to undo it. Put `humour = 0` in `~/.config/ya-bro/config.toml` for plain lines, `language = "ar"` for Egyptian Arabic (the Arabic lines are drafts), or `less_chatty = true` for fewer extras; `broctl persona list` shows everything it can say.
 
 ## 7. Write your own plan
 

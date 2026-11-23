@@ -1,0 +1,435 @@
+# Arabic lines, Egyptian register (ADR-0013). DRAFTS: every line needs the maintainer's native review before release.
+# Same placeholders and fields as en.toml. Names are bidi-isolated by the code, not here.
+
+[[line]]
+moment = "greeting"
+humour = 0
+text = "أهلاً. قولّي عايز تعمل إيه وأنا أشاورلك عليه."
+
+[[line]]
+moment = "greeting"
+humour = 1
+bro = true
+text = "يا برو! هنعمل إيه النهارده؟"
+
+[[line]]
+moment = "greeting"
+humour = 1
+text = "أهلاً! عايز تعمل إيه؟"
+
+[[line]]
+moment = "greeting"
+humour = 1
+text = "أهلاً بيك. اختار التطبيق وأنا أمشّيك فيه."
+
+[[line]]
+moment = "greeting"
+humour = 2
+bro = true
+text = "يا برو! وريني التطبيق وأنا أوريك الطريق."
+
+[[line]]
+moment = "step_done"
+humour = 0
+text = "الخطوة دي خلصت."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "تمام. اللي بعدها."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "واحدة خلصت."
+
+[[line]]
+moment = "step_done"
+humour = 1
+text = "حلو. نكمل اللي بعدها."
+
+[[line]]
+moment = "step_done"
+humour = 2
+text = "حلو أوي. كأنك عملتها قبل كده."
+
+[[line]]
+moment = "task_done"
+humour = 0
+text = "خلصنا كل الخطوات."
+
+[[line]]
+moment = "task_done"
+humour = 1
+bro = true
+text = "خلصنا يا برو. مش قلتلك سهلة؟"
+
+[[line]]
+moment = "task_done"
+humour = 1
+text = "خلصنا. الموضوع مشي كويس."
+
+[[line]]
+moment = "task_done"
+humour = 1
+text = "ده كل حاجة. برافو عليك."
+
+[[line]]
+moment = "task_done"
+humour = 2
+text = "عملتها! تستاهل قهوة."
+
+[[line]]
+moment = "task_done"
+humour = 2
+text = "خلصنا. كنت هديك خمسة بس معنديش إيد."
+
+[[line]]
+moment = "cant_find"
+humour = 0
+text = "مش لاقي «{name}» هنا لسه. افتح الشاشة الصح وأنا أشاورلك عليه."
+
+[[line]]
+moment = "cant_find"
+humour = 0
+text = "مش شايف «{name}» في الشاشة دي لسه. افتح الصح وأنا أشاورلك."
+
+[[line]]
+moment = "unsure"
+humour = 0
+text = "أظن ده هو «{name}»:"
+
+[[line]]
+moment = "unsure"
+humour = 0
+text = "ده شبه «{name}» بس مش متأكد:"
+
+[[line]]
+moment = "not_yet"
+humour = 0
+text = "لسه مش شايف إنك عملتها. اعملها وأنا هكمل. لو دوست التالي تاني هعدّي."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+bro = true
+text = "حاولت يا برو، بس لسه مش شايفها. اعملها وأنا هكمل. التالي تاني يعدّي."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+text = "قربت، بس لسه مش شايفها. اعملها وأنا هكمل. التالي تاني يعدّي."
+
+[[line]]
+moment = "not_yet"
+humour = 1
+text = "لسه شوية. اعملها وأنا هكمل. التالي تاني يعدّي."
+
+[[line]]
+moment = "not_yet"
+humour = 2
+text = "الضغط على التالي مش معناه إنك عملتها. هكمل لما أشوفها. التالي تاني يعدّي."
+
+[[line]]
+moment = "pre_done"
+humour = 0
+text = "شكلها خلصت خلاص. دوس التالي عشان نكمل."
+
+[[line]]
+moment = "pre_done"
+humour = 1
+text = "خلصتها قبلي؟ فاهم. دوس التالي عشان نكمل."
+
+[[line]]
+moment = "pre_done"
+humour = 1
+text = "سبقتني! دوس التالي عشان نكمل."
+
+[[line]]
+moment = "pre_done"
+humour = 2
+text = "خلصانة أصلاً. إنت محتاجني فعلاً؟ دوس التالي."
+
+[[line]]
+moment = "still_here"
+humour = 0
+text = "لسه هنا. دوس التالي لما تخلص."
+
+[[line]]
+moment = "still_here"
+humour = 1
+bro = true
+text = "لسه هنا يا برو. خد وقتك. دوس التالي لما تخلص."
+
+[[line]]
+moment = "still_here"
+humour = 1
+text = "براحتك، مش مستعجل. دوس التالي لما تخلص."
+
+[[line]]
+moment = "still_here"
+humour = 1
+text = "خد وقتك. دوس التالي لما تخلص."
+
+[[line]]
+moment = "still_here"
+humour = 2
+text = "خد وقتك، معايا النهار كله. دوس التالي لما تخلص."
+
+[[line]]
+moment = "offer_stuck"
+humour = 0
+text = "محتاج مساعدة في {app}؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 0
+text = "شكل {app} مضايقك. تحب أساعد؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+bro = true
+text = "إنت متلخبط ولا إيه يا برو؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+text = "{app} بيعاندك؟ أساعدك؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 1
+text = "تحب أساعدك في {app}؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 2
+bro = true
+text = "متلخبط يا برو؟ أنا شاطر في الحاجات دي."
+
+[[line]]
+moment = "offer_stuck"
+humour = 2
+text = "شكلها كانت صعبة. أساعدك؟"
+
+[[line]]
+moment = "offer_stuck"
+humour = 3
+bro = true
+text = "يا برو. شفت اللي حصل. سيبني أساعدك قبل ما {app} يكسب."
+
+[[line]]
+moment = "offer_declined"
+humour = 0
+text = "تمام. مش هتدخل."
+
+[[line]]
+moment = "offer_declined"
+humour = 1
+text = "ولا يهمك. أنا هنا لو احتجتني."
+
+[[line]]
+moment = "offer_declined"
+humour = 1
+text = "خد راحتك. قولّي لو عايزني."
+
+[[line]]
+moment = "offer_declined"
+humour = 2
+text = "مش شايف كده، بس أنا هنا."
+
+[[line]]
+moment = "offer_declined"
+humour = 3
+text = "خلاص خلاص. هقعد هنا ساكت ومفيد."
+
+[[line]]
+moment = "back_off_long"
+humour = 0
+text = "تمام، هسكت شوية."
+
+[[line]]
+moment = "back_off_long"
+humour = 1
+text = "فهمت. هسيبك براحتك شوية."
+
+[[line]]
+moment = "back_off_long"
+humour = 1
+text = "مفهوم. مش هزعجك لفترة."
+
+[[line]]
+moment = "back_off_long"
+humour = 2
+text = "وضع الهدوء. اندهلي لو احتجتني."
+
+[[line]]
+moment = "error_recovered"
+humour = 0
+text = "اشتغلت. نكمل."
+
+[[line]]
+moment = "error_recovered"
+humour = 0
+text = "تمام دلوقتي. نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 0
+text = "ده مش اللي طلبته. كنت مستني «{want}» على الشاشة. تراجع عنه، أو دوس التالي نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "شفت؟! مش ده يا برو. أنا حذرتك. كنت عايز «{want}» وإنت ادّيتني «{got}». تراجع، أو دوس التالي نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "شفت؟! مش ده يا برو. أنا حذرتك. كنت عايز «{want}». تراجع، أو دوس التالي نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "يا برو... قلت «{want}» وإنت ادّيتني «{got}». تراجع، أو دوس التالي لو حاسس إنك محظوظ."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "يا برو... قلت «{want}». تراجع، أو دوس التالي لو حاسس إنك محظوظ."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "ها! غلط. كنت عايز «{want}» وإنت ادّيتني «{got}». تراجع وحاول تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "ها! غلط. كنت عايز «{want}». تراجع وحاول تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "همم. مش دي. كنت عايز «{want}» وإنت ضغطت «{got}». تراجع وحاول تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "همم. مش دي. كنت عايز «{want}». تراجع وحاول تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "قريب، بس لأ. محتاج «{want}» مش «{got}». تراجع وجرّب تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "قريب، بس لأ. محتاج «{want}». تراجع وجرّب تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+requires = ["got"]
+text = "أوبس، ده «{got}». أنا كنت عايز «{want}». تراجع، أو دوس التالي نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 1
+forbids = ["got"]
+text = "أوبس، غلط. أنا كنت عايز «{want}». تراجع، أو دوس التالي نكمل."
+
+[[line]]
+moment = "mismatch"
+humour = 2
+requires = ["got"]
+text = "اختيار جريء. غلط، بس جريء. كنت عايز «{want}» وإنت ادّيتني «{got}». تراجع، أو دوس التالي."
+
+[[line]]
+moment = "mismatch"
+humour = 2
+forbids = ["got"]
+text = "اختيار جريء. غلط، بس جريء. كنت عايز «{want}». تراجع، أو دوس التالي."
+
+[[line]]
+moment = "mismatch"
+humour = 3
+requires = ["got"]
+text = "أنا شفت حاجات كتير، بس عمري ما شفت «{got}» مكان «{want}». تراجع وحاول تاني."
+
+[[line]]
+moment = "mismatch"
+humour = 3
+forbids = ["got"]
+text = "أنا شفت حاجات كتير، بس عمري ما شفت ده مكان «{want}». تراجع وحاول تاني."
+
+[[line]]
+moment = "why_mismatch"
+humour = 0
+requires = ["got"]
+text = "الشاشة بتقول «{got}»، لكن الخطوة دي محتاجة «{want}».{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "why_mismatch"
+humour = 0
+forbids = ["got"]
+text = "الشاشة بتقول حاجة تانية، لكن الخطوة دي محتاجة «{want}».{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+bro = true
+requires = ["got"]
+text = "الشاشة بتقول «{got}» يا برو، بس أنا محتاج «{want}». ده الغلط.{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+bro = true
+forbids = ["got"]
+text = "الشاشة بتقول حاجة تانية يا برو، بس أنا محتاج «{want}». ده الغلط.{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+requires = ["got"]
+text = "الشاشة بتقول «{got}»، بس أنا محتاج «{want}». ده الغلط.{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "why_mismatch"
+humour = 1
+forbids = ["got"]
+text = "الشاشة بتقول حاجة تانية، بس أنا محتاج «{want}». ده الغلط.{why} تراجع (C أو Undo) وبعدين دوس المفتاح اللي بشاور عليه."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+text = "الخطوة دي قرارك إنت: أنا بشاورلك وإنت اللي بتدوس بنفسك."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+text = "مش هعمل الخطوة دي بدالك. دوس عليها بنفسك."
+
+[[line]]
+moment = "risk_confirm"
+humour = 0
+requires = ["name"]
+text = "هشاورلك على «{name}» بس إنت اللي تدوس بنفسك."
+

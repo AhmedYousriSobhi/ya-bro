@@ -206,6 +206,38 @@ def _struggle(args: argparse.Namespace) -> int:
     return 0
 
 
+def _persona(args: argparse.Namespace) -> int:
+    from ya_bro import persona
+
+    if args.verb == "lint":
+        problems = persona.lint()
+        for p in problems:
+            print(p)
+        print("persona: ok" if not problems else f"persona: {len(problems)} problems")
+        return 1 if problems else 0
+    data = persona.load()
+    if args.verb == "style":
+        print(persona.style_guide(), end="")
+        return 0
+    if args.verb == "list":  # every line, grouped, for review (the Arabic needs a native reader)
+        for moment, spec in data.moments.items():
+            print(
+                f"\n[{moment}] max humour {spec.max_humour}"
+                + (", sensitive" if spec.sensitive else "")
+            )
+            for ln in data.lines[args.lang].get(moment, ()):
+                print(f"  h{ln.humour}{' bro' if ln.bro else ''}: {ln.text}")
+        return 0
+    facts = dict(kv.split("=", 1) for kv in args.fact if "=" in kv)
+    p = persona.Persona(humour=args.humour, locale=args.lang, less_chatty=args.less_chatty)
+    try:
+        print(p.say(args.moment, **facts))
+    except persona.PersonaError as e:
+        print(e)
+        return 1
+    return 0
+
+
 def _eval_struggle(args: argparse.Namespace) -> int:
     from pathlib import Path
 
@@ -399,8 +431,22 @@ def main(argv: list[str] | None = None) -> int:
     sv.add_parser("watch", help="print offers as they would appear").add_argument(
         "--seconds", type=int, default=300
     )
+    pe = sub.add_parser("persona", help="what the bro says (ADR-0013): preview, review, lint")
+    pv = pe.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    say = pv.add_parser("say", help="print one line for a moment")
+    say.add_argument("moment", help="e.g. mismatch, offer_stuck, task_done")
+    say.add_argument("--humour", type=int, default=1, help="0 (plain) to 3 (full bro)")
+    say.add_argument("--lang", choices=("en", "ar"), default="en")
+    say.add_argument("--less-chatty", action="store_true")
+    say.add_argument("--fact", action="append", default=[], help="name=value, e.g. want=7")
+    lst = pv.add_parser("list", help="print every line, for review")
+    lst.add_argument("--lang", choices=("en", "ar"), default="en")
+    pv.add_parser("lint", help="check the persona data (exit 1 on a problem)")
+    pv.add_parser("style", help="print the tone guide that goes in the Brain's prompt")
     args = parser.parse_args(argv)
 
+    if args.noun == "persona":
+        return _persona(args)
     if args.noun == "struggle":
         return _struggle(args)
     if args.noun == "hook":

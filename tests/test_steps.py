@@ -389,9 +389,20 @@ def test_tone_lines_cap_screen_text_and_rotate():
     long = "9" * 200
     line = tone.mismatch("7", long)
     assert long not in line and "…" in line
-    seen = {tone.mismatch("7", "5") for _ in range(3)}
+    seen = set()
+    for _ in range(3):
+        tone.note_progress()  # (a run of wrong actions makes the bro drop a level: tested below)
+        seen.add(tone.mismatch("7", "5"))
     assert len(seen) == 3  # three different lines in a row
     assert "warned" not in Tone(0).mismatch("7", "5")
+    # Three wrong actions in a row: the bro stops teasing (ADR-0013: humour drops a level).
+    tone = Tone(1)
+    lines = [tone.mismatch("7", "5") for _ in range(4)]
+    assert (
+        "That's not what I asked for" in lines[3] and "That's not what I asked for" not in lines[0]
+    )
+    tone.note_progress()
+    assert "That's not what I asked for" not in tone.mismatch("7", "5")
     assert Tone(0).why_mismatch("7", "", "").startswith("The screen shows something else")
 
 
@@ -441,24 +452,30 @@ async def test_the_bro_points_while_a_step_waits_and_looks_puzzled_when_it_canno
     task.cancel()
 
 
-async def test_a_wrong_action_makes_the_bro_tease():
-    perception = FakePerception(
-        {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: ""}
-    )
-    overlay = FakeOverlay()
-    loop = StepLoop(
-        perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE, tone=Tone(0)
-    )
-    task = asyncio.create_task(loop.run(Plan("g", [text_step("7")]), APP))
-    await settle()
-    assert overlay.moods[-1] == "pointing"
-    perception.texts[DISPLAY] = "5"  # the wrong key
-    await asyncio.sleep(0.3)
-    assert overlay.moods[-1] == "teasing" and "That's not what I asked for" in overlay.calls[-1][2]
-    perception.texts[DISPLAY] = ""  # undone: back to pointing
-    await asyncio.sleep(0.3)
-    assert overlay.moods[-1] == "pointing"
-    task.cancel()
+async def test_a_wrong_action_makes_the_bro_tease_only_when_humour_allows_it():
+    for humour, mood, marker in (
+        (1, "teasing", "I warned you"),
+        (0, "pointing", "That's not what I"),
+    ):
+        perception = FakePerception(
+            {CREATE: Rect(1, 1, 2, 2), DISPLAY: Rect(0, 0, 9, 9)}, {DISPLAY: ""}
+        )
+        overlay = FakeOverlay()
+        tone = Tone(humour)
+        loop = StepLoop(
+            perception, overlay, FakeCompositorBridge([WIN]), FakePolicy(), SETTLE, tone=tone
+        )
+        task = asyncio.create_task(loop.run(Plan("g", [text_step("7")]), APP))
+        await settle()
+        assert overlay.moods[-1] == "pointing"
+        perception.texts[DISPLAY] = "5"  # the wrong key
+        await asyncio.sleep(0.3)
+        assert overlay.moods[-1] == mood and marker in overlay.calls[-1][2]
+        perception.texts[DISPLAY] = ""  # undone: back to pointing
+        await asyncio.sleep(0.3)
+        assert overlay.moods[-1] == "pointing"
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
 
 
 async def test_the_bro_is_happy_when_everything_is_done_and_only_if_asked_to_stay():

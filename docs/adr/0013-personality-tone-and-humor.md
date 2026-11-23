@@ -1,6 +1,6 @@
 # ADR-0013: Personality, tone and humour system
 
-- Status: Proposed
+- Status: Proposed (persona module, lines, filter and controls implemented in #23; see "Implemented")
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0008, ADR-0010, ADR-0019
@@ -69,6 +69,16 @@ The maintainer is Arabic-speaking. The persona should sound natural in Egyptian 
 7. **Safety filter.**
    - Every LLM-generated persona line passes a deterministic check before display: length, banned-topic keyword list in EN and AR, and no imperative to perform an R2+ action unless it came from the policy-approved step.
    - A line that fails falls back to a template.
+
+## Implemented (#23, 2026-11-23)
+- **`ya_bro.persona`** (data in the package): `persona.toml` (14 moments with a humour ceiling each, `optional` and `sensitive` flags, banned topics in English and Arabic), `lines/en.toml` and `lines/ar.toml` (79 lines each, tagged with the lowest humour setting that may use them, with `bro`, `requires` and `forbids` fields), `style.md` (the tone guide for the Brain's prompt, `broctl persona style`).
+- **Rules enforced in code:** humour never in `cant_find`, `unsure`, `error_recovered` or the sensitive `risk_confirm` (a ceiling of 0, and a risky step silences everything); the setting is a ceiling per moment; it drops one level when the user seems frustrated (three wrong actions in a row, cleared by progress); "less chatty" mutes optional moments and all humour; "bro" at most once per task; a line does not repeat while an unused one exists; lines are chosen deterministically in file order, so a run is reproducible.
+- **Languages:** English and Egyptian Arabic; the bro follows the user's language (`detect_locale`, a third of the letters Arabic), UI names are bidi-isolated in Arabic lines, the overlay is told `dir = rtl` for Arabic. `language` in `config.toml` is `auto` (English until the user writes Arabic), `en` or `ar`; `less_chatty` is a config key too.
+- **Safety filter for generated lines:** `Persona.vet` (one line, at most 140 characters, no banned topic in either language including with the Arabic article, no link or backtick command, no risky instruction unless the approved step is risky) and `generated_or` (falls back to the template, never replaces a sensitive moment). Nothing generates lines yet; this is the gate for the Claude brain.
+- **In the step loop:** a step the user must take themselves (R3) gets a plain "this one is yours to press" line and no teasing even after a wrong action at full humour; the teasing face needs humour of at least 1 and no frustration; the struggle offer's lines (`offer_stuck`, `offer_declined`, `back_off_long`) exist and are previewable (`broctl persona say|list|lint|style`) but the offer bubble is not built.
+- **Measured:** 46 unit tests (every moment and level in both languages, the ceilings, frustration, less-chatty, bro-once, rotation, language switching, the filter with 17 good and bad lines, the loop on a risky step, config, the command, and a lint that catches broken data) and a real-frame check in the isolated shell that an Arabic line renders as real text and that the right-to-left bubble mirrors its buttons.
+- **Changed from the old behaviour:** "can't find" and the hedge are no longer playful (ADR-0013's table); the first mismatch line is unchanged.
+- **Not done:** the rubric eval (100 generated lines per locale graded by an LLM judge, 90% target) and the dogfood rule (more than 40% lowering the slider), because no line is generated yet; 10 to 30 variants per moment (there are 2 to 9); native review of every Arabic line (they are drafts, marked as such in the file); the humour slider UI and the "less chatty" toggle UI (only `config.toml`); code-switching inside one line; MSA for TTS fallback; persona name and avatar choice; reading the user's language from their requests (no request input exists yet); the offer bubble itself; the Arabic first/last-line wrap of RTL paragraphs inside the bubble was only looked at, not measured.
 
 ## Consequences
 - **Positive:**
