@@ -19,6 +19,7 @@ from __future__ import annotations
 import tomllib
 from pathlib import Path
 
+from ya_bro import shell_command
 from ya_bro.types import ElementRef, Expect, Plan, Risk, Step
 
 MAX_STEPS = 50
@@ -68,6 +69,11 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
             if not isinstance(name, str) or not isinstance(text, str) or not (name or text):
                 raise PlanError(f"{where} expect: needs a name or a text")
             expect = Expect(e["role"], name, bool(e.get("appears", True)), text)
+        command = s.get("command", "")
+        if command and (not isinstance(command, str) or not shell_command.valid(command)):
+            raise PlanError(
+                f"{where}: command must be one printable line of at most 200 characters"
+            )
         try:
             risk = Risk(int(s.get("risk", 0)))
         except ValueError as e:
@@ -81,6 +87,7 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
                 risk=risk,
                 expect=expect,
                 why=str(s.get("why", "")),
+                command=command,
             )
         )
     keywords = [k.lower() for k in head.get("keywords", []) if isinstance(k, str)]

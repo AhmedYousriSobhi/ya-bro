@@ -87,6 +87,15 @@ class Tone:
     def act_failed(self) -> str:
         return self.persona.say("act_failed")
 
+    def copied(self) -> str:
+        return self.persona.say("copied")
+
+    def written(self) -> str:
+        return self.persona.say("written")
+
+    def cmd_failed(self, code: int) -> str:
+        return self.persona.say("cmd_failed", got=str(code))
+
     def mismatch(self, want: str, got: str) -> str:
         self.persona.note_mismatch()
         return self.persona.say("mismatch", want=snippet(want), got=snippet(got))

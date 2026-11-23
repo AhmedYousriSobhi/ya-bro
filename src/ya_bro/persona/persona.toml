@@ -50,6 +50,12 @@ max_humour = 0
 sensitive = true
 [moments.act_failed]       # Do-it did not work twice: handing the step back
 max_humour = 0
+[moments.copied]          # Copy was pressed
+max_humour = 0
+[moments.written]         # Write it put the command at the prompt
+max_humour = 0
+[moments.cmd_failed]      # the step's command ended with an error code
+max_humour = 0
 
 # Topics humour never touches and generated lines never mention (whole words, lower case).
 [banned]

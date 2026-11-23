@@ -486,3 +486,24 @@ text = "ماشتغلتش، فدي عليك: هشاورلك وإنت دوس."
 moment = "act_failed"
 humour = 0
 text = "معرفتش أعملها. كملها إنت."
+
+[[line]]
+moment = "copied"
+humour = 0
+text = "اتنسخ. الصقه في التيرمنال بـ Ctrl+Shift+V."
+
+[[line]]
+moment = "written"
+humour = 0
+text = "اتكتب عند البرومبت. راجعه وبعدين دوس Enter."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+requires = ["got"]
+text = "خلص بكود {got}. شغّله تاني أو دوس Next عشان تعدّي."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+text = "خلص بغلط. شغّله تاني أو دوس Next عشان تعدّي."

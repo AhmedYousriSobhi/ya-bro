@@ -4,13 +4,16 @@ goal = "start the workbench cluster"
 keywords = ["start", "cluster", "workbench", "benchctl", "run"]
 
 [[step]]
-narration = "In the workbench folder, run: ./scripts/benchctl plan"
+narration = "In the workbench folder, run this."
+command = "./scripts/benchctl plan"
 why = "plan checks the memory first. A REFUSED here is a decision, not a bug."
 
 [[step]]
-narration = "Now run: ./scripts/benchctl start"
+narration = "Now run this."
+command = "./scripts/benchctl start"
 why = "It builds on the first run, then starts the cluster and the web page, and prints a link."
 
 [[step]]
-narration = "Run: ./scripts/benchctl wait ready"
+narration = "Run this."
+command = "./scripts/benchctl wait ready"
 why = "wait blocks until every service answers, so you do not have to poll."

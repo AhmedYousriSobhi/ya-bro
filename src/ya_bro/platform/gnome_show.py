@@ -20,7 +20,15 @@ gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib  # noqa: E402
 
 from ya_bro import brain as brains  # noqa: E402
-from ya_bro import config, keystore, packs, plans, privacy  # noqa: E402
+from ya_bro import (  # noqa: E402
+    config,
+    keystore,
+    packs,
+    plans,
+    privacy,
+    shell_command,  # noqa: E402
+)
+from ya_bro.command_watch import CommandWatch  # noqa: E402
 from ya_bro.platform.docked_overlay import DockedOverlay  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
@@ -32,7 +40,9 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
     _call,
 )
 from ya_bro.policy import LocalPolicy, ShowMePolicy  # noqa: E402
+from ya_bro.shell_spool import ShellSpool  # noqa: E402
 from ya_bro.steps import StepLoop, Timing  # noqa: E402
+from ya_bro.terminal_write import TerminalWriter  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
 from ya_bro.types import Plan, Rect, WindowInfo  # noqa: E402
 
@@ -155,10 +165,28 @@ class _NoBridge:
         return self._win
 
 
+async def _hover():
+    """The bubble beside an allowed terminal window when the extension shows one, else a plain
+    window. Returns (overlay, bridge, hovering)."""
+    try:
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        Gio.bus_own_name_on_connection(
+            bus, f"{PREFIX}.Core", Gio.BusNameOwnerFlags.NONE, None, None
+        )
+        await asyncio.sleep(0.5)  # let the extension notice the new owner
+        bridge = GnomeBridge(bus)
+        if bridge.raw_windows():
+            return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True
+    except GLib.Error:
+        pass
+    return DockedOverlay(), _NoBridge(), False
+
+
 async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None) -> int:
-    """`broctl ask --pack ID`: walk through a pack's task in a plain window. It reads no screen and
-    names no control (a terminal or web tool has none to point at yet), so the user does each step
-    and presses Next. Needs neither the Shell extension nor an allowed app."""
+    """`broctl ask --pack ID`: walk through a pack's task. Steps with a command show it as a snippet
+    (Copy, Write it); the user presses Enter, and the plan moves on when the shell hook sees it
+    finish. Reads no screen. With an allowed terminal window the bubble hovers beside it, else it
+    is a plain window."""
     found, _problems = packs.load_all()
     pack = next((p for p in found if p.id == pack_id), None)
     if pack is None or not pack.tasks:
@@ -177,17 +205,31 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
         print(f"{e}. Tasks in {pack_id}: {', '.join(sorted(pack.tasks))}")
         return 1
     cfg = config.load(pack_id)
+    hovering = False
+    if overlay is None:
+        overlay, bridge, hovering = await _hover()
+    else:
+        bridge = _NoBridge()
+    # The hook records only the commands this plan shows, and only while this run lasts.
+    spool = ShellSpool()
+    spool.open(sorted({shell_command.argv0(s.command) for s in plan.steps if s.command}))
     loop = StepLoop(
         _NoPerception(),
-        overlay or DockedOverlay(),
-        _NoBridge(),
+        overlay,
+        bridge,
         ShowMePolicy(),
         Timing(done_hold=1.5),
         log=lambda event, **f: print(event, *(f"{k}={v}" for k, v in f.items()), flush=True),
         tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
+        writer=TerminalWriter(),
+        commands=CommandWatch(spool),
     )
-    print(f"{len(plan.steps)} steps for {pack.name}. You run each one; Next goes on, Stop ends.")
-    print(f"finished: {await loop.run(plan, pack_id)}")
+    where = "beside your terminal" if hovering else "in a window"
+    print(f"{len(plan.steps)} steps for {pack.name}, shown {where}. Stop or Esc ends it.")
+    try:
+        print(f"finished: {await loop.run(plan, pack_id)}")
+    finally:
+        spool.close()
     return 0
 
 

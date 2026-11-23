@@ -13,6 +13,7 @@ const CORE_ONLY = ['Core'];
 const EVENT_PEERS = ['Core', 'Actuator'];
 const DEAD_MAN_SECONDS = 6;
 const MAX_TEXT = 280;
+const MAX_SNIPPET = 240;  // a command line, shown and copied exactly as core sent it
 const EDGE = 8;           // keep the bubble this far inside the monitor
 const AVATAR_SIZE = 48;   // the bro, drawn from assets/bro/<mood>.svg (ADR-0028)
 const INDICATORS = ['watching', 'listening', 'sending', 'acting'];  // ADR-0014 §3, fixed list
@@ -22,6 +23,7 @@ const MOODS = ['idle', 'pointing', 'thinking', 'happy', 'teasing', 'quiet'];
 const BUTTONS = {
     next: 'Next', repeat: 'Repeat', why: 'Why?', do_it: 'Do it', stop: 'Stop',
     yes: 'Yes', no: 'No', not_for_app: 'Not for this app',
+    copy: 'Copy', write: 'Write it',
 };
 
 const XML = `<node><interface name="${IFACE}">
@@ -135,9 +137,13 @@ export class Overlay {
             const pointer = new St.Widget({style_class: 'yabro-pointer', reactive: false, visible: false});
             const label = new St.Label({style_class: 'yabro-bubble-label', reactive: false});
             label.clutter_text.line_wrap = true;
+            const snippet = new St.Label({style_class: 'yabro-snippet', reactive: false, visible: false});
+            snippet.clutter_text.line_wrap = false;
+            snippet.set_text_direction(Clutter.TextDirection.LTR);  // code reads left to right, even in an Arabic bubble
             const buttons = new St.BoxLayout({style_class: 'yabro-buttons', reactive: false});
             const bubble = new St.BoxLayout({style_class: 'yabro-bubble', vertical: true, reactive: false, visible: false});
             bubble.add_child(label);
+            bubble.add_child(snippet);
             bubble.add_child(buttons);
             const avatarIcon = new St.Icon({icon_size: AVATAR_SIZE, gicon: this._icon('idle')});
             const avatar = new St.Button({
@@ -149,7 +155,7 @@ export class Overlay {
             for (const a of [ring, pointer, bubble, avatar, dots])
                 root.add_child(a);
             Main.layoutManager.addTopChrome(root, {affectsStruts: false, trackFullscreen: false});
-            this._containers.push({monitor: m, root, ring, pointer, label, buttons, bubble, avatar, avatarIcon, dots});
+            this._containers.push({monitor: m, root, ring, pointer, label, snippet, buttons, bubble, avatar, avatarIcon, dots});
         }
     }
 
@@ -227,10 +233,19 @@ export class Overlay {
                 c.ring.show();
             }
             c.label.text = text;   // plain text, never markup
+            // One command line, no control characters (core checks too); empty means no snippet.
+            const snippet = String(args.snippet ?? '').slice(0, MAX_SNIPPET).replace(/[\x00-\x1f\x7f]/g, '');
+            c.snippet.text = snippet;
+            c.snippet.visible = snippet !== '';
             c.buttons.destroy_all_children();
             for (const b of (args.buttons ?? []).filter(k => k in BUTTONS)) {
                 const btn = new St.Button({style_class: 'yabro-button', label: BUTTONS[b], reactive: true, can_focus: false});
-                btn.connect('clicked', () => this._event(`button:${b}`, b));
+                btn.connect('clicked', () => {
+                    // Copy writes the clipboard here, with the text already on screen; nothing is read back.
+                    if (b === 'copy' && snippet !== '')
+                        St.Clipboard.get_default().set_text(St.ClipboardType.CLIPBOARD, snippet);
+                    this._event(`button:${b}`, b);
+                });
                 c.buttons.add_child(btn);
             }
             // RTL: only the direction is set here; full ADR-0019 handling is deferred.

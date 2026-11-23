@@ -12,15 +12,18 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
-from ya_bro import grounding
+from ya_bro import grounding, shell_command
+from ya_bro.command_watch import CommandWatch
 from ya_bro.grounding import Tier
 from ya_bro.interfaces import Actuator, CompositorBridge, Overlay, Perception, Policy
+from ya_bro.terminal_write import TerminalWriter
 from ya_bro.tone import Tone
 from ya_bro.types import Mode, Plan, Rect, Step
 
 MAX_REPLANS = 2  # per task; a plan that keeps missing is the user's cue to rephrase
 
 BUTTONS = ("next", "repeat", "why", "stop")
+COMMAND_BUTTONS = ("copy", "write", "next", "why", "stop")
 
 
 def _joined(fp: tuple[str, ...] | None) -> str:
@@ -61,7 +64,11 @@ class StepLoop:
         tone: Tone | None = None,
         replan: Replan | None = None,
         actuator: Actuator | None = None,
+        writer: TerminalWriter | None = None,
+        commands: CommandWatch | None = None,
     ) -> None:
+        self._writer = writer  # "Write it": puts a step's command at the shell prompt
+        self._commands = commands  # a step's command finishing moves the plan on
         self._actuator = actuator  # None: Show-me only
         self._replan = replan
         self._replans = 0
@@ -291,7 +298,11 @@ class StepLoop:
         note: str = "",
     ) -> str:
         count = f"({index + 1}/{total})"
-        shown: tuple[Rect | None, str, str] | None = None
+        shown: tuple | None = None
+        cmd = step.command
+        cmd_name = shell_command.argv0(cmd)
+        started = self._commands.now() if self._commands else 0.0
+        last_code: int | None = None
         hidden = False
         loop = asyncio.get_running_loop()
         since = loop.time()
@@ -346,6 +357,14 @@ class StepLoop:
                     changed_since, mismatch, mismatch_text = None, False, None
                     if why_is_mistake:  # the mistake was undone: its explanation no longer applies
                         extra, shown, why_is_mistake = "", None, False
+                if cmd and self._commands is not None:
+                    code = self._commands.finished(cmd_name, started)
+                    if code == 0:
+                        self._log("command_ran", step=index)
+                        return "verified"
+                    if code is not None and code != last_code:
+                        last_code = code
+                        extra, shown = f"{count} {self._tone.cmd_failed(code)}", None
                 rect, tier = await self._locate(step, app_id)
                 if step.target is not None and rect is None:
                     lost_since = lost_since if lost_since is not None else loop.time()
@@ -368,9 +387,14 @@ class StepLoop:
                     mood = "idle"
                 if (mismatch or why_is_mistake) and self._tone.can_tease():
                     mood = "teasing"  # never at humour 0, on a risky step, or after repeated slips
-                if (rect, text, mood) != shown:
-                    await self._overlay.show_step(rect, text, BUTTONS, mood=mood)
-                    shown = (rect, text, mood)
+                buttons = BUTTONS
+                if cmd:
+                    ok = self._writer is not None and self._writer.can_write(cmd).ok
+                    buttons = tuple(b for b in COMMAND_BUTTONS if ok or b != "write")
+                if (rect, text, mood, buttons) != shown:
+                    extra_args = {"snippet": cmd} if cmd else {}
+                    await self._overlay.show_step(rect, text, buttons, mood=mood, **extra_args)
+                    shown = (rect, text, mood, buttons)
                 if not nudged and not extra and loop.time() - since > self._timing.nudge:
                     nudged, extra = True, f"{count} {self._tone.still_here()}"
             try:
@@ -387,6 +411,12 @@ class StepLoop:
                 warned = True
                 extra = f"{count} {self._tone.not_yet()}"
                 shown = None
+            elif event == "copy" and cmd:
+                extra, shown = f"{count} {self._tone.copied()}", None
+            elif event == "write" and cmd and self._writer is not None:
+                done = await asyncio.to_thread(self._writer.write, cmd)
+                note = self._tone.written() if done.ok else done.reason
+                extra, shown = f"{count} {note}", None
             elif event == "repeat":
                 extra, shown, warned, why_is_mistake = "", None, False, False
             elif event == "why":

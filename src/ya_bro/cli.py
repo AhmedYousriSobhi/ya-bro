@@ -462,6 +462,42 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "", show: list[str] | None =
             server.stop()
 
 
+def _companion(pack: str, goal: str, wait: bool) -> int:
+    """Bro beside the terminal (ADR-0029). It runs in the background so this terminal's prompt
+    comes back: "Write it" needs an idle prompt, and a command to run needs one too."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    from ya_bro import dirs
+
+    if wait:
+        return _gnome_demo("show", 0, show=["--pack", pack, "--ask", goal])
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        print("needs the system python3 with PyGObject (sudo apt install python3-gi)")
+        return 1
+    # The hook only marks a prompt idle while this folder exists, and the next prompt is drawn
+    # right after we return, so it must exist before we do (the companion re-creates it).
+    run = dirs.runtime_dir() / "ya-bro"
+    run.mkdir(mode=0o700, parents=True, exist_ok=True)
+    log = dirs.state_dir() / "companion.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
+    with open(log, "w") as out:
+        subprocess.Popen(
+            [py, "-m", "ya_bro.platform.gnome_show", "--pack", pack, "--ask", goal],
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=out,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    print("Bro is up beside your terminal. Use its bubble: Copy, Write it, Next, Stop.")
+    print(f"(`broctl panic` stops it; messages go to {log})")
+    return 0
+
+
 def _load(wait_seconds: int = 120) -> int:
     import time
 
@@ -527,6 +563,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     ask.add_argument("--app", default="", help="app id (default: the focused allowed window)")
     ask.add_argument("--dry", action="store_true", help="print the plan and stop")
+    ask.add_argument(
+        "--wait", action="store_true", help="with --pack: stay in this terminal until it ends"
+    )
     ask.add_argument(
         "--pack", default="", help="use this pack's tasks in a plain window (no app, no extension)"
     )
@@ -667,7 +706,7 @@ def main(argv: list[str] | None = None) -> int:
             ],
         )
     if args.noun == "ask" and args.pack:
-        return _gnome_demo("show", 0, show=["--pack", args.pack, "--ask", args.goal])
+        return _companion(args.pack, args.goal, args.wait)
     if args.noun == "ask":
         extra = ["--app", args.app] if args.app else []
         return _gnome_demo("show", 0, show=["--ask", args.goal, *extra, *(["--dry"] * args.dry)])
