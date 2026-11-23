@@ -94,6 +94,7 @@ A small **GNOME Shell extension** draws the ring and bubble and reports window p
 | `broctl apps list \| available \| allow \| revoke` | Manage which app Ya-Bro may see |
 | `broctl targets list \| allow \| revoke` | Allow one web tool by origin instead of a whole browser |
 | `broctl show <plan.toml>` | Walk through a plan, step by step |
+| `broctl struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` | The "you stuck, bro?" offers (off for every app until you enable one) |
 | `broctl hook install \| uninstall \| print \| status` | The bash hook that sees allowed commands finish (asks first) |
 | `broctl shell watch` | Print allowed commands as they finish |
 | `broctl eval pointing` | Score pointing accuracy on the labelled sets (exit 1 below the gate) |

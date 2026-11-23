@@ -1,6 +1,6 @@
 # ADR-0010: Struggle detection ("you stuck, bro?") and back-off policy
 
-- Status: Proposed
+- Status: Proposed (core detector, shell and idle sources implemented in #9; see "Implemented")
 - Date: 2026-11-20
 - Issue: #13 (designs #9)
 - Depends on: ADR-0002, ADR-0003, ADR-0005, ADR-0014, ADR-0021
@@ -129,6 +129,13 @@ Hard caps: **≤ 3 offers per hour** and **≤ 10 per day** by default.
 **8. Content rule.**
 - Detection uses types and counts only.
 - Text (dialog message, failing command line, stderr) is read **only after the user says yes**, as perception input to the Brain (ADR-0014).
+
+## Implemented (#9, 2026-11-23)
+- **Core:** `ya_bro.struggle`: content-free `Observation`s (kind, short token, number; anything else raises `ContentError`), the nine signals with their counts and windows (defaults from the table above), a score that halves every 90 s, the context gate (typing, fullscreen, do not disturb), breakpoints (a dialog closed, an alert, a command finished, or 5 s of idle) and every back-off rule: one pending offer, 2 min cooldown, 3 an hour and 10 a day, "no" or ignored suppresses that signal for that app until the context changes (or the failing command finally succeeds), two in a row silence the app for 30 min, three in a week halve that weight (reversible), "not for this app", "yes" clears the score. Opt-in per app and a global switch; sensitivity 1 to 4 maps to the threshold (2.5, 1.4, 1.0, 0.6). State (opt-ins, "never", the 7-day "no" log, halved weights, answer counts) is a private JSON file with no observations in it.
+- **Pack tuning:** `signals.toml` in a pack (`[weights]`, `[counts.signal]`), bounded at load (weight 0 to 3, count 2 to 50, window 1 s to 1 h); the workbench pack ships one.
+- **Sources built:** failing commands from the shell hook (ADR-0021; only allowed commands reach it) and idle from Mutter's IdleMonitor (`platform/gnome_idle.py`, through `gdbus`). `StruggleHost` joins them to the detector; `broctl struggle status|on|off|enable|disable|sensitivity|watch`.
+- **Measured for real:** a real interactive bash with the hook, the real spool and the real host: three failures of an allowed command give one offer with the reason "In workbench I saw 3 failed commands of the same name."; a success in between, or a command nobody allowed, gives none; a "no" keeps the same loop quiet. Real Mutter idle in the isolated shell: about 0.5 s right after a key, 4.5 s after 4 s of nothing, back to 0.5 s on the next key; a real pause after a failure is the idle-in-context signal, once, with an offer. That run found a re-arm bug (a shortened idle threshold below the 5 s breakpoint fired every second); fixed with a regression test.
+- **Not built:** the AT-SPI sources for menu thrash, dialog bounce, error dialogs, undo, help and typing (the detector handles them; nothing emits them yet, so spike S5b is still open), focus ping-pong from the bridge's focus signal, fullscreen and do-not-disturb inputs, the offer bubble with [Yes] [No] [Not for this app] and its 8 s fade (needs the overlay and the persona, #23), "why did you offer?" in the UI, the learned gate, the replay eval set (#24), and persistence of the in-session quiet timers and the hour and day caps (a restart forgets them).
 
 ## Consequences
 - **Positive:**

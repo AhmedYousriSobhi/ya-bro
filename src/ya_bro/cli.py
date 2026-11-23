@@ -143,6 +143,69 @@ def _shell_watch(args: argparse.Namespace) -> int:
     return 0
 
 
+def _struggle(args: argparse.Namespace) -> int:
+    import asyncio
+    import contextlib
+    import time
+
+    from ya_bro import struggle, struggle_host, targets
+    from ya_bro.shell_spool import ShellSpool
+
+    det = struggle.Detector(time.time, struggle.default_state_path())
+    verb = args.verb
+    if verb == "status":
+        watching = sorted(a for a in det._opted_in if det.is_watching(a))
+        print(f"proactive mode: {'on' if det.enabled_globally else 'off'}")
+        print(f"sensitivity: {det.sensitivity} of 4 (1 quiet, 4 eager)")
+        print("watching: " + (", ".join(watching) or "nothing (it is off for every app)"))
+        print("answers so far: " + ", ".join(f"{k} {v}" for k, v in det.stats().items()))
+        return 0
+    if verb in ("on", "off"):
+        det.set_enabled(verb == "on")
+        print(f"proactive mode {verb}")
+        return 0
+    if verb in ("enable", "disable"):
+        try:
+            (det.opt_in if verb == "enable" else det.opt_out)(args.app)
+        except struggle.ContentError as e:
+            print(e)
+            return 1
+        print(f"{verb}d {args.app}")
+        return 0
+    if verb == "sensitivity":
+        try:
+            det.set_sensitivity(args.step)
+        except ValueError as e:
+            print(e)
+            return 1
+        print(f"sensitivity {args.step} of 4")
+        return 0
+    found = targets.load_all()
+    commands = struggle_host.command_apps(found)
+    watched = [a for a in sorted(set(commands.values())) if det.is_watching(a)]
+    if not watched:
+        print("watching nothing: `broctl struggle enable APP` for an allowed target first")
+        return 1
+    spool = ShellSpool()
+    spool.open(sorted(c for c, a in commands.items() if a in watched))
+    host = struggle_host.StruggleHost(
+        det, commands, shell=spool, on_offer=lambda o: print(f"OFFER ({o.score:.1f}): {o.why}")
+    )
+    print(f"watching {', '.join(watched)} for {args.seconds} s; you are never interrupted here")
+
+    async def go():
+        with contextlib.suppress(TimeoutError):
+            await asyncio.wait_for(host.run(), args.seconds)
+
+    try:
+        asyncio.run(go())
+    except KeyboardInterrupt:
+        pass
+    finally:
+        spool.close()
+    return 0
+
+
 def _eval(args: argparse.Namespace) -> int:
     from pathlib import Path
 
@@ -290,8 +353,21 @@ def main(argv: list[str] | None = None) -> int:
     shw.add_subparsers(dest="verb", required=True, metavar="<verb>").add_parser(
         "watch", help="print allowed commands as they finish"
     ).add_argument("--seconds", type=int, default=60)
+    st = sub.add_parser("struggle", help='the "you stuck, bro?" offers (off for every app)')
+    sv = st.add_subparsers(dest="verb", required=True, metavar="<verb>")
+    sv.add_parser("status", help="what is on, how eager, what you answered")
+    sv.add_parser("on", help="turn proactive mode on")
+    sv.add_parser("off", help="turn proactive mode off")
+    sv.add_parser("enable", help="watch one app or target for struggle").add_argument("app")
+    sv.add_parser("disable", help="stop watching it").add_argument("app")
+    sv.add_parser("sensitivity", help="1 (quiet) to 4 (eager)").add_argument("step", type=int)
+    sv.add_parser("watch", help="print offers as they would appear").add_argument(
+        "--seconds", type=int, default=300
+    )
     args = parser.parse_args(argv)
 
+    if args.noun == "struggle":
+        return _struggle(args)
     if args.noun == "hook":
         return _hook(args)
     if args.noun == "shell":
