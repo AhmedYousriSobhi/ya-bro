@@ -24,10 +24,12 @@ from ya_bro import dirs
 
 SPOOL = "shell.spool"
 COMMANDS = "commands"
+SCOPE_TOKEN = "scope-token"
 MAX_READ = 64 * 1024  # bytes taken per poll; the rest waits for the next one
 MAX_LINE = 512
 TRUNCATE_AT = 256 * 1024  # a spool this large, fully read, is emptied
 _NAME = re.compile(r"[A-Za-z0-9_.-]{1,32}")
+_TOKEN = re.compile(r"yb-[0-9a-f]{32}")  # token_server.new_token()
 _TTY = re.compile(r"[a-z0-9/]{0,32}")
 _WEEK_MS = 7 * 24 * 3600 * 1000
 
@@ -60,6 +62,15 @@ class ShellSpool:
         with os.fdopen(fd, "w") as f:
             f.write("".join(f"{c}\n" for c in sorted(self._allowed)))
         os.replace(tmp, path)
+
+    def set_scope_token(self, token: str) -> None:
+        """The hook puts this in the terminal title (OSC 2) at each prompt while the run lasts."""
+        if not _TOKEN.fullmatch(token):
+            raise ValueError("not a scope token")
+        path = self._root / SCOPE_TOKEN
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(token + "\n")
 
     def close(self) -> None:
         shutil.rmtree(self._root, ignore_errors=True)

@@ -22,7 +22,7 @@ def test_terminal_companion_copy_write_and_advance_on_a_real_terminal():
         capture_output=True,
         text=True,
         timeout=240,
-        env={**os.environ, "YB_ALLOWED": '["io.github.ahmedyousrisobhi.YaBroVte"]'},
+        env={k: v for k, v in os.environ.items() if k != "YB_ALLOWED"},
     )
     lines = [ln for ln in r.stdout.splitlines() if ln.startswith(("PASS", "FAIL"))]
     assert lines, f"no checks ran:\n{r.stdout[-1500:]}\n{r.stderr[-1500:]}"
