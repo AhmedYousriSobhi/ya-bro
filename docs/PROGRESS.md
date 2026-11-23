@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-23: running Bro on workbench
+Done: `broctl ask GOAL --pack workbench` (plain window, pack task, user presses Next; real-frame test) and `docs/guides/workbench.md`. Found: there was no way to run the pack at all: the workbench pack matches only `argv0`, so a terminal window never selects it, and `broctl show` needs an allowed focused window, which a CLI tool never has.
+Not done: pointing at web page elements (#31, selectors), explaining an error code when the user accepts the stuck offer, Do-it on terminals, zsh/fish, Firefox, the web token path was not re-run on the live desktop here (it was verified with real Chrome in #61).
+
 ### 2026-11-23: #18 CI draft corrected (not active)
 Done: the unit-test line in `docs/ci/ci.yml` now uses the same marker selection as `scripts/check.sh` (the old `-m "not atspi"` would also have run the gnome, keyring and live tests, which cannot work on a runner).
 Not done: **CI is still not active**: pushing `.github/workflows/` needs a token with `workflow` scope and the current one has `repo`, `read:org` and `gist` only (checked with `gh auth status`); the maintainer must copy the file or widen the token. The GNOME headless job and the 48/49/51 version matrix (#30) are not written: they need a container with each Shell version and I could not test one here. #18 stays open.
