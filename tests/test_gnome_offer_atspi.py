@@ -1,4 +1,4 @@
-"""An error loop in a real GTK3 app becomes a clickable bubble (#9: AT-SPI sources + offer bubble)."""
+"""An error loop in a real GTK3 app becomes a clickable bubble (#9, sources plus bubble)."""
 
 import os
 import shutil
