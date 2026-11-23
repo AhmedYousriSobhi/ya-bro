@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ya-Bro candidate 2: Yaya (the word يا as a figure)</title>
+  <!-- Palette (light / dark): body #2EC4B6 / #45D9CB, ink #1E1E2E, halo #FFFFFF / #F0F0F5, accent #F5A524.
+       Letterforms kept intact: final alif (the figure) joined to initial ya (tooth + two dots below). Never mirror. -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-linecap:round;stroke-linejoin:round}
+    .edge{fill:none;stroke:#1E1E2E;stroke-linecap:round;stroke-linejoin:round}
+    .fill{fill:none;stroke:#2EC4B6;stroke-linecap:round;stroke-linejoin:round}
+    .dot{fill:#F5A524;stroke:#1E1E2E;stroke-width:7}
+    .doth{fill:#FFFFFF}
+    .ink{fill:#1E1E2E}
+    .line{fill:none;stroke:#1E1E2E;stroke-width:6;stroke-linecap:round}
+    @media (prefers-color-scheme:dark){.fill{stroke:#45D9CB}.halo{stroke:#F0F0F5}.doth{fill:#F0F0F5}}
+  </style>
+  <defs>
+    <path id="alif" d="M88 58V176"/>
+    <path id="ya" d="M88 176Q88 196 110 196H178Q200 196 200 174V146"/>
+  </defs>
+  <g id="bro">
+    <use xlink:href="#alif" class="halo" stroke-width="72"/>
+    <use xlink:href="#ya" class="halo" stroke-width="50"/>
+    <circle class="doth" cx="172" cy="232" r="19"/>
+    <circle class="doth" cx="210" cy="232" r="19"/>
+    <use xlink:href="#alif" class="edge" stroke-width="62"/>
+    <use xlink:href="#ya" class="edge" stroke-width="40"/>
+    <use xlink:href="#alif" class="fill" stroke-width="48"/>
+    <use xlink:href="#ya" class="fill" stroke-width="26"/>
+    <circle class="dot" cx="172" cy="232" r="11"/>
+    <circle class="dot" cx="210" cy="232" r="11"/>
+    <g id="eyes">
+      <rect class="ink" x="72" y="74" width="12" height="22" rx="6"/>
+      <rect class="ink" x="96" y="74" width="12" height="22" rx="6"/>
+    </g>
+    <path id="mouth" class="line" d="M82 112Q90 118 98 112"/>
+  </g>
+</svg>

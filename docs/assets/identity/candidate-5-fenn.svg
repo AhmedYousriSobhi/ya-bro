@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256" width="256" height="256">
+  <title>Ya-Bro candidate 5: Fenn (big-eared desert fox kit)</title>
+  <!-- Palette (light / dark): body #2EC4B6 / #45D9CB, inner ear #F5A524, ink #1E1E2E, halo #FFFFFF / #F0F0F5 -->
+  <style>
+    .halo{fill:none;stroke:#FFFFFF;stroke-width:18;stroke-linejoin:round}
+    .body{fill:#2EC4B6;stroke:#1E1E2E;stroke-width:8;stroke-linejoin:round}
+    .inner{fill:#F5A524}
+    .ink{fill:#1E1E2E}
+    .line{fill:none;stroke:#1E1E2E;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+    @media (prefers-color-scheme:dark){.body{fill:#45D9CB}.halo{stroke:#F0F0F5}}
+  </style>
+  <defs>
+    <path id="f" d="M70 128L40 38Q38 26 50 30L118 96Q128 94 138 96L206 30Q218 26 216 38L186 128C204 150 200 196 176 214C148 234 108 234 80 214C56 196 52 150 70 128Z"/>
+  </defs>
+  <g id="bro">
+    <use xlink:href="#f" class="halo"/>
+    <use xlink:href="#f" class="body"/>
+    <path class="inner" d="M68 104L54 52L100 98Z"/>
+    <path class="inner" d="M188 104L202 52L156 98Z"/>
+    <g id="eyes">
+      <ellipse class="ink" cx="104" cy="158" rx="10" ry="14"/>
+      <ellipse class="ink" cx="152" cy="158" rx="10" ry="14"/>
+    </g>
+    <path class="ink" d="M118 188H138L128 199Z"/>
+    <path class="line" d="M128 199V206M118 210Q128 214 138 210"/>
+  </g>
+</svg>
