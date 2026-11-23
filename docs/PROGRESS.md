@@ -14,7 +14,7 @@ Legend: done · in progress · todo
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23, #24 (replay eval done: 62 scenarios, passes the gates) |
-| M7 MVP hardening | todo | #25, #26 |
+| M7 MVP hardening | in progress | #25, #26 (licence gate done) |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
@@ -22,6 +22,10 @@ Legend: done · in progress · todo
 Done: identity study by an Opus agent (5 candidates, scored, ranked; the maintainer rejected Yaya and Fenn, artwork removed), Brim as the provisional look, six SVG moods drawn by the extension (a real-frame pixel test: all six drawn, all different, mood reported, unknown mood falls back, avatar=false hides it), `mood` in `ShowStep` and `Overlay.show_step`, moods in the step loop, a happy finish, README restructured, demo GIF re-recorded from the real overlay at 2× with a moving camera (centred wide shots, zooms onto the bubble, popping title and end cards; 90 frames, 560 x 640, 1.3 MB, about 29 s).
 Found: my own stylesheet edit emptied `extension/stylesheet.css` (opened for writing before reading); the first re-recorded GIF showed an unstyled bubble and no ring, which is how I noticed; fixed and the GIF re-recorded.
 Not done: the maintainer has not chosen the look (Pip, Orbit and Brim remain); gaze rotation, RTL mirroring, cross-fade and hop; no teasing at humour 0 is not enforced; `quiet` is not wired to the struggle detector; the Arabic lines in the design note need review; the SVGs were rendered with cairosvg and in the real Shell, not in librsvg or on GitHub's dark theme; the bro is 48 px, so only the zoomed shots show it large; the GIF is 29 s long (the story needs the holds to be readable); the first re-record had an unstyled bubble and a left-heavy crop, which the maintainer spotted.
+
+### 2026-11-23: #26 licence gate
+Done: `scripts/check_licences.py` (project, packs, the uv.lock closure with extras and dev tools, forbidden names, installed-metadata cross-check, copyleft imports under `src/`), the policy `docs/licences.toml`, `docs/LICENCES.md` (table checked for drift), a `licence-gate` job in the CI draft, a step in `scripts/check.sh`, pack `license` field, 34 tests that break a small project tree every way the gate guards against. The real project passes (11 packages, none at runtime). A test caught that free-text licence names ("GNU General Public License v3") were not recognised; fixed.
+Not done: model register (no model yet), SPDX headers, DCO enforcement, CODE_OF_CONDUCT, SECURITY and CONTRIBUTING files, checking the built wheel, system packages; CI is not active so the job has never run.
 
 ### 2026-11-23: #24 struggle replay eval
 Done: `struggle_eval` (second-by-second replay on a fake clock, 8 s bubble fade, answers, idle spans; precision, recall, time to offer, false offers per hour of calm, back-off conformance, by kind and source), `broctl eval struggle [-v] [--sensitivity] [--sweep]`, 62 scenarios (54 scripted, 8 recorded from a real bash with the hook), and 32 tests that include breaking the back-off or the threshold and seeing the eval fail. Default sensitivity: precision 97%, recall 74%, median time to offer 20 s (p90 57 s), 0.31 false offers per hour, back-off 7/7; sweep: sensitivity 1 recall 6%, 3 and 4 recall 91% at 0.62 false offers per hour.

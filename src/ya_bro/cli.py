@@ -78,7 +78,7 @@ def _pack(args: argparse.Namespace) -> int:
         return 0
     found, problems = packs.load_all()
     for p in found:
-        print(f"{p.id}\t{p.version}\t{len(p.tasks)} tasks\t{p.name}")
+        print(f"{p.id}\t{p.version}\t{p.license or 'no licence'}\t{len(p.tasks)} tasks\t{p.name}")
     for line in problems:
         print(f"skipped {line}")
     if not found:

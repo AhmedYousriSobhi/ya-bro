@@ -125,6 +125,7 @@ Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` 
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Developer setup, plan format, layout |
 | [docs/PRIOR_ART.md](docs/PRIOR_ART.md) | Who else works on this, and how Ya-Bro differs |
 | [CHANGELOG.md](CHANGELOG.md) | Release notes |
+| [docs/LICENCES.md](docs/LICENCES.md) | Dependency licences and the compliance gate |
 
 ## Contributing
 

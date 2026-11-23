@@ -2,6 +2,7 @@
 id = "workbench"
 name = "workbench"
 version = "0.1.0"
+license = "MIT"
 locales = ["en"]
 
 # Terminal use only for now. The web UI is scoped separately as a target (ADR-0025) and its
