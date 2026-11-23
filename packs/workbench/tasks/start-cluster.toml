@@ -1,0 +1,16 @@
+# Terminal steps carry no target: there is no AT-SPI element to point at until the terminal adapter (#21).
+[plan]
+goal = "start the workbench cluster"
+keywords = ["start", "cluster", "workbench", "benchctl", "run"]
+
+[[step]]
+narration = "In the workbench folder, run: ./scripts/benchctl plan"
+why = "plan checks the memory first. A REFUSED here is a decision, not a bug."
+
+[[step]]
+narration = "Now run: ./scripts/benchctl start"
+why = "It builds on the first run, then starts the cluster and the web page, and prints a link."
+
+[[step]]
+narration = "Run: ./scripts/benchctl wait ready"
+why = "wait blocks until every service answers, so you do not have to poll."

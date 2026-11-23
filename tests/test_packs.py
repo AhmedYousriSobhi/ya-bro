@@ -127,3 +127,53 @@ def test_broctl_pack(tmp_path, capsys, monkeypatch):
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     assert cli.main(["pack", "list"]) == 0
     assert "gnome-calculator" in capsys.readouterr().out
+
+
+FIXITS = """
+[[fixit]]
+code = "DM-REFUSED-MEMORY"
+meaning = "No room."
+suggest = "democtl plan"
+[[fixit]]
+code = "DM-NEEDS-YES"
+meaning = "Needs --yes."
+hint = "repeat with --yes"
+"""
+
+
+def test_fixits_load(tmp_path):
+    root = make(tmp_path)
+    (root / "fixits.toml").write_text(FIXITS)
+    p = packs.load(root)
+    assert p.fixits["DM-REFUSED-MEMORY"].suggest == "democtl plan"
+    assert p.fixits["DM-NEEDS-YES"].hint == "repeat with --yes"
+
+
+@pytest.mark.parametrize(
+    "body,msg",
+    [
+        ('[[fixit]]\ncode = "bad code"\nmeaning = "x"\n', "needs a code"),
+        ('[[fixit]]\ncode = "DM-A"\nmeaning = "x"\nsuggest = "rm -rf /"\n', "own commands"),
+        (
+            '[[fixit]]\ncode = "DM-A"\nmeaning = "x"\n[[fixit]]\ncode = "DM-A"\nmeaning = "y"\n',
+            "dup",
+        ),
+        ("[[fixit]\n", "cannot read"),
+    ],
+)
+def test_bad_fixits(tmp_path, body, msg):
+    root = make(tmp_path)
+    (root / "fixits.toml").write_text(body)
+    with pytest.raises(packs.PackError, match=msg):
+        packs.load(root)
+
+
+def test_shipped_workbench_pack():
+    found, problems = packs.load_all([packs.SHIPPED])
+    assert problems == []
+    (wb,) = packs.resolve(found, argv0="benchctl")
+    assert wb.id == "workbench" and wb.trust == "data-only"
+    assert {"start-cluster", "run-scenario", "clear-faults", "export-test-report"} <= set(wb.tasks)
+    assert wb.fixits["WB-REFUSED-MEMORY"].suggest == "benchctl plan"
+    assert "REFUSED" in wb.knowledge
+    assert packs.resolve(found, argv0="ls") == []

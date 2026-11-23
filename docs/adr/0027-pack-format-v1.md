@@ -15,10 +15,11 @@ ADR-0012 designed packs; this records what v1 actually is.
 - **`knowledge.md`** is capped at 16,000 characters (about 4k tokens, ADR-0012 §4).
 - **Search order:** shipped `packs/`, then `$XDG_DATA_HOME/ya-bro/packs/`; a user pack replaces a shipped one with the same id.
 - **A broken pack is skipped and reported**, never half-loaded (same rule as targets). Tasks are validated at load time. A task symlink leaving the pack is refused.
+- **`fixits.toml`** (added with the workbench pack, #22): `[[fixit]]` rows of `code` (like `WB-REFUSED-MEMORY`), `meaning`, and either `suggest` or `hint`. `suggest` must start with one of the pack's own `argv0` commands (checked at load) and is only ever offered to the user, never run (R2, ADR-0009); anything else is a `hint` in plain words.
 - **Data only:** core reads packs and never imports or executes anything in one. `trust = "hooks"` parses but no hook is read yet.
 
 ## Not in v1
-`selectors.toml`, `signals.toml`, `fixits.toml`, `hooks.toml`, `docs/` retrieval, toolkit packs and the auto-pack fallback, overrides directory, `broctl pack new|test|doctor`, app version ranges. Each lands with the feature that needs it.
+`selectors.toml`, `signals.toml` (needs the detector, #9), `hooks.toml`, `docs/` retrieval, toolkit packs and the auto-pack fallback, overrides directory, `broctl pack new|test|doctor`, app version ranges. Each lands with the feature that needs it.
 
 ## Consequences
 The Brain can later list a pack's tasks and knowledge for an app without app-specific core code. The workbench pack (#22) is the first real consumer; `packs/gnome-calculator` is the reference example.
