@@ -17,8 +17,8 @@ SPEC §2 said the bro's look was not decided, so the overlay drew a placeholder 
 
 ## Consequences
 - The demo GIF shows the real overlay, bro included.
-- At `humour = 0` the face still teases (an eyebrow and a flipped cap); the design note says the teasing frame should not be shown there. Not enforced yet.
+- The teasing face is shown only when humour allows it (ADR-0013: humour of at least 1, no frustration, not on a risky step); otherwise a wrong action keeps the pointing face with a plain line.
 - Moving the avatar (48 px, gap 56) changed the bubble's minimum left margin; the click-through and placement tests were updated.
 
 ## Not done
-Gaze rotation toward the ring and mirroring for right-to-left, the cross-fade and the single hop (frames swap instantly), the favicon and about-dialog use, enforcing no teasing at humour 0, the `quiet` mood, and the maintainer's final choice of look.
+Gaze rotation toward the ring and mirroring for right-to-left, the cross-fade and the single hop (frames swap instantly), the favicon and about-dialog use, the `quiet` mood, and the maintainer's final choice of look.

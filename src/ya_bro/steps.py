@@ -69,6 +69,7 @@ class StepLoop:
 
     async def run(self, plan: Plan, app_id: str) -> Outcome:
         pump = asyncio.create_task(self._pump_events())
+        self._tone.begin_task()
         try:
             for index, step in enumerate(plan.steps):
                 decision = self._policy.check(step, Mode.SHOW_ME)
@@ -76,8 +77,17 @@ class StepLoop:
                     await self._overlay.show_step(None, "I can't help with this step.", ())
                     self._log("step_blocked", step=index)
                     return Outcome.BLOCKED
-                if await self._present(step, app_id, index, len(plan.steps)) == "stop":
+                # A step the user must take themselves is never joked about (ADR-0013 §3).
+                self._tone.set_sensitive(decision.needs_confirmation)
+                try:
+                    result = await self._present(
+                        step, app_id, index, len(plan.steps), decision.needs_confirmation
+                    )
+                finally:
+                    self._tone.set_sensitive(False)
+                if result == "stop":
                     return Outcome.STOPPED
+                self._tone.note_progress()
             if self._timing.done_hold > 0:
                 await self._overlay.show_step(None, self._tone.done(), (), mood="happy")
                 await asyncio.sleep(self._timing.done_hold)
@@ -121,9 +131,18 @@ class StepLoop:
         refs = await self._perception.find(app_id, e.role, e.name)
         return tuple([await self._perception.read_text(r) for r in refs])
 
-    def _text(self, step: Step, rect: Rect | None, count: str, tier: Tier = Tier.HIGH) -> str:
+    def _text(
+        self,
+        step: Step,
+        rect: Rect | None,
+        count: str,
+        tier: Tier = Tier.HIGH,
+        confirm: bool = False,
+    ) -> str:
         if step.target is not None and rect is not None and tier is Tier.MEDIUM:
             return f"{count} {self._tone.unsure(step.target.name)} {step.narration}"
+        if confirm and step.target is not None and rect is not None:
+            return f"{count} {self._tone.risky(step.target.name)} {step.narration}"
         if step.target is None or rect is not None:
             return f"{count} {step.narration}"
         return f"{count} {self._tone.cant_find(step.target.name)}"
@@ -131,7 +150,9 @@ class StepLoop:
     async def _in_scope(self) -> bool:
         return await self._bridge.focused_window() is not None
 
-    async def _present(self, step: Step, app_id: str, index: int, total: int) -> str:
+    async def _present(
+        self, step: Step, app_id: str, index: int, total: int, confirm: bool = False
+    ) -> str:
         count = f"({index + 1}/{total})"
         shown: tuple[Rect | None, str, str] | None = None
         hidden = False
@@ -188,7 +209,7 @@ class StepLoop:
                     if why_is_mistake:  # the mistake was undone: its explanation no longer applies
                         extra, shown, why_is_mistake = "", None, False
                 rect, tier = await self._locate(step, app_id)
-                text = extra or self._text(step, rect, count, tier)
+                text = extra or self._text(step, rect, count, tier, confirm)
                 if predone and not extra:
                     text = f"{count} {self._tone.pre_done()}"
                 if mismatch and not extra:
@@ -200,8 +221,8 @@ class StepLoop:
                     mood = "thinking"  # it cannot find the thing: it is working it out
                 if (extra or predone) and not why_is_mistake:
                     mood = "idle"
-                if mismatch or why_is_mistake:
-                    mood = "teasing"
+                if (mismatch or why_is_mistake) and self._tone.can_tease():
+                    mood = "teasing"  # never at humour 0, on a risky step, or after repeated slips
                 if (rect, text, mood) != shown:
                     await self._overlay.show_step(rect, text, BUTTONS, mood=mood)
                     shown = (rect, text, mood)

@@ -61,6 +61,7 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
     def log(event: str, **fields) -> None:
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
 
+    cfg = config.load(app)
     loop = StepLoop(
         AtspiPerception(bridge, plan.extents_offset),
         overlay,
@@ -68,7 +69,7 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
         ShowMePolicy(),
         Timing(done_hold=1.5),
         log=log,
-        tone=Tone(config.load(app).humour),
+        tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
     )
     print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
     outcome = await loop.run(plan, app)

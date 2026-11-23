@@ -32,7 +32,7 @@ Guides and tutorials make you switch between a document and the app, and they go
   <img src="docs/assets/identity/bro-states.svg" alt="The bro's six states: idle, pointing, thinking, happy, teasing, quiet" width="720">
 </p>
 
-One small character with six moods: it **points** at the control, **thinks** when it cannot find it yet, is **happy** when you finish, **teases** a wrong key (only when humour is on), and goes **quiet** when you tell it to back off. The ring around the real control carries the instruction; the bro only looks at it. Humour is a dial: plain with `humour = 0`, playful by default.
+One small character with six moods: it **points** at the control, **thinks** when it cannot find it yet, is **happy** when you finish, **teases** a wrong key (only when humour is on), and goes **quiet** when you tell it to back off. The ring around the real control carries the instruction; the bro only looks at it. Humour is a dial (`humour = 0` to `3` in `config.toml`): plain at 0, playful by default, never in errors, when it is unsure, or before a risky step, and one level lower when you seem frustrated. It speaks English or Egyptian Arabic (`language = "auto"`) and `less_chatty = true` mutes the extras.
 
 > **The look is provisional.** This is the working candidate from the [identity study](docs/design/BRO_IDENTITY.md) until the maintainer picks the final one.
 
@@ -109,6 +109,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 | **Knowledge packs** | `pack list \| check <dir>` |
 | **Terminal** | `hook install \| uninstall \| print \| status`, `shell watch` |
 | **Offers** | `struggle status \| on \| off \| enable APP \| disable APP \| sensitivity N \| watch` |
+| **Words** | `persona say \| list \| lint \| style` (preview and review what the bro says) |
 | **Measure** | `eval pointing`, `eval struggle [--sweep]` |
 
 Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. `ANTHROPIC_API_KEY` is only checked by `broctl doctor` (present or not, never its value); it is reserved for the Claude brain and unused today.

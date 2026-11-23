@@ -16,6 +16,7 @@ gi.require_version("Gio", "2.0")
 gi.require_version("Atspi", "2.0")
 from gi.repository import Atspi, Gio, GLib  # noqa: E402
 
+from ya_bro.persona import is_rtl  # noqa: E402
 from ya_bro.types import ElementRef, Rect, WindowInfo  # noqa: E402
 
 PREFIX = "io.github.ahmedyousrisobhi.YaBro"
@@ -97,6 +98,7 @@ class GnomeOverlay:
             "buttons": GLib.Variant("as", list(buttons)),
             "follow_window": GLib.Variant("t", self._window_for(target)),
             "avatar": GLib.Variant("b", self._avatar),
+            "dir": GLib.Variant("s", "rtl" if is_rtl(bubble_text) else "ltr"),
         }
         if mood:
             args["mood"] = GLib.Variant("s", mood)

@@ -13,6 +13,7 @@ from ya_bro import dirs
 log = logging.getLogger(__name__)
 
 SENSITIVITIES = ("low", "normal", "high")
+LANGUAGES = ("auto", "en", "ar")
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,12 +38,16 @@ class Config:
     capture: Capture = field(default_factory=Capture)
     do_it: DoIt = field(default_factory=DoIt)
     humour: int = 1  # 0 = off .. 3 = chatty
+    language: str = "auto"  # auto (English until the user writes Arabic), en or ar
+    less_chatty: bool = False  # mute optional lines and all humour
 
 
 def _check(section: str, key: str, value: Any, default: Any) -> bool:
     ok = type(value) is type(default)  # bool is not an int here
     if ok and key == "sensitivity":
         ok = value in SENSITIVITIES
+    if ok and key == "language":
+        ok = value in LANGUAGES
     if ok and section == "" and key == "humour":
         ok = 0 <= value <= 3
     if not ok:

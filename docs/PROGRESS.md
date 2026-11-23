@@ -13,11 +13,16 @@ Legend: done · in progress · todo
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
-| M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23, #24 (replay eval done: 62 scenarios, passes the gates) |
+| M6 Struggle + persona | in progress | #9 (core detector, shell and idle sources done; AT-SPI sources and the bubble open), #23 (persona done; nothing generates lines and the offer bubble is not built yet), #24 (replay eval done: 62 scenarios, passes the gates) |
 | M7 MVP hardening | in progress | #25, #26 (licence gate done) |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #23 persona
+Done: `ya_bro.persona` (14 moments, 79 EN and 79 AR lines, humour ceilings, sensitive moments, frustration drop, less chatty, bro once per task, recency, bidi isolates, language following, the vet filter for generated lines, a tone guide, `lint`), `Tone` now a thin face over it, the step loop's risky-step line and the humour-gated teasing face, config `language` and `less_chatty`, `dir = rtl` to the overlay, `broctl persona say|list|lint|style`, 46 unit tests, and a real-frame test in the isolated shell (Arabic renders as real text; the RTL bubble mirrors its buttons).
+Found: the banned-topic filter missed Arabic words with the article (`الموت`); a test caught it. Arabic text direction inside a label follows its content, not the widget, so only the button strip mirrors with `dir`.
+Not done: the rubric eval and dogfood rule (nothing is generated yet), the humour slider and less-chatty toggle UIs, native review of the Arabic (drafts), 10 to 30 variants per moment (2 to 9 now), code-switching, MSA for TTS, the struggle offer bubble that would use the offer lines, language from the user's request (no request input yet).
+
 ### 2026-11-23: #96 the bro's look, README and demo GIF
 Done: identity study by an Opus agent (5 candidates, scored, ranked; the maintainer rejected Yaya and Fenn, artwork removed), Brim as the provisional look, six SVG moods drawn by the extension (a real-frame pixel test: all six drawn, all different, mood reported, unknown mood falls back, avatar=false hides it), `mood` in `ShowStep` and `Overlay.show_step`, moods in the step loop, a happy finish, README restructured, demo GIF re-recorded from the real overlay at 2× with a moving camera (centred wide shots, zooms onto the bubble, popping title and end cards; 90 frames, 560 x 640, 1.3 MB, about 29 s).
 Found: my own stylesheet edit emptied `extension/stylesheet.css` (opened for writing before reading); the first re-recorded GIF showed an unstyled bubble and no ring, which is how I noticed; fixed and the GIF re-recorded.
