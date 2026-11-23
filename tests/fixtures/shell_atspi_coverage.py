@@ -33,11 +33,12 @@ ACT_ROLES = (
 BUDGET = 30000
 TMP = tempfile.mkdtemp(prefix="yb-s2-")
 
+APP_NAMES = {"vscode": "code"}  # AT-SPI application name, for apps with no reportable window
 # name -> command; the window's app id is discovered, not assumed
 APPS = {
     "libreoffice-writer": ["soffice", "--writer", "--norestore", f"-env:UserInstallation=file://{TMP}/lo"],
     "vscode": ["/usr/share/code/code", "--new-window", "--user-data-dir", f"{TMP}/code", "--extensions-dir", f"{TMP}/ext",
-               "--disable-gpu", "--ozone-platform=wayland", "--force-renderer-accessibility"],
+               "--disable-gpu", "--ozone-platform=wayland", "--no-sandbox", "--force-renderer-accessibility"],
     "firefox": ["firefox", "--no-remote", "--profile", f"{TMP}/ff", "about:blank"],
 }  # fmt: skip
 
@@ -100,11 +101,19 @@ async def main():
             if win:
                 break
         if win is None:
+            # No window the extension may report (id unknown): walk the app by its AT-SPI name, with
+            # no window frame, so the on-screen column is meaningless (frame is the whole screen).
+            await asyncio.sleep(15)
+            desktop = Atspi.get_desktop(0)
+            apps = [desktop.get_child_at_index(i) for i in range(desktop.get_child_count())]
+            mine = next((a for a in apps if a and a.get_name() == APP_NAMES.get(name)), None)
+            tree = walk(mine, [0, 0, 100000, 100000]) if mine else None
             print(
-                f"COVERAGE {json.dumps({'app': name, 'window': False, 'exit': proc.poll(), 'stderr': open(f'{TMP}/{name}.err').read()[-400:]})}",
-                flush=True,
+                f"COVERAGE {json.dumps({'app': name, 'window': False, 'tree': tree})}", flush=True
             )
             proc.terminate()
+            await asyncio.sleep(3)
+            proc.kill()
             continue
         await asyncio.sleep(15)  # big apps build their accessible tree lazily
         win = next((w for w in sh.windows() if w["id"] == win["id"]), win)
