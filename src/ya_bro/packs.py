@@ -4,6 +4,7 @@ packs/<id>/
   pack.toml     id, name, version, trust, locales, [match], [sources]
   knowledge.md  vocabulary, mental model, common mistakes (kept small: it rides in every prompt)
   tasks/*.toml  Show-me plans (the plans.py format) for common goals
+  [[element]]   in pack.toml: role, name ("" = any), risk 0-3 and/or secret = true
   fixits.toml   [[fixit]] code, meaning, suggest (a command to offer) or hint (plain words)
 The core only reads packs; nothing in one is imported or executed.
 """
@@ -17,6 +18,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 
 from ya_bro import dirs, plans
+from ya_bro.types import Risk
 
 PACK_FORMAT = 1
 MAX_KNOWLEDGE_CHARS = 16_000  # about 4k tokens, ADR-0012 §4
@@ -44,6 +46,21 @@ class Fixit:
 
 
 @dataclass(frozen=True)
+class PackElement:
+    """What the pack knows about an element: a floor for its risk, and whether it holds a secret."""
+
+    role: str
+    name: str = ""
+    risk: Risk = Risk.R0
+    secret: bool = False
+
+    def covers(self, role: str, name: str) -> bool:
+        return role.lower() == self.role.lower() and (
+            not self.name or name.lower() == self.name.lower()
+        )
+
+
+@dataclass(frozen=True)
 class Pack:
     id: str
     name: str
@@ -56,6 +73,13 @@ class Pack:
     knowledge: str = ""
     tasks: dict[str, Path] = field(default_factory=dict)
     fixits: dict[str, Fixit] = field(default_factory=dict)
+    elements: tuple[PackElement, ...] = ()
+
+    def risk_of(self, role: str, name: str) -> Risk:
+        return Risk(max((e.risk for e in self.elements if e.covers(role, name)), default=Risk.R0))
+
+    def is_secret(self, role: str, name: str) -> bool:
+        return any(e.secret and e.covers(role, name) for e in self.elements)
 
     def matches(
         self, app_id: str = "", window_class: str = "", argv0: str = "", url: str = ""
@@ -106,6 +130,28 @@ def _fixits(root: Path, argv0: tuple[str, ...]) -> dict[str, Fixit]:
             raise PackError(f"{where}: suggest must run one of the pack's own commands")
         out[fields["code"]] = Fixit(**fields)
     return out
+
+
+def _elements(rows: object) -> tuple[PackElement, ...]:
+    if not isinstance(rows, list):
+        raise PackError("element must be a list of [[element]] tables")
+    out = []
+    for i, row in enumerate(rows, 1):
+        where = f"element {i}"
+        role, name = row.get("role"), row.get("name", "")
+        if not isinstance(role, str) or not role or not isinstance(name, str):
+            raise PackError(f"{where}: needs a role (and a name, or none for any)")
+        secret = row.get("secret", False)
+        if not isinstance(secret, bool):
+            raise PackError(f"{where}: secret must be true or false")
+        try:
+            risk = Risk(row.get("risk", 0))
+        except ValueError as e:
+            raise PackError(f"{where}: risk must be 0 to 3") from e
+        if not secret and risk is Risk.R0:
+            raise PackError(f"{where}: needs a risk above 0 or secret = true")
+        out.append(PackElement(role, name, risk, secret))
+    return tuple(out)
 
 
 def load(root: Path) -> Pack:
@@ -161,7 +207,10 @@ def load(root: Path) -> Pack:
             raise PackError(f"tasks/{path.name}: {e}") from e
         tasks[path.stem] = path
     fixits = _fixits(root, match.get("argv0", ()))
-    return Pack(pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits)
+    elements = _elements(data.get("element", []))
+    return Pack(
+        pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits, elements
+    )
 
 
 def roots(extra: list[Path] | None = None) -> list[Path]:

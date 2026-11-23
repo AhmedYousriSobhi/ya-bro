@@ -16,6 +16,7 @@ ADR-0012 designed packs; this records what v1 actually is.
 - **Search order:** shipped `packs/`, then `$XDG_DATA_HOME/ya-bro/packs/`; a user pack replaces a shipped one with the same id.
 - **A broken pack is skipped and reported**, never half-loaded (same rule as targets). Tasks are validated at load time. A task symlink leaving the pack is refused.
 - **`fixits.toml`** (added with the workbench pack, #22): `[[fixit]]` rows of `code` (like `WB-REFUSED-MEMORY`), `meaning`, and either `suggest` or `hint`. `suggest` must start with one of the pack's own `argv0` commands (checked at load) and is only ever offered to the user, never run (R2, ADR-0009); anything else is a `hint` in plain words.
+- **`[[element]]` in `pack.toml`** (added with #20): `role`, optional `name` (empty means any), `risk` 1 to 3 and/or `secret = true`. `LocalPolicy` takes the highest of the planner's tier, the pack's and the heuristics, so a pack can raise an element's risk or mark it secret and can never lower either (ADR-0012 §9). A secret element is treated like a password field: Show-me points at it as the user's own click, Do-it never acts on it. A pack applies only to its own app.
 - **Data only:** core reads packs and never imports or executes anything in one. `trust = "hooks"` parses but no hook is read yet.
 
 ## Not in v1

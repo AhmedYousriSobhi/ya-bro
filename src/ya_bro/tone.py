@@ -6,11 +6,14 @@ never over free text read off the screen beyond a short, cut-down snippet.
 
 from __future__ import annotations
 
+from ya_bro.redact import redact
+
 SNIPPET = 24  # the most characters of screen text we echo back
 
 
 def snippet(text: str) -> str:
-    one = " ".join(text.split())
+    # Redact before cutting: a cut could leave half a secret that no pattern recognises.
+    one = " ".join(redact(text).text.split())
     return one if len(one) <= SNIPPET else one[: SNIPPET - 1] + "…"
 
 
