@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import os
 import sys
 from pathlib import Path
 
@@ -18,7 +19,8 @@ import gi.events
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib  # noqa: E402
 
-from ya_bro import config, plans  # noqa: E402
+from ya_bro import brain as brains  # noqa: E402
+from ya_bro import config, packs, plans, privacy  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
     PREFIX,
@@ -30,15 +32,22 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
 from ya_bro.policy import ShowMePolicy  # noqa: E402
 from ya_bro.steps import StepLoop, Timing  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
+from ya_bro.types import Plan  # noqa: E402
 
 
-async def run(plan_path: Path, app_override: str, token: str) -> int:
+async def run(
+    plan_path: Path | None, app_override: str, token: str, goal: str = "", dry: bool = False
+) -> int:
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
-    try:
-        plan, app, _ = plans.load(plan_path, app_override)
-    except plans.PlanError as e:
-        print(e)
-        return 2
+    plan = None
+    cascade = None
+    app = app_override
+    if plan_path is not None:
+        try:
+            plan, app, _ = plans.load(plan_path, app_override)
+        except plans.PlanError as e:
+            print(e)
+            return 2
     Gio.bus_own_name_on_connection(bus, f"{PREFIX}.Core", Gio.BusNameOwnerFlags.NONE, None, None)
     await asyncio.sleep(0.5)  # let the extension notice the new owner
     if token:
@@ -55,6 +64,17 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
     if not app:
         print("no allowed window is open; open the app you allowed (broctl apps list)")
         return 1
+    if plan is None:
+        try:
+            cascade, plan = await ask(goal, app, bridge)
+        except brains.BrainError as e:
+            print(e)
+            return 1
+        if dry:
+            for n, s in enumerate(plan.steps, 1):
+                aim = f" -> {s.target.role} {s.target.name!r}" if s.target else ""
+                print(f"{n}. [R{int(s.risk)}] {s.narration}{aim}")
+            return 0
     plan = plans.rebind(plan, app)
     overlay = GnomeOverlay(bus, bridge)
 
@@ -62,6 +82,12 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
         print(f"{event} " + " ".join(f"{k}={v}" for k, v in fields.items()), flush=True)
 
     cfg = config.load(app)
+    replan = None
+    if cascade is not None:
+
+        async def replan(done, stuck):
+            return await cascade.revise(app, done, stuck)
+
     loop = StepLoop(
         AtspiPerception(bridge, plan.extents_offset),
         overlay,
@@ -70,21 +96,66 @@ async def run(plan_path: Path, app_override: str, token: str) -> int:
         Timing(done_hold=1.5),
         log=log,
         tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
+        replan=replan,
     )
     print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
-    outcome = await loop.run(plan, app)
+    outcome = await loop.run(plan, app, preview=cascade is not None and cascade.from_model)
     print(f"finished: {outcome}")
+    if cascade is not None:
+        print(cascade.usage_line())
     return 0
+
+
+async def ask(goal: str, app: str, bridge: GnomeBridge) -> tuple[brains.FallbackBrain, Plan]:
+    """Plan from plain words: a pack task if one matches, else Claude (ADR-0008 §4)."""
+    found, _problems = packs.load_all()
+    mine = packs.resolve(found, app_id=app, window_class=app)
+    scripted = plans.ScriptedBrain([t for p in mine for t in p.tasks.values()]) if mine else None
+    perception = AtspiPerception(bridge)
+
+    async def observe(app_id: str) -> list[tuple[str, str]]:
+        seen = []
+        for role in OBSERVED_ROLES:
+            seen += [(role, r.name) for r in await perception.find(app_id, role)]
+        return seen
+
+    cfg = config.load(app)
+    key = brains.load_key()
+    model = (
+        brains.ClaudeBrain(
+            key,
+            observe,
+            found,
+            cfg.brain.model,
+            base_url=os.environ.get("ANTHROPIC_BASE_URL", brains.API_URL),
+            max_calls=cfg.brain.max_calls,
+        )
+        if key
+        else None
+    )
+    if model is None and not privacy.load_consent().given:
+        print("no API key and no consent yet: only pack tasks can answer (see `broctl setup`)")
+    cascade = brains.FallbackBrain(scripted, model)
+    return cascade, await cascade.plan(goal, app)
+
+
+# What the model is told is on screen: the roles a person can act on, nothing else.
+OBSERVED_ROLES = ("button", "toggle button", "menu item", "page tab", "check box", "radio button")
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="broctl show")
-    ap.add_argument("plan", type=Path)
+    ap.add_argument("plan", type=Path, nargs="?")
     ap.add_argument("--app", default="")
+    ap.add_argument("--ask", default="", metavar="GOAL", help="plan from plain words instead")
+    ap.add_argument("--dry", action="store_true", help="with --ask: print the plan and stop")
     args = ap.parse_args(argv)
+    if bool(args.plan) == bool(args.ask):
+        ap.error("give a plan file or --ask GOAL")
     token = sys.stdin.readline().strip()
     return asyncio.run(
-        run(args.plan, args.app, token), loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop
+        run(args.plan, args.app, token, args.ask, args.dry),
+        loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop,
     )
 
 

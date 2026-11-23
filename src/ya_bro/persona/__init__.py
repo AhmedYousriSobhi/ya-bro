@@ -33,7 +33,7 @@ _ARABIC = re.compile(r"[؀-ۿݐ-ݿ]")
 _LETTER = re.compile(r"[^\W\d_]", re.UNICODE)
 _FIELD = re.compile(r"\{(\w+)\}")
 _WORD = re.compile(r"[^\W\d_]+", re.UNICODE)
-FACTS = ("name", "want", "got", "why", "app")
+FACTS = ("name", "want", "got", "why", "app", "count", "first")
 
 
 class PersonaError(ValueError):
@@ -275,7 +275,7 @@ class Persona:
             self._bro_used = True
 
     def _fill(self, line: Line, facts: dict[str, str], locale: str) -> str:
-        names = {"name", "want", "got", "app"}
+        names = {"name", "want", "got", "app", "first"}
         shown = {k: (isolate(v) if k in names and locale == "ar" else v) for k, v in facts.items()}
         shown.setdefault("why", "")
         # {why} is an optional sentence: " text" when there is one.
@@ -330,7 +330,10 @@ def lint() -> list[str]:
     data = load()
     problems: list[str] = []
     banned = frozenset().union(*data.banned.values())
-    sample = {"name": "Save", "want": "7", "got": "5", "why": "Because.", "app": "GIMP"}
+    sample = {"name": "Save", "want": "7", "got": "5", "why": "Because.", "app": "GIMP"} | {
+        "count": "3",
+        "first": "Press 7.",
+    }
     for loc in LOCALES:
         by_moment = data.lines.get(loc, {})
         for name, spec in data.moments.items():

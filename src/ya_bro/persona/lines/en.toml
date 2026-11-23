@@ -433,3 +433,34 @@ humour = 0
 requires = ["name"]
 text = "I'll point at “{name}”, but you press it yourself."
 
+
+[[line]]
+moment = "plan_preview"
+humour = 0
+text = "Here is the plan: {count} steps, starting with: {first} Press Next to begin or Stop to cancel."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "I have a plan, {count} steps. First up: {first} Next to start, Stop if you'd rather not."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+bro = true
+text = "Got a plan, bro: {count} steps. First: {first} Next to go, Stop to bail."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "Plan's ready, {count} steps. Starting with: {first} Press Next, or Stop to cancel."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "That control isn't on this screen. Give me a moment to work out another way."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "I can't find that one here. Let me look again and make a new plan."

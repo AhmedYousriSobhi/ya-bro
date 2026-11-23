@@ -433,3 +433,34 @@ humour = 0
 requires = ["name"]
 text = "هشاورلك على «{name}» بس إنت اللي تدوس بنفسك."
 
+
+[[line]]
+moment = "plan_preview"
+humour = 0
+text = "دي الخطة: {count} خطوات، وأولها: {first} دوس التالي نبدأ أو إيقاف نلغي."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "جهزت خطة من {count} خطوات. الأولى: {first} دوس التالي نبدأ، أو إيقاف لو مش عايز."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+bro = true
+text = "عندي خطة يا برو، {count} خطوات. الأولى: {first} التالي نبدأ، إيقاف نلغي."
+
+[[line]]
+moment = "plan_preview"
+humour = 1
+text = "الخطة جاهزة، {count} خطوات. بنبدأ بـ: {first} دوس التالي، أو إيقاف للإلغاء."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "العنصر ده مش موجود في الشاشة دي. ثانية أفكر في طريقة تانية."
+
+[[line]]
+moment = "replanning"
+humour = 0
+text = "مش لاقيه هنا. هبص تاني وأعمل خطة جديدة."
