@@ -4,6 +4,9 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- App knowledge pack format v1 and loader (#8, ADR-0027): `packs/<id>/pack.toml` + `knowledge.md` + `tasks/*.toml`, exact app matchers, validated at load, broken packs skipped; `broctl pack list|check`; first pack `packs/gnome-calculator`.
+
 ## [0.1.0] - 2026-11-22
 First tagged release (pre-alpha): the scripted Show-me loop on GNOME Wayland, with hand-written plans. No LLM brain, voice or Do-it mode yet.
 

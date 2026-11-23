@@ -94,6 +94,7 @@ A small **GNOME Shell extension** draws the ring and bubble and reports window p
 | `broctl apps list \| available \| allow \| revoke` | Manage which app Ya-Bro may see |
 | `broctl targets list \| allow \| revoke` | Allow one web tool by origin instead of a whole browser |
 | `broctl show <plan.toml>` | Walk through a plan, step by step |
+| `broctl pack list \| check <dir>` | List app knowledge packs; validate one |
 | `broctl point`, `broctl scope watch` | Draw the ring on the allowed window; watch scope changes |
 
 Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. `ANTHROPIC_API_KEY` is only checked by `broctl doctor` (present or not, never its value); it is reserved for the Claude brain and unused today.
