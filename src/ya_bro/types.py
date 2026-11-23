@@ -90,3 +90,17 @@ class Plan:
     steps: list[Step] = field(default_factory=list)
     # Added to every AT-SPI rectangle: some apps report window extents a constant off (S9).
     extents_offset: tuple[int, int] = (0, 0)
+
+
+@dataclass(frozen=True, slots=True)
+class UiEvent:
+    """A content-free thing seen in an app's UI (ADR-0010): a kind, a short opaque key, a number.
+
+    `kind` is one of the struggle detector's observation kinds; `key` identifies a menu or dialog
+    inside one run (a salted hash, never a name or text). The host stamps the time.
+    """
+
+    app: str
+    kind: str
+    key: str = ""
+    value: int = 0

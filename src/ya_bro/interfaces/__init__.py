@@ -10,7 +10,16 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Protocol, runtime_checkable
 
-from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Step, WindowInfo
+from ya_bro.types import (
+    ElementRef,
+    Mode,
+    Plan,
+    PolicyDecision,
+    Rect,
+    Step,
+    UiEvent,
+    WindowInfo,
+)
 
 
 @runtime_checkable
@@ -68,6 +77,13 @@ class Capture(Protocol):
 @runtime_checkable
 class IdleSource(Protocol):
     async def idle_seconds(self) -> float: ...
+
+
+@runtime_checkable
+class UiEventSource(Protocol):
+    def events(self) -> AsyncIterator[UiEvent]:
+        """Content-free UI events (menu, dialog, alert, undo, typing) of the apps it may watch."""
+        ...
 
 
 @runtime_checkable

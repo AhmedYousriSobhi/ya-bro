@@ -10,6 +10,7 @@ PAIRS = [
     (i.Actuator, fakes.FakeActuator),
     (i.Capture, fakes.FakeCapture),
     (i.IdleSource, fakes.FakeIdleSource),
+    (i.UiEventSource, fakes.FakeUiEvents),
     (i.Hotkeys, fakes.FakeHotkeys),
     (i.ShellHook, fakes.FakeShellHook),
     (i.Voice, fakes.FakeVoice),

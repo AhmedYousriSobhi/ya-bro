@@ -1,0 +1,21 @@
+{
+ "id": "atspi-two-error-dialogs",
+ "kind": "error_loop",
+ "source": "recorded",
+ "label": "struggle",
+ "app": "gtk-fixture",
+ "duration": 34.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "alert",
+   "key": "k917ec31f0d"
+  },
+  {
+   "t": 4.0,
+   "kind": "alert",
+   "key": "k917ec31f0d"
+  }
+ ],
+ "onset": 0.0
+}

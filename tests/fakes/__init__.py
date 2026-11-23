@@ -6,7 +6,17 @@ import asyncio
 from collections.abc import AsyncIterator
 from pathlib import Path
 
-from ya_bro.types import ElementRef, Mode, Plan, PolicyDecision, Rect, Risk, Step, WindowInfo
+from ya_bro.types import (
+    ElementRef,
+    Mode,
+    Plan,
+    PolicyDecision,
+    Rect,
+    Risk,
+    Step,
+    UiEvent,
+    WindowInfo,
+)
 
 
 class FakePerception:
@@ -121,6 +131,15 @@ class FakeShellHook:
         self.queued = list(queued or [])
 
     async def events(self) -> AsyncIterator[dict[str, int | str]]:
+        for e in self.queued:
+            yield e
+
+
+class FakeUiEvents:
+    def __init__(self, queued: list[UiEvent] | None = None) -> None:
+        self.queued = list(queued or [])
+
+    async def events(self) -> AsyncIterator[UiEvent]:
         for e in self.queued:
             yield e
 

@@ -1,0 +1,14 @@
+{
+ "id": "atspi-typing-and-one-undo",
+ "kind": "undo_loop",
+ "source": "recorded",
+ "label": "not_struggle",
+ "app": "gtk-fixture",
+ "duration": 30.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "undo"
+  }
+ ]
+}

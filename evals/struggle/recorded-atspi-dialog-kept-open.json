@@ -1,0 +1,30 @@
+{
+ "id": "atspi-dialog-kept-open",
+ "kind": "dialog_bounce",
+ "source": "recorded",
+ "label": "not_struggle",
+ "app": "gtk-fixture",
+ "duration": 36.0,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "menu_shown",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 0.9,
+   "kind": "dialog_opened",
+   "key": "k7a50b79ddb"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_hidden",
+   "key": "k193ebd25f8"
+  },
+  {
+   "t": 6.0,
+   "kind": "dialog_closed",
+   "key": "k7a50b79ddb"
+  }
+ ]
+}

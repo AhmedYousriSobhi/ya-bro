@@ -1,6 +1,7 @@
 """Feeds the struggle detector from the real sources and hands back offers (ADR-0010 §1, §3).
 
-Written against the interfaces only: `ShellHook` (a command finished), `IdleSource`, and a
+Written against the interfaces only: `ShellHook` (a command finished), `UiEventSource` (menus,
+dialogs, alerts, undo), `IdleSource`, and a
 function saying which allowed app has focus. Packs tune the detector per app through `signals.toml`.
 """
 
@@ -12,9 +13,9 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Protocol
 
-from ya_bro.interfaces import IdleSource, ShellHook
+from ya_bro.interfaces import IdleSource, ShellHook, UiEventSource
 from ya_bro.packs import Pack
-from ya_bro.struggle import Detector, Observation, Offer
+from ya_bro.struggle import ContentError, Detector, Observation, Offer
 from ya_bro.targets import Target
 
 POLL = 1.0  # seconds between idle reads and offer checks
@@ -48,6 +49,7 @@ class StruggleHost:
         on_offer: Callable[[Offer], None] = lambda _o: None,
         sink: Sink | None = None,
         clock: Callable[[], float] = time.time,
+        ui: UiEventSource | None = None,
     ) -> None:
         self._d = detector
         self._commands = commands
@@ -57,6 +59,7 @@ class StruggleHost:
         self._on_offer = on_offer
         self._sink = sink
         self._clock = clock
+        self._ui = ui
 
     def _log(self, name: str, **fields: int | str) -> None:
         if self._sink is not None:  # a log failure never stops the detector
@@ -72,6 +75,17 @@ class StruggleHost:
             fired = self._d.observe(
                 Observation(self._clock(), app, "command_exit", str(e["argv0"]), int(e["exit"]))
             )
+            for sig in fired:
+                self._log("struggle_signal", signal=sig.value)
+            self._offer()
+
+    async def _ui_loop(self) -> None:
+        assert self._ui is not None
+        async for e in self._ui.events():
+            try:
+                fired = self._d.observe(Observation(self._clock(), e.app, e.kind, e.key, e.value))
+            except ContentError:
+                continue  # never let one bad token stop the watch
             for sig in fired:
                 self._log("struggle_signal", signal=sig.value)
             self._offer()
@@ -99,8 +113,20 @@ class StruggleHost:
         tasks = [asyncio.create_task(self._tick_loop())]
         if self._shell is not None:
             tasks.append(asyncio.create_task(self._shell_loop()))
+        if self._ui is not None:
+            tasks.append(asyncio.create_task(self._ui_loop()))
         try:
             await asyncio.gather(*tasks)
         finally:
             for t in tasks:
                 t.cancel()
+
+
+def tune_from_packs(
+    detector: Detector, packs: list[Pack], commands: dict[str, str], apps: list[str]
+) -> None:
+    """Pack tuning for what is watched: a command target by its commands, a GUI app by its id."""
+    who = {app: {"app_id": app} for app in apps}
+    for command, app in commands.items():
+        who.setdefault(app, {"argv0": command})
+    apply_packs(detector, packs, who)

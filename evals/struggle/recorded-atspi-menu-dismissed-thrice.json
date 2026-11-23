@@ -1,0 +1,41 @@
+{
+ "id": "atspi-menu-dismissed-thrice",
+ "kind": "menu_thrash",
+ "source": "recorded",
+ "label": "struggle",
+ "app": "gtk-fixture",
+ "duration": 35.5,
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "menu_shown",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 1.1,
+   "kind": "menu_hidden",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 2.1,
+   "kind": "menu_shown",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 3.3,
+   "kind": "menu_hidden",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 4.3,
+   "kind": "menu_shown",
+   "key": "k6e851d6ca3"
+  },
+  {
+   "t": 5.5,
+   "kind": "menu_hidden",
+   "key": "k6e851d6ca3"
+  }
+ ],
+ "onset": 0.0
+}
