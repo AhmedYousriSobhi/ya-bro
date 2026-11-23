@@ -1,0 +1,231 @@
+{
+ "app": "org.gnome.Nautilus",
+ "locale": "en",
+ "source": "recorded",
+ "window": [
+  195,
+  141,
+  890,
+  550
+ ],
+ "elements": [
+  {
+   "id": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/0",
+   "role": "list item",
+   "name": "Open Personal Folder",
+   "rect": [
+    201,
+    187,
+    168,
+    36
+   ]
+  },
+  {
+   "id": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/1",
+   "role": "list item",
+   "name": "Recent Files",
+   "rect": [
+    201,
+    225,
+    168,
+    36
+   ]
+  },
+  {
+   "id": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/2",
+   "role": "list item",
+   "name": "Starred Files",
+   "rect": [
+    201,
+    263,
+    168,
+    36
+   ]
+  },
+  {
+   "id": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/3",
+   "role": "list item",
+   "name": "Open Network Locations",
+   "rect": [
+    201,
+    301,
+    168,
+    36
+   ]
+  },
+  {
+   "id": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/4",
+   "role": "list item",
+   "name": "Open Trash",
+   "rect": [
+    201,
+    339,
+    168,
+    36
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "exact",
+   "role": "list item",
+   "name": "Open Personal Folder",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/0"
+  },
+  {
+   "id": "c1",
+   "kind": "spelling",
+   "role": "list item",
+   "name": "  OPEN PERSONAL FOLDER  ",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/0"
+  },
+  {
+   "id": "c2",
+   "kind": "drift",
+   "role": "list item",
+   "name": "Open Personal Folde",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/0"
+  },
+  {
+   "id": "c3",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Open Personal Folder",
+   "truth": null
+  },
+  {
+   "id": "c4",
+   "kind": "exact",
+   "role": "list item",
+   "name": "Recent Files",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/1"
+  },
+  {
+   "id": "c5",
+   "kind": "spelling",
+   "role": "list item",
+   "name": "  RECENT FILES  ",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/1"
+  },
+  {
+   "id": "c6",
+   "kind": "drift",
+   "role": "list item",
+   "name": "Recent File",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/1"
+  },
+  {
+   "id": "c7",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Recent Files",
+   "truth": null
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "list item",
+   "name": "Starred Files",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/2"
+  },
+  {
+   "id": "c9",
+   "kind": "spelling",
+   "role": "list item",
+   "name": "  STARRED FILES  ",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/2"
+  },
+  {
+   "id": "c10",
+   "kind": "drift",
+   "role": "list item",
+   "name": "Starred File",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/2"
+  },
+  {
+   "id": "c11",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Starred Files",
+   "truth": null
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "list item",
+   "name": "Open Network Locations",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/3"
+  },
+  {
+   "id": "c13",
+   "kind": "spelling",
+   "role": "list item",
+   "name": "  OPEN NETWORK LOCATIONS  ",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/3"
+  },
+  {
+   "id": "c14",
+   "kind": "drift",
+   "role": "list item",
+   "name": "Open Network Location",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/3"
+  },
+  {
+   "id": "c15",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Open Network Locations",
+   "truth": null
+  },
+  {
+   "id": "c16",
+   "kind": "exact",
+   "role": "list item",
+   "name": "Open Trash",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/4"
+  },
+  {
+   "id": "c17",
+   "kind": "spelling",
+   "role": "list item",
+   "name": "  OPEN TRASH  ",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/4"
+  },
+  {
+   "id": "c18",
+   "kind": "drift",
+   "role": "list item",
+   "name": "Open Tras",
+   "truth": "74194:0/0/0/0/0/0/0/1/0/0/0/0/0/4"
+  },
+  {
+   "id": "c19",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Open Trash",
+   "truth": null
+  },
+  {
+   "id": "c20",
+   "kind": "missing",
+   "role": "button",
+   "name": "Mirror the universe",
+   "truth": null
+  },
+  {
+   "id": "c21",
+   "kind": "missing",
+   "role": "button",
+   "name": "Teleport",
+   "truth": null
+  },
+  {
+   "id": "c22",
+   "kind": "missing",
+   "role": "button",
+   "name": "Flux capacitor",
+   "truth": null
+  }
+ ]
+}

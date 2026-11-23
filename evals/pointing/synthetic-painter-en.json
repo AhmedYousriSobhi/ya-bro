@@ -1,0 +1,591 @@
+{
+ "app": "painter",
+ "locale": "en",
+ "source": "synthetic",
+ "elements": [
+  {
+   "id": "e0",
+   "role": "button",
+   "name": "Close",
+   "rect": [
+    10,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e1",
+   "role": "menu item",
+   "name": "Copy",
+   "rect": [
+    130,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e2",
+   "role": "check box",
+   "name": "Rotate",
+   "rect": [
+    250,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e3",
+   "role": "page tab",
+   "name": "View",
+   "rect": [
+    370,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e4",
+   "role": "button",
+   "name": "Network",
+   "rect": [
+    490,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e5",
+   "role": "menu item",
+   "name": "New",
+   "rect": [
+    610,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e6",
+   "role": "check box",
+   "name": "Replace",
+   "rect": [
+    10,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e7",
+   "role": "page tab",
+   "name": "Edit",
+   "rect": [
+    130,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e8",
+   "role": "button",
+   "name": "Resize",
+   "rect": [
+    250,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e9",
+   "role": "menu item",
+   "name": "Stop",
+   "rect": [
+    370,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e10",
+   "role": "check box",
+   "name": "Tools",
+   "rect": [
+    490,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e11",
+   "role": "page tab",
+   "name": "Sound",
+   "rect": [
+    610,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e12",
+   "role": "button",
+   "name": "Help",
+   "rect": [
+    10,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e13",
+   "role": "menu item",
+   "name": "Save",
+   "rect": [
+    130,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e14",
+   "role": "check box",
+   "name": "Run",
+   "rect": [
+    250,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e15",
+   "role": "page tab",
+   "name": "Save As…",
+   "rect": [
+    370,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e16",
+   "role": "button",
+   "name": "Start",
+   "rect": [
+    490,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e17",
+   "role": "menu item",
+   "name": "Crop",
+   "rect": [
+    610,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e18",
+   "role": "check box",
+   "name": "Zoom Out",
+   "rect": [
+    10,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e19",
+   "role": "page tab",
+   "name": "Window",
+   "rect": [
+    130,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e20",
+   "role": "button",
+   "name": "Preferences",
+   "rect": [
+    250,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e21",
+   "role": "menu item",
+   "name": "Refresh",
+   "rect": [
+    370,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e22",
+   "role": "check box",
+   "name": "Export…",
+   "rect": [
+    490,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e23",
+   "role": "page tab",
+   "name": "Bold",
+   "rect": [
+    610,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e24",
+   "role": "button",
+   "name": "Rename",
+   "rect": [
+    10,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e25",
+   "role": "menu item",
+   "name": "Settings",
+   "rect": [
+    130,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e26",
+   "role": "check box",
+   "name": "Power",
+   "rect": [
+    250,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e27",
+   "role": "page tab",
+   "name": "Language",
+   "rect": [
+    370,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e28",
+   "role": "button",
+   "name": "Hide",
+   "rect": [
+    490,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e29",
+   "role": "menu item",
+   "name": "Find",
+   "rect": [
+    610,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e30",
+   "role": "check box",
+   "name": "Stroke",
+   "rect": [
+    10,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e31",
+   "role": "page tab",
+   "name": "Volume",
+   "rect": [
+    130,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e32",
+   "role": "button",
+   "name": "Redo",
+   "rect": [
+    250,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e33",
+   "role": "menu item",
+   "name": "Layers",
+   "rect": [
+    370,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e34",
+   "role": "check box",
+   "name": "Underline",
+   "rect": [
+    490,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e35",
+   "role": "page tab",
+   "name": "Add",
+   "rect": [
+    610,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "twin",
+   "role": "page tab",
+   "name": "Sound",
+   "rect": [
+    10,
+    500,
+    110,
+    36
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Find",
+   "truth": "e29"
+  },
+  {
+   "id": "c1",
+   "kind": "exact",
+   "role": "button",
+   "name": "Preferences",
+   "truth": "e20"
+  },
+  {
+   "id": "c2",
+   "kind": "missing",
+   "role": "button",
+   "name": "Apply",
+   "truth": null
+  },
+  {
+   "id": "c3",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "Save As…",
+   "truth": "e15"
+  },
+  {
+   "id": "c4",
+   "kind": "exact",
+   "role": "check box",
+   "name": "Power",
+   "truth": "e26"
+  },
+  {
+   "id": "c5",
+   "kind": "exact",
+   "role": "check box",
+   "name": "Rotate",
+   "truth": "e2"
+  },
+  {
+   "id": "c6",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "Bold",
+   "truth": "e23"
+  },
+  {
+   "id": "c7",
+   "kind": "exact",
+   "role": "button",
+   "name": "Network",
+   "truth": "e4"
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "View",
+   "truth": "e3"
+  },
+  {
+   "id": "c9",
+   "kind": "drift",
+   "role": "page tab",
+   "name": "Save As",
+   "truth": "e15"
+  },
+  {
+   "id": "c10",
+   "kind": "missing",
+   "role": "button",
+   "name": "Fill",
+   "truth": null
+  },
+  {
+   "id": "c11",
+   "kind": "duplicate",
+   "role": "page tab",
+   "name": "Sound",
+   "truth": "e11"
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Copy",
+   "truth": "e1"
+  },
+  {
+   "id": "c13",
+   "kind": "drift",
+   "role": "menu item",
+   "name": "Sav",
+   "truth": "e13"
+  },
+  {
+   "id": "c14",
+   "kind": "exact",
+   "role": "button",
+   "name": "Rename",
+   "truth": "e24"
+  },
+  {
+   "id": "c15",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "Volume",
+   "truth": "e31"
+  },
+  {
+   "id": "c16",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Refresh",
+   "truth": "e21"
+  },
+  {
+   "id": "c17",
+   "kind": "spelling",
+   "role": "menu item",
+   "name": "  CROP  ",
+   "truth": "e17"
+  },
+  {
+   "id": "c18",
+   "kind": "missing",
+   "role": "button",
+   "name": "Align Right",
+   "truth": null
+  },
+  {
+   "id": "c19",
+   "kind": "drift",
+   "role": "button",
+   "name": "Hel",
+   "truth": "e12"
+  },
+  {
+   "id": "c20",
+   "kind": "drift",
+   "role": "check box",
+   "name": "Export",
+   "truth": "e22"
+  },
+  {
+   "id": "c21",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Settings",
+   "truth": "e25"
+  },
+  {
+   "id": "c22",
+   "kind": "exact",
+   "role": "button",
+   "name": "Resize",
+   "truth": "e8"
+  },
+  {
+   "id": "c23",
+   "kind": "spelling",
+   "role": "menu item",
+   "name": "  SAVE  ",
+   "truth": "e13"
+  },
+  {
+   "id": "c24",
+   "kind": "spelling",
+   "role": "page tab",
+   "name": "  ADD  ",
+   "truth": "e35"
+  }
+ ]
+}

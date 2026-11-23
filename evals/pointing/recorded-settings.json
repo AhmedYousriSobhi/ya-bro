@@ -1,0 +1,894 @@
+{
+ "app": "org.gnome.Settings",
+ "locale": "en",
+ "source": "recorded",
+ "window": [
+  150,
+  96,
+  980,
+  640
+ ],
+ "elements": [
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/0",
+   "role": "button",
+   "name": "Wi-Fi",
+   "rect": [
+    156,
+    142,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/1",
+   "role": "button",
+   "name": "Network",
+   "rect": [
+    156,
+    186,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/2",
+   "role": "button",
+   "name": "Bluetooth",
+   "rect": [
+    156,
+    230,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/3",
+   "role": "button",
+   "name": "Displays",
+   "rect": [
+    156,
+    287,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/4",
+   "role": "button",
+   "name": "Sound",
+   "rect": [
+    156,
+    331,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/5",
+   "role": "button",
+   "name": "Power",
+   "rect": [
+    156,
+    375,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/6",
+   "role": "button",
+   "name": "Multitasking",
+   "rect": [
+    156,
+    419,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/7",
+   "role": "button",
+   "name": "Appearance",
+   "rect": [
+    156,
+    463,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/8",
+   "role": "button",
+   "name": "Ubuntu Desktop",
+   "rect": [
+    156,
+    507,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/9",
+   "role": "button",
+   "name": "Apps",
+   "rect": [
+    156,
+    564,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/10",
+   "role": "button",
+   "name": "Notifications",
+   "rect": [
+    156,
+    608,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/11",
+   "role": "button",
+   "name": "Search",
+   "rect": [
+    156,
+    652,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/12",
+   "role": "button",
+   "name": "Online Accounts",
+   "rect": [
+    156,
+    696,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/13",
+   "role": "button",
+   "name": "Sharing",
+   "rect": [
+    156,
+    740,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/14",
+   "role": "button",
+   "name": "Wellbeing",
+   "rect": [
+    156,
+    784,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/15",
+   "role": "button",
+   "name": "Mouse & Touchpad",
+   "rect": [
+    156,
+    841,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/16",
+   "role": "button",
+   "name": "Keyboard",
+   "rect": [
+    156,
+    885,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/17",
+   "role": "button",
+   "name": "Color Management",
+   "rect": [
+    156,
+    929,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/18",
+   "role": "button",
+   "name": "Printers",
+   "rect": [
+    156,
+    973,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/19",
+   "role": "button",
+   "name": "Accessibility",
+   "rect": [
+    156,
+    1030,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/20",
+   "role": "button",
+   "name": "Privacy & Security",
+   "rect": [
+    156,
+    1074,
+    233,
+    42
+   ]
+  },
+  {
+   "id": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/21",
+   "role": "button",
+   "name": "System",
+   "rect": [
+    156,
+    1118,
+    233,
+    42
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "exact",
+   "role": "button",
+   "name": "Wi-Fi",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c1",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  WI-FI  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c2",
+   "kind": "drift",
+   "role": "button",
+   "name": "Wi-F",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c3",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Wi-Fi",
+   "truth": null
+  },
+  {
+   "id": "c4",
+   "kind": "exact",
+   "role": "button",
+   "name": "Network",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c5",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  NETWORK  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c6",
+   "kind": "drift",
+   "role": "button",
+   "name": "Networ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c7",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Network",
+   "truth": null
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "button",
+   "name": "Bluetooth",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/2"
+  },
+  {
+   "id": "c9",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  BLUETOOTH  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/2"
+  },
+  {
+   "id": "c10",
+   "kind": "drift",
+   "role": "button",
+   "name": "Bluetoot",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/2"
+  },
+  {
+   "id": "c11",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Bluetooth",
+   "truth": null
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "button",
+   "name": "Displays",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/3"
+  },
+  {
+   "id": "c13",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  DISPLAYS  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/3"
+  },
+  {
+   "id": "c14",
+   "kind": "drift",
+   "role": "button",
+   "name": "Display",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/3"
+  },
+  {
+   "id": "c15",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Displays",
+   "truth": null
+  },
+  {
+   "id": "c16",
+   "kind": "exact",
+   "role": "button",
+   "name": "Sound",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/4"
+  },
+  {
+   "id": "c17",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  SOUND  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/4"
+  },
+  {
+   "id": "c18",
+   "kind": "drift",
+   "role": "button",
+   "name": "Soun",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/4"
+  },
+  {
+   "id": "c19",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Sound",
+   "truth": null
+  },
+  {
+   "id": "c20",
+   "kind": "exact",
+   "role": "button",
+   "name": "Power",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/5"
+  },
+  {
+   "id": "c21",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  POWER  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/5"
+  },
+  {
+   "id": "c22",
+   "kind": "drift",
+   "role": "button",
+   "name": "Powe",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/5"
+  },
+  {
+   "id": "c23",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Power",
+   "truth": null
+  },
+  {
+   "id": "c24",
+   "kind": "exact",
+   "role": "button",
+   "name": "Multitasking",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/6"
+  },
+  {
+   "id": "c25",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MULTITASKING  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/6"
+  },
+  {
+   "id": "c26",
+   "kind": "drift",
+   "role": "button",
+   "name": "Multitaskin",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/6"
+  },
+  {
+   "id": "c27",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Multitasking",
+   "truth": null
+  },
+  {
+   "id": "c28",
+   "kind": "exact",
+   "role": "button",
+   "name": "Appearance",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/7"
+  },
+  {
+   "id": "c29",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  APPEARANCE  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/7"
+  },
+  {
+   "id": "c30",
+   "kind": "drift",
+   "role": "button",
+   "name": "Appearanc",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/7"
+  },
+  {
+   "id": "c31",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Appearance",
+   "truth": null
+  },
+  {
+   "id": "c32",
+   "kind": "exact",
+   "role": "button",
+   "name": "Ubuntu Desktop",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/8"
+  },
+  {
+   "id": "c33",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  UBUNTU DESKTOP  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/8"
+  },
+  {
+   "id": "c34",
+   "kind": "drift",
+   "role": "button",
+   "name": "Ubuntu Deskto",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/8"
+  },
+  {
+   "id": "c35",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Ubuntu Desktop",
+   "truth": null
+  },
+  {
+   "id": "c36",
+   "kind": "exact",
+   "role": "button",
+   "name": "Apps",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/9"
+  },
+  {
+   "id": "c37",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  APPS  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/9"
+  },
+  {
+   "id": "c38",
+   "kind": "drift",
+   "role": "button",
+   "name": "App",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/9"
+  },
+  {
+   "id": "c39",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Apps",
+   "truth": null
+  },
+  {
+   "id": "c40",
+   "kind": "exact",
+   "role": "button",
+   "name": "Notifications",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/10"
+  },
+  {
+   "id": "c41",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  NOTIFICATIONS  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/10"
+  },
+  {
+   "id": "c42",
+   "kind": "drift",
+   "role": "button",
+   "name": "Notification",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/10"
+  },
+  {
+   "id": "c43",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Notifications",
+   "truth": null
+  },
+  {
+   "id": "c44",
+   "kind": "exact",
+   "role": "button",
+   "name": "Search",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/11"
+  },
+  {
+   "id": "c45",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  SEARCH  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/11"
+  },
+  {
+   "id": "c46",
+   "kind": "drift",
+   "role": "button",
+   "name": "Searc",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/11"
+  },
+  {
+   "id": "c47",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Search",
+   "truth": null
+  },
+  {
+   "id": "c48",
+   "kind": "exact",
+   "role": "button",
+   "name": "Online Accounts",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/12"
+  },
+  {
+   "id": "c49",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  ONLINE ACCOUNTS  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/12"
+  },
+  {
+   "id": "c50",
+   "kind": "drift",
+   "role": "button",
+   "name": "Online Account",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/12"
+  },
+  {
+   "id": "c51",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Online Accounts",
+   "truth": null
+  },
+  {
+   "id": "c52",
+   "kind": "exact",
+   "role": "button",
+   "name": "Sharing",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/13"
+  },
+  {
+   "id": "c53",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  SHARING  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/13"
+  },
+  {
+   "id": "c54",
+   "kind": "drift",
+   "role": "button",
+   "name": "Sharin",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/13"
+  },
+  {
+   "id": "c55",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Sharing",
+   "truth": null
+  },
+  {
+   "id": "c56",
+   "kind": "exact",
+   "role": "button",
+   "name": "Wellbeing",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/14"
+  },
+  {
+   "id": "c57",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  WELLBEING  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/14"
+  },
+  {
+   "id": "c58",
+   "kind": "drift",
+   "role": "button",
+   "name": "Wellbein",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/14"
+  },
+  {
+   "id": "c59",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Wellbeing",
+   "truth": null
+  },
+  {
+   "id": "c60",
+   "kind": "exact",
+   "role": "button",
+   "name": "Mouse & Touchpad",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/15"
+  },
+  {
+   "id": "c61",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MOUSE & TOUCHPAD  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/15"
+  },
+  {
+   "id": "c62",
+   "kind": "drift",
+   "role": "button",
+   "name": "Mouse & Touchpa",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/15"
+  },
+  {
+   "id": "c63",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Mouse & Touchpad",
+   "truth": null
+  },
+  {
+   "id": "c64",
+   "kind": "exact",
+   "role": "button",
+   "name": "Keyboard",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/16"
+  },
+  {
+   "id": "c65",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  KEYBOARD  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/16"
+  },
+  {
+   "id": "c66",
+   "kind": "drift",
+   "role": "button",
+   "name": "Keyboar",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/16"
+  },
+  {
+   "id": "c67",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Keyboard",
+   "truth": null
+  },
+  {
+   "id": "c68",
+   "kind": "exact",
+   "role": "button",
+   "name": "Color Management",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/17"
+  },
+  {
+   "id": "c69",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  COLOR MANAGEMENT  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/17"
+  },
+  {
+   "id": "c70",
+   "kind": "drift",
+   "role": "button",
+   "name": "Color Managemen",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/17"
+  },
+  {
+   "id": "c71",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Color Management",
+   "truth": null
+  },
+  {
+   "id": "c72",
+   "kind": "exact",
+   "role": "button",
+   "name": "Printers",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/18"
+  },
+  {
+   "id": "c73",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  PRINTERS  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/18"
+  },
+  {
+   "id": "c74",
+   "kind": "drift",
+   "role": "button",
+   "name": "Printer",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/18"
+  },
+  {
+   "id": "c75",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Printers",
+   "truth": null
+  },
+  {
+   "id": "c76",
+   "kind": "exact",
+   "role": "button",
+   "name": "Accessibility",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/19"
+  },
+  {
+   "id": "c77",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  ACCESSIBILITY  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/19"
+  },
+  {
+   "id": "c78",
+   "kind": "drift",
+   "role": "button",
+   "name": "Accessibilit",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/19"
+  },
+  {
+   "id": "c79",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Accessibility",
+   "truth": null
+  },
+  {
+   "id": "c80",
+   "kind": "exact",
+   "role": "button",
+   "name": "Privacy & Security",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/20"
+  },
+  {
+   "id": "c81",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  PRIVACY & SECURITY  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/20"
+  },
+  {
+   "id": "c82",
+   "kind": "drift",
+   "role": "button",
+   "name": "Privacy & Securit",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/20"
+  },
+  {
+   "id": "c83",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Privacy & Security",
+   "truth": null
+  },
+  {
+   "id": "c84",
+   "kind": "exact",
+   "role": "button",
+   "name": "System",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/21"
+  },
+  {
+   "id": "c85",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  SYSTEM  ",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/21"
+  },
+  {
+   "id": "c86",
+   "kind": "drift",
+   "role": "button",
+   "name": "Syste",
+   "truth": "74372:0/0/0/0/0/0/0/0/0/0/0/0/0/0/21"
+  },
+  {
+   "id": "c87",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "System",
+   "truth": null
+  },
+  {
+   "id": "c88",
+   "kind": "missing",
+   "role": "button",
+   "name": "Mirror the universe",
+   "truth": null
+  },
+  {
+   "id": "c89",
+   "kind": "missing",
+   "role": "button",
+   "name": "Teleport",
+   "truth": null
+  },
+  {
+   "id": "c90",
+   "kind": "missing",
+   "role": "button",
+   "name": "Flux capacitor",
+   "truth": null
+  }
+ ]
+}

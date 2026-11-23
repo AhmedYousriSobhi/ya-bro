@@ -1,0 +1,1146 @@
+{
+ "app": "org.gnome.Calculator",
+ "locale": "en",
+ "source": "recorded",
+ "window": [
+  460,
+  108,
+  360,
+  616
+ ],
+ "elements": [
+  {
+   "id": "73738:0/0/0/0/0/0/0/0/1/0/1",
+   "role": "button",
+   "name": "Backspace",
+   "rect": [
+    768,
+    389,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/0",
+   "role": "button",
+   "name": "C",
+   "rect": [
+    472,
+    476,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/3",
+   "role": "button",
+   "name": "7",
+   "rect": [
+    472,
+    524,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/4",
+   "role": "button",
+   "name": "8",
+   "rect": [
+    540,
+    524,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/5",
+   "role": "button",
+   "name": "9",
+   "rect": [
+    608,
+    524,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/6",
+   "role": "button",
+   "name": "4",
+   "rect": [
+    472,
+    572,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/7",
+   "role": "button",
+   "name": "5",
+   "rect": [
+    540,
+    572,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/8",
+   "role": "button",
+   "name": "6",
+   "rect": [
+    608,
+    572,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/9",
+   "role": "button",
+   "name": "1",
+   "rect": [
+    472,
+    620,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/10",
+   "role": "button",
+   "name": "2",
+   "rect": [
+    540,
+    620,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/11",
+   "role": "button",
+   "name": "3",
+   "rect": [
+    608,
+    620,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/12",
+   "role": "button",
+   "name": "0",
+   "rect": [
+    472,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/13",
+   "role": "button",
+   "name": ".",
+   "rect": [
+    540,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14",
+   "role": "button",
+   "name": "x",
+   "rect": [
+    608,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15",
+   "role": "button",
+   "name": "f(x)",
+   "rect": [
+    676,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/16",
+   "role": "button",
+   "name": "÷",
+   "rect": [
+    676,
+    476,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/17",
+   "role": "button",
+   "name": "×",
+   "rect": [
+    676,
+    524,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/18",
+   "role": "button",
+   "name": "−",
+   "rect": [
+    676,
+    572,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/19",
+   "role": "button",
+   "name": "+",
+   "rect": [
+    676,
+    620,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/20",
+   "role": "button",
+   "name": "mod",
+   "rect": [
+    744,
+    476,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/21",
+   "role": "button",
+   "name": "%",
+   "rect": [
+    744,
+    524,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/22",
+   "role": "button",
+   "name": "‎( )",
+   "rect": [
+    744,
+    572,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/23",
+   "role": "button",
+   "name": "=",
+   "rect": [
+    744,
+    620,
+    64,
+    92
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/0",
+   "role": "button",
+   "name": "Undo",
+   "rect": [
+    447,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/1",
+   "role": "button",
+   "name": "Redo",
+   "rect": [
+    487,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0",
+   "role": "button",
+   "name": "Basic",
+   "rect": [
+    567,
+    96,
+    74,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0",
+   "role": "button",
+   "name": "Main Menu",
+   "rect": [
+    647,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/0",
+   "role": "button",
+   "name": "Minimize",
+   "rect": [
+    687,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/1",
+   "role": "button",
+   "name": "Maximize",
+   "rect": [
+    724,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/2",
+   "role": "button",
+   "name": "Close",
+   "rect": [
+    761,
+    96,
+    34,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/1",
+   "role": "toggle button",
+   "name": "↑n",
+   "rect": [
+    540,
+    476,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/2",
+   "role": "toggle button",
+   "name": "↓n",
+   "rect": [
+    608,
+    476,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14/0",
+   "role": "toggle button",
+   "name": "x",
+   "rect": [
+    608,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15/0",
+   "role": "toggle button",
+   "name": "f(x)",
+   "rect": [
+    676,
+    668,
+    64,
+    44
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0/0",
+   "role": "toggle button",
+   "name": "Basic",
+   "rect": [
+    567,
+    96,
+    74,
+    34
+   ]
+  },
+  {
+   "id": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0/0",
+   "role": "toggle button",
+   "name": "Main Menu",
+   "rect": [
+    647,
+    96,
+    34,
+    34
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "exact",
+   "role": "button",
+   "name": "Backspace",
+   "truth": "73738:0/0/0/0/0/0/0/0/1/0/1"
+  },
+  {
+   "id": "c1",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  BACKSPACE  ",
+   "truth": "73738:0/0/0/0/0/0/0/0/1/0/1"
+  },
+  {
+   "id": "c2",
+   "kind": "drift",
+   "role": "button",
+   "name": "Backspac",
+   "truth": "73738:0/0/0/0/0/0/0/0/1/0/1"
+  },
+  {
+   "id": "c3",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Backspace",
+   "truth": null
+  },
+  {
+   "id": "c4",
+   "kind": "exact",
+   "role": "button",
+   "name": "C",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/0"
+  },
+  {
+   "id": "c5",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "C",
+   "truth": null
+  },
+  {
+   "id": "c6",
+   "kind": "exact",
+   "role": "button",
+   "name": "7",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/3"
+  },
+  {
+   "id": "c7",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "7",
+   "truth": null
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "button",
+   "name": "8",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/4"
+  },
+  {
+   "id": "c9",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "8",
+   "truth": null
+  },
+  {
+   "id": "c10",
+   "kind": "exact",
+   "role": "button",
+   "name": "9",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/5"
+  },
+  {
+   "id": "c11",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "9",
+   "truth": null
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "button",
+   "name": "4",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/6"
+  },
+  {
+   "id": "c13",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "4",
+   "truth": null
+  },
+  {
+   "id": "c14",
+   "kind": "exact",
+   "role": "button",
+   "name": "5",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/7"
+  },
+  {
+   "id": "c15",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "5",
+   "truth": null
+  },
+  {
+   "id": "c16",
+   "kind": "exact",
+   "role": "button",
+   "name": "6",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/8"
+  },
+  {
+   "id": "c17",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "6",
+   "truth": null
+  },
+  {
+   "id": "c18",
+   "kind": "exact",
+   "role": "button",
+   "name": "1",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/9"
+  },
+  {
+   "id": "c19",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "1",
+   "truth": null
+  },
+  {
+   "id": "c20",
+   "kind": "exact",
+   "role": "button",
+   "name": "2",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/10"
+  },
+  {
+   "id": "c21",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "2",
+   "truth": null
+  },
+  {
+   "id": "c22",
+   "kind": "exact",
+   "role": "button",
+   "name": "3",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/11"
+  },
+  {
+   "id": "c23",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "3",
+   "truth": null
+  },
+  {
+   "id": "c24",
+   "kind": "exact",
+   "role": "button",
+   "name": "0",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/12"
+  },
+  {
+   "id": "c25",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "0",
+   "truth": null
+  },
+  {
+   "id": "c26",
+   "kind": "exact",
+   "role": "button",
+   "name": ".",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/13"
+  },
+  {
+   "id": "c27",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": ".",
+   "truth": null
+  },
+  {
+   "id": "c28",
+   "kind": "exact",
+   "role": "button",
+   "name": "x",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14"
+  },
+  {
+   "id": "c29",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  X  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14"
+  },
+  {
+   "id": "c30",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "x",
+   "truth": null
+  },
+  {
+   "id": "c31",
+   "kind": "exact",
+   "role": "button",
+   "name": "f(x)",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15"
+  },
+  {
+   "id": "c32",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  F(X)  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15"
+  },
+  {
+   "id": "c33",
+   "kind": "drift",
+   "role": "button",
+   "name": "f(x",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15"
+  },
+  {
+   "id": "c34",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "f(x)",
+   "truth": null
+  },
+  {
+   "id": "c35",
+   "kind": "exact",
+   "role": "button",
+   "name": "÷",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/16"
+  },
+  {
+   "id": "c36",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "÷",
+   "truth": null
+  },
+  {
+   "id": "c37",
+   "kind": "exact",
+   "role": "button",
+   "name": "×",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/17"
+  },
+  {
+   "id": "c38",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "×",
+   "truth": null
+  },
+  {
+   "id": "c39",
+   "kind": "exact",
+   "role": "button",
+   "name": "−",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/18"
+  },
+  {
+   "id": "c40",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "−",
+   "truth": null
+  },
+  {
+   "id": "c41",
+   "kind": "exact",
+   "role": "button",
+   "name": "+",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/19"
+  },
+  {
+   "id": "c42",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "+",
+   "truth": null
+  },
+  {
+   "id": "c43",
+   "kind": "exact",
+   "role": "button",
+   "name": "mod",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/20"
+  },
+  {
+   "id": "c44",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MOD  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/20"
+  },
+  {
+   "id": "c45",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "mod",
+   "truth": null
+  },
+  {
+   "id": "c46",
+   "kind": "exact",
+   "role": "button",
+   "name": "%",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/21"
+  },
+  {
+   "id": "c47",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "%",
+   "truth": null
+  },
+  {
+   "id": "c48",
+   "kind": "exact",
+   "role": "button",
+   "name": "‎( )",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/22"
+  },
+  {
+   "id": "c49",
+   "kind": "drift",
+   "role": "button",
+   "name": "‎( ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/22"
+  },
+  {
+   "id": "c50",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "‎( )",
+   "truth": null
+  },
+  {
+   "id": "c51",
+   "kind": "exact",
+   "role": "button",
+   "name": "=",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/23"
+  },
+  {
+   "id": "c52",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "=",
+   "truth": null
+  },
+  {
+   "id": "c53",
+   "kind": "exact",
+   "role": "button",
+   "name": "Undo",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c54",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  UNDO  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c55",
+   "kind": "drift",
+   "role": "button",
+   "name": "Und",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/0"
+  },
+  {
+   "id": "c56",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Undo",
+   "truth": null
+  },
+  {
+   "id": "c57",
+   "kind": "exact",
+   "role": "button",
+   "name": "Redo",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c58",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  REDO  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c59",
+   "kind": "drift",
+   "role": "button",
+   "name": "Red",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/0/0/1"
+  },
+  {
+   "id": "c60",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Redo",
+   "truth": null
+  },
+  {
+   "id": "c61",
+   "kind": "exact",
+   "role": "button",
+   "name": "Basic",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0"
+  },
+  {
+   "id": "c62",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  BASIC  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0"
+  },
+  {
+   "id": "c63",
+   "kind": "drift",
+   "role": "button",
+   "name": "Basi",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0"
+  },
+  {
+   "id": "c64",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "Basic",
+   "truth": null
+  },
+  {
+   "id": "c65",
+   "kind": "exact",
+   "role": "button",
+   "name": "Main Menu",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0"
+  },
+  {
+   "id": "c66",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MAIN MENU  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0"
+  },
+  {
+   "id": "c67",
+   "kind": "drift",
+   "role": "button",
+   "name": "Main Men",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0"
+  },
+  {
+   "id": "c68",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "Main Menu",
+   "truth": null
+  },
+  {
+   "id": "c69",
+   "kind": "exact",
+   "role": "button",
+   "name": "Minimize",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/0"
+  },
+  {
+   "id": "c70",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MINIMIZE  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/0"
+  },
+  {
+   "id": "c71",
+   "kind": "drift",
+   "role": "button",
+   "name": "Minimiz",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/0"
+  },
+  {
+   "id": "c72",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Minimize",
+   "truth": null
+  },
+  {
+   "id": "c73",
+   "kind": "exact",
+   "role": "button",
+   "name": "Maximize",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/1"
+  },
+  {
+   "id": "c74",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  MAXIMIZE  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/1"
+  },
+  {
+   "id": "c75",
+   "kind": "drift",
+   "role": "button",
+   "name": "Maximiz",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/1"
+  },
+  {
+   "id": "c76",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Maximize",
+   "truth": null
+  },
+  {
+   "id": "c77",
+   "kind": "exact",
+   "role": "button",
+   "name": "Close",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/2"
+  },
+  {
+   "id": "c78",
+   "kind": "spelling",
+   "role": "button",
+   "name": "  CLOSE  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/2"
+  },
+  {
+   "id": "c79",
+   "kind": "drift",
+   "role": "button",
+   "name": "Clos",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/1/2"
+  },
+  {
+   "id": "c80",
+   "kind": "wrong-role",
+   "role": "toggle button",
+   "name": "Close",
+   "truth": null
+  },
+  {
+   "id": "c81",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "↑n",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/1"
+  },
+  {
+   "id": "c82",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  ↑N  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/1"
+  },
+  {
+   "id": "c83",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "↑n",
+   "truth": null
+  },
+  {
+   "id": "c84",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "↓n",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/2"
+  },
+  {
+   "id": "c85",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  ↓N  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/2"
+  },
+  {
+   "id": "c86",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "↓n",
+   "truth": null
+  },
+  {
+   "id": "c87",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "x",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14/0"
+  },
+  {
+   "id": "c88",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  X  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/14/0"
+  },
+  {
+   "id": "c89",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "x",
+   "truth": null
+  },
+  {
+   "id": "c90",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "f(x)",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15/0"
+  },
+  {
+   "id": "c91",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  F(X)  ",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15/0"
+  },
+  {
+   "id": "c92",
+   "kind": "drift",
+   "role": "toggle button",
+   "name": "f(x",
+   "truth": "73738:0/0/0/0/0/0/0/1/0/0/0/0/15/0"
+  },
+  {
+   "id": "c93",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "f(x)",
+   "truth": null
+  },
+  {
+   "id": "c94",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "Basic",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0/0"
+  },
+  {
+   "id": "c95",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  BASIC  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0/0"
+  },
+  {
+   "id": "c96",
+   "kind": "drift",
+   "role": "toggle button",
+   "name": "Basi",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/1/0/0"
+  },
+  {
+   "id": "c97",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "Basic",
+   "truth": null
+  },
+  {
+   "id": "c98",
+   "kind": "exact",
+   "role": "toggle button",
+   "name": "Main Menu",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0/0"
+  },
+  {
+   "id": "c99",
+   "kind": "spelling",
+   "role": "toggle button",
+   "name": "  MAIN MENU  ",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0/0"
+  },
+  {
+   "id": "c100",
+   "kind": "drift",
+   "role": "toggle button",
+   "name": "Main Men",
+   "truth": "73738:0/0/0/0/0/1/0/0/0/0/0/2/0/0/0"
+  },
+  {
+   "id": "c101",
+   "kind": "wrong-role",
+   "role": "menu item",
+   "name": "Main Menu",
+   "truth": null
+  },
+  {
+   "id": "c102",
+   "kind": "missing",
+   "role": "button",
+   "name": "Mirror the universe",
+   "truth": null
+  },
+  {
+   "id": "c103",
+   "kind": "missing",
+   "role": "button",
+   "name": "Teleport",
+   "truth": null
+  },
+  {
+   "id": "c104",
+   "kind": "missing",
+   "role": "button",
+   "name": "Flux capacitor",
+   "truth": null
+  }
+ ]
+}

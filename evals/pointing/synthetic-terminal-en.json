@@ -1,0 +1,591 @@
+{
+ "app": "terminal",
+ "locale": "en",
+ "source": "synthetic",
+ "elements": [
+  {
+   "id": "e0",
+   "role": "button",
+   "name": "Copy",
+   "rect": [
+    10,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e1",
+   "role": "menu item",
+   "name": "Rotate",
+   "rect": [
+    130,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e2",
+   "role": "check box",
+   "name": "Align Right",
+   "rect": [
+    250,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e3",
+   "role": "page tab",
+   "name": "Language",
+   "rect": [
+    370,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e4",
+   "role": "button",
+   "name": "Replace",
+   "rect": [
+    490,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e5",
+   "role": "menu item",
+   "name": "Bluetooth",
+   "rect": [
+    610,
+    40,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e6",
+   "role": "check box",
+   "name": "View",
+   "rect": [
+    10,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e7",
+   "role": "page tab",
+   "name": "Open",
+   "rect": [
+    130,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e8",
+   "role": "button",
+   "name": "Zoom Out",
+   "rect": [
+    250,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e9",
+   "role": "menu item",
+   "name": "Window",
+   "rect": [
+    370,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e10",
+   "role": "check box",
+   "name": "Keyboard",
+   "rect": [
+    490,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e11",
+   "role": "page tab",
+   "name": "Sort",
+   "rect": [
+    610,
+    88,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e12",
+   "role": "button",
+   "name": "Crop",
+   "rect": [
+    10,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e13",
+   "role": "menu item",
+   "name": "Save",
+   "rect": [
+    130,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e14",
+   "role": "check box",
+   "name": "Show",
+   "rect": [
+    250,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e15",
+   "role": "page tab",
+   "name": "Preferences",
+   "rect": [
+    370,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e16",
+   "role": "button",
+   "name": "Mute",
+   "rect": [
+    490,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e17",
+   "role": "menu item",
+   "name": "Paste",
+   "rect": [
+    610,
+    136,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e18",
+   "role": "check box",
+   "name": "Settings",
+   "rect": [
+    10,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e19",
+   "role": "page tab",
+   "name": "Mouse",
+   "rect": [
+    130,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e20",
+   "role": "button",
+   "name": "Italic",
+   "rect": [
+    250,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e21",
+   "role": "menu item",
+   "name": "About",
+   "rect": [
+    370,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e22",
+   "role": "check box",
+   "name": "Insert",
+   "rect": [
+    490,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e23",
+   "role": "page tab",
+   "name": "Select All",
+   "rect": [
+    610,
+    184,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e24",
+   "role": "button",
+   "name": "Rename",
+   "rect": [
+    10,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e25",
+   "role": "menu item",
+   "name": "Refresh",
+   "rect": [
+    130,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e26",
+   "role": "check box",
+   "name": "Hide",
+   "rect": [
+    250,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e27",
+   "role": "page tab",
+   "name": "Find",
+   "rect": [
+    370,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e28",
+   "role": "button",
+   "name": "Help",
+   "rect": [
+    490,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e29",
+   "role": "menu item",
+   "name": "Display",
+   "rect": [
+    610,
+    232,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e30",
+   "role": "check box",
+   "name": "Undo",
+   "rect": [
+    10,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e31",
+   "role": "page tab",
+   "name": "New",
+   "rect": [
+    130,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e32",
+   "role": "button",
+   "name": "OK",
+   "rect": [
+    250,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e33",
+   "role": "menu item",
+   "name": "Print",
+   "rect": [
+    370,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e34",
+   "role": "check box",
+   "name": "Close",
+   "rect": [
+    490,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "e35",
+   "role": "page tab",
+   "name": "Brush",
+   "rect": [
+    610,
+    280,
+    110,
+    36
+   ]
+  },
+  {
+   "id": "twin",
+   "role": "button",
+   "name": "Rename",
+   "rect": [
+    10,
+    500,
+    110,
+    36
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "id": "c0",
+   "kind": "exact",
+   "role": "check box",
+   "name": "Undo",
+   "truth": "e30"
+  },
+  {
+   "id": "c1",
+   "kind": "spelling",
+   "role": "page tab",
+   "name": "  OPEN  ",
+   "truth": "e7"
+  },
+  {
+   "id": "c2",
+   "kind": "exact",
+   "role": "button",
+   "name": "Help",
+   "truth": "e28"
+  },
+  {
+   "id": "c3",
+   "kind": "wrong-role",
+   "role": "button",
+   "name": "Sort",
+   "truth": null
+  },
+  {
+   "id": "c4",
+   "kind": "exact",
+   "role": "check box",
+   "name": "Settings",
+   "truth": "e18"
+  },
+  {
+   "id": "c5",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Rotate",
+   "truth": "e1"
+  },
+  {
+   "id": "c6",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Bluetooth",
+   "truth": "e5"
+  },
+  {
+   "id": "c7",
+   "kind": "exact",
+   "role": "button",
+   "name": "Rename",
+   "truth": "e24"
+  },
+  {
+   "id": "c8",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "Preferences",
+   "truth": "e15"
+  },
+  {
+   "id": "c9",
+   "kind": "drift",
+   "role": "page tab",
+   "name": "Sor",
+   "truth": "e11"
+  },
+  {
+   "id": "c10",
+   "kind": "spelling",
+   "role": "check box",
+   "name": "  ALIGN RIGHT  ",
+   "truth": "e2"
+  },
+  {
+   "id": "c11",
+   "kind": "missing",
+   "role": "button",
+   "name": "Export…",
+   "truth": null
+  },
+  {
+   "id": "c12",
+   "kind": "exact",
+   "role": "page tab",
+   "name": "Select All",
+   "truth": "e23"
+  },
+  {
+   "id": "c13",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Paste",
+   "truth": "e17"
+  },
+  {
+   "id": "c14",
+   "kind": "duplicate",
+   "role": "button",
+   "name": "Rename",
+   "truth": "twin"
+  },
+  {
+   "id": "c15",
+   "kind": "exact",
+   "role": "button",
+   "name": "Copy",
+   "truth": "e0"
+  },
+  {
+   "id": "c16",
+   "kind": "drift",
+   "role": "menu item",
+   "name": "Sav",
+   "truth": "e13"
+  },
+  {
+   "id": "c17",
+   "kind": "missing",
+   "role": "button",
+   "name": "Add",
+   "truth": null
+  },
+  {
+   "id": "c18",
+   "kind": "missing",
+   "role": "button",
+   "name": "Merge",
+   "truth": null
+  },
+  {
+   "id": "c19",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "Print",
+   "truth": "e33"
+  },
+  {
+   "id": "c20",
+   "kind": "spelling",
+   "role": "check box",
+   "name": "  CLOSE  ",
+   "truth": "e34"
+  },
+  {
+   "id": "c21",
+   "kind": "exact",
+   "role": "check box",
+   "name": "View",
+   "truth": "e6"
+  },
+  {
+   "id": "c22",
+   "kind": "exact",
+   "role": "button",
+   "name": "Crop",
+   "truth": "e12"
+  },
+  {
+   "id": "c23",
+   "kind": "exact",
+   "role": "menu item",
+   "name": "About",
+   "truth": "e21"
+  },
+  {
+   "id": "c24",
+   "kind": "drift",
+   "role": "menu item",
+   "name": "Rotat",
+   "truth": "e1"
+  }
+ ]
+}

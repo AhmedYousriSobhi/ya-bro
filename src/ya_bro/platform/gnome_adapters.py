@@ -186,7 +186,13 @@ class AtspiPerception:
                 return
             budget[0] -= 1
             if depth and _matches(node, role, name, text):
-                found.append(ElementRef(app_id, role, name, f"{pid}:" + "/".join(map(str, trail))))
+                # The element's own name (equal to `name` when one was asked for), so a caller
+                # that lists a whole role can tell the elements apart.
+                try:
+                    own = node.get_name() or ""
+                except GLib.Error:
+                    own = name
+                found.append(ElementRef(app_id, role, own, f"{pid}:" + "/".join(map(str, trail))))
             try:
                 count = node.get_child_count()
             except GLib.Error:

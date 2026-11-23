@@ -27,6 +27,11 @@ class Tone:
             return f"I can't find “{name}” here yet. Open the right screen and I'll point at it."
         return f"Where's “{name}” hiding, bro? Open the right screen and I'll point at it."
 
+    def unsure(self, name: str) -> str:
+        if not self.humour:
+            return f"I think it's this one, “{name}”:"
+        return f"I think it's this one, bro, “{name}”:"
+
     def not_yet(self) -> str:
         if not self.humour:
             return "I don't see that yet. Do it and I'll move on. Next again skips."

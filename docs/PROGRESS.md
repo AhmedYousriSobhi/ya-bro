@@ -11,13 +11,18 @@ Legend: done · in progress · todo
 | M1 Spikes S1, S2, S3 | in progress | #15 (S1 measured and merged in #38, go/no-go open), #2, #18 |
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
-| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 (engine and redaction done, not yet wired to any LLM request) |
+| M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19 (harness and synthetic corpus done, real recordings open), #20 (engine and redaction done, not yet wired to any LLM request) |
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21, #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #19 pointing eval harness
+Done: `grounding.point` (high, medium, none; names normalised for case, spacing, Arabic letter variants and diacritics; ring centre must be inside the focused window), used by the step loop (medium gets a hedged bubble), `pointing_eval`, `broctl eval pointing`, 300 synthetic cases, and **real recordings** from GNOME Calculator (36 elements), Files (5) and Settings (22) with 219 cases. Real checks, isolated headless shell (`tests/test_gnome_pointing.py`, repeated runs): Calculator 10/10 digit keys pointed High and a click in the ring types that digit; 7 × 6 = 42 by pointing at each key; Settings 3/3 and Files 3/3 pointed rows open their page when clicked. Eval over everything: 519 cases, 98.8% pointed-correct, 0.0% confidently wrong, medium precision 94.2%; the 6 misses are all synthetic (twins, one close sibling).
+Findings: GNOME Text Editor exposes no buttons in its tree (0 usable elements), so nothing can be pointed at by name there; Files' sidebar rows are `list item`, Settings' are `button`; the first press after a window opens is spent on activating it, so a harness must click the title bar first; GTK4 rows need the pointer over them before the press.
+Not done: the recorded cases are built from each element's own name (exact, case, drop-a-letter, wrong role, missing), so they are circular; the click checks above are what really validate the rects, and only 4 apps were tried, English only, one window size, scale 1; GIMP, Inkscape, LibreOffice, Firefox/workbench and Ptyxis not recorded (not installed or not accessible); vision and OCR tiers do not exist; no tokens, LLM cassettes or nightly run (no LLM request exists); the 0.3 margin and 0.6 floor are untuned; a duplicate name still cannot be told apart.
+
 ### 2026-11-23: #20 policy engine and redaction
 Done: `policy.py` (`effective_risk` = max of planner, pack and heuristics; whole-word EN and AR deny-list, so `Payload` is R0; `LocalPolicy` for Show-me and a switched-off Do-it; `command_risk`), pack-declared element risk and secrets (`[[element]]`, ADR-0027), `redact.py` (9 secret shapes, counts per kind, the value never kept) applied to the echoed screen text in `tone.snippet`, the ADR-0014 tables: 177 names x 2 modes and 50 injected texts, and a no-R3-without-confirmation check over every mode.
 Not done: no LLM request exists, so nothing else calls `redact` (log records are already free-text-free); the deny-list is a word list and still misses synonyms and phrases ("place order"); the injection eval covers the policy and redaction only, not model behaviour or real pages and terminals; terminal commands reach `command_risk` only once #21 exists; no pack ships `[[element]]` rows yet; the 177 names and 50 texts are written by us, not an independent corpus.
