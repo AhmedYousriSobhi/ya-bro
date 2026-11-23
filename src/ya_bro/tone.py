@@ -80,6 +80,13 @@ class Tone:
         """Before a step the user must take themselves (R3): never humorous."""
         return self.persona.say("risk_confirm", name=snippet(name))
 
+    def act_confirm(self, name: str = "") -> str:
+        """Before pressing an R2 control for the user (Do-it): asks, never jokes."""
+        return self.persona.say("act_confirm", name=snippet(name))
+
+    def act_failed(self) -> str:
+        return self.persona.say("act_failed")
+
     def mismatch(self, want: str, got: str) -> str:
         self.persona.note_mismatch()
         return self.persona.say("mismatch", want=snippet(want), got=snippet(got))

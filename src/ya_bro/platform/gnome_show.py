@@ -24,19 +24,25 @@ from ya_bro import config, keystore, packs, plans, privacy  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
     PREFIX,
+    AtspiActuator,
     AtspiPerception,
     GnomeBridge,
     GnomeOverlay,
     _call,
 )
-from ya_bro.policy import ShowMePolicy  # noqa: E402
+from ya_bro.policy import LocalPolicy, ShowMePolicy  # noqa: E402
 from ya_bro.steps import StepLoop, Timing  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
 from ya_bro.types import Plan  # noqa: E402
 
 
 async def run(
-    plan_path: Path | None, app_override: str, token: str, goal: str = "", dry: bool = False
+    plan_path: Path | None,
+    app_override: str,
+    token: str,
+    goal: str = "",
+    dry: bool = False,
+    do_it: bool = False,
 ) -> int:
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
     plan = None
@@ -88,17 +94,26 @@ async def run(
         async def replan(done, stuck):
             return await cascade.revise(app, done, stuck)
 
+    perception = AtspiPerception(bridge, plan.extents_offset)
+    if do_it and not cfg.do_it.allowed:
+        print(f"Do-it is off for {app}: set `allowed = true` under [do_it] in its config first")
+        return 2
+    found_packs, _ = packs.load_all()
     loop = StepLoop(
-        AtspiPerception(bridge, plan.extents_offset),
+        perception,
         overlay,
         bridge,
-        ShowMePolicy(),
+        LocalPolicy(do_it=do_it, packs=packs.resolve(found_packs, app_id=app, window_class=app))
+        if do_it
+        else ShowMePolicy(),
         Timing(done_hold=1.5),
+        actuator=AtspiActuator(perception) if do_it else None,
         log=log,
         tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
         replan=replan,
     )
-    print(f"showing {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
+    verb = "doing" if do_it else "showing"
+    print(f"{verb} {len(plan.steps)} steps on {app}. Stop: bubble button or Super+Shift+Esc.")
     outcome = await loop.run(plan, app, preview=cascade is not None and cascade.from_model)
     print(f"finished: {outcome}")
     if cascade is not None:
@@ -149,12 +164,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--app", default="")
     ap.add_argument("--ask", default="", metavar="GOAL", help="plan from plain words instead")
     ap.add_argument("--dry", action="store_true", help="with --ask: print the plan and stop")
+    ap.add_argument("--do-it", action="store_true", help="press the controls itself (R0/R1)")
     args = ap.parse_args(argv)
     if bool(args.plan) == bool(args.ask):
         ap.error("give a plan file or --ask GOAL")
     token = sys.stdin.readline().strip()
     return asyncio.run(
-        run(args.plan, args.app, token, args.ask, args.dry),
+        run(args.plan, args.app, token, args.ask, args.dry, args.do_it),
         loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop,
     )
 

@@ -14,7 +14,7 @@ from enum import StrEnum
 
 from ya_bro import grounding
 from ya_bro.grounding import Tier
-from ya_bro.interfaces import CompositorBridge, Overlay, Perception, Policy
+from ya_bro.interfaces import Actuator, CompositorBridge, Overlay, Perception, Policy
 from ya_bro.tone import Tone
 from ya_bro.types import Mode, Plan, Rect, Step
 
@@ -40,6 +40,8 @@ class Timing:
     nudge: float = 90.0  # after this long, say we are still waiting (never skips on its own)
     lost: float = 4.0  # a target missing this long counts as a plan that no longer fits the screen
     done_hold: float = 0.0  # how long a happy "all done" bubble stays at the end (0: just hide)
+    act_pause: float = 1.0  # Do-it: the pointer is shown on the target this long before the press
+    verify: float = 3.0  # Do-it: how long to wait for the screen to show the step's result
 
 
 Log = Callable[..., object]
@@ -58,7 +60,9 @@ class StepLoop:
         log: Log | None = None,
         tone: Tone | None = None,
         replan: Replan | None = None,
+        actuator: Actuator | None = None,
     ) -> None:
+        self._actuator = actuator  # None: Show-me only
         self._replan = replan
         self._replans = 0
         self._tone = tone or Tone()
@@ -102,6 +106,16 @@ class StepLoop:
                     await self._overlay.show_step(None, "I can't help with this step.", ())
                     self._log("step_blocked", step=index)
                     return Outcome.BLOCKED
+                note = ""
+                if self._actuator is not None:
+                    outcome = await self._try_do_it(step, app_id, index, len(steps))
+                    if outcome == "stop":
+                        return Outcome.STOPPED
+                    if outcome == "done":
+                        self._tone.note_progress()
+                        index += 1
+                        continue
+                    note = outcome  # "" or a line saying Do-it handed the step back
                 # A step the user must take themselves is never joked about (ADR-0013 §3).
                 self._tone.set_sensitive(decision.needs_confirmation)
                 try:
@@ -114,6 +128,7 @@ class StepLoop:
                         can_replan=can_replan
                         and self._replan is not None
                         and self._replans < MAX_REPLANS,
+                        note=note,
                     )
                 finally:
                     self._tone.set_sensitive(False)
@@ -143,6 +158,75 @@ class StepLoop:
             with contextlib.suppress(asyncio.CancelledError):
                 await pump
             await self._overlay.hide()
+
+    async def _wait_stop(self) -> None:
+        while await self._events.get() != "stop":
+            pass
+
+    async def _pause(self, seconds: float) -> bool:
+        """Wait, True when the user stopped meanwhile."""
+        try:
+            await asyncio.wait_for(self._wait_stop(), seconds)
+        except TimeoutError:
+            return False
+        return True
+
+    async def _verified(self, step: Step, app_id: str, was_done: bool) -> bool:
+        if step.expect is None or was_done:
+            return True  # nothing to check, or the screen could not tell us apart
+        loop = asyncio.get_running_loop()
+        end = loop.time() + self._timing.verify
+        while True:
+            if await self._satisfied(step, app_id):
+                return True
+            if loop.time() >= end:
+                return False
+            await asyncio.sleep(self._timing.poll)
+
+    async def _try_do_it(self, step: Step, app_id: str, index: int, total: int) -> str:
+        """Do-it (ADR-0009): narrate, point, press, check. Returns "done", "stop", or what Show-me
+        should say first ("" when Do-it simply does not apply to this step). Anything Do-it cannot
+        do safely goes back to the user: Show-me then points and the user presses it."""
+        decision = self._policy.check(step, Mode.DO_IT)
+        if not decision.allowed or step.target is None:
+            return ""
+        count = f"({index + 1}/{total})"
+        for attempt in range(2):
+            rect, tier = await self._locate(step, app_id)
+            if rect is None or tier is not Tier.HIGH:
+                return ""  # never press on a guess
+            if decision.needs_confirmation and attempt == 0:
+                self._tone.set_sensitive(True)
+                text = f"{count} {self._tone.act_confirm(step.target.name)} {step.narration}"
+                self._tone.set_sensitive(False)
+                await self._overlay.show_step(rect, text, ("next", "stop"), mood="pointing")
+                while (event := await self._events.get()) not in ("next", "stop"):
+                    pass
+                if event == "stop":
+                    return "stop"
+            await self._overlay.show_step(rect, f"{count} {step.narration}", ("stop",), "pointing")
+            await self._overlay.fly_pointer(rect)
+            if await self._pause(self._timing.act_pause):
+                return "stop"
+            rect, tier = await self._locate(step, app_id)  # it may have moved while we looked
+            if rect is None or tier is not Tier.HIGH:
+                return ""
+            was_done = await self._satisfied(step, app_id)
+            act = asyncio.create_task(self._actuator.act(step))  # type: ignore[union-attr]
+            stop = asyncio.create_task(self._wait_stop())
+            await asyncio.wait({act, stop}, return_when=asyncio.FIRST_COMPLETED)
+            if stop.done():
+                await self._actuator.abort()  # type: ignore[union-attr]
+                act.cancel()
+                self._log("act_stopped", step=index)
+                return "stop"
+            stop.cancel()
+            ok = act.result()
+            self._log("act", step=index, ok=int(ok), attempt=attempt)
+            if (ok or step.expect is not None) and await self._verified(step, app_id, was_done):
+                return "done"
+        self._log("act_gave_up", step=index)
+        return self._tone.act_failed()
 
     async def _pump_events(self) -> None:
         async for event in self._overlay.events():
@@ -204,6 +288,7 @@ class StepLoop:
         total: int,
         confirm: bool = False,
         can_replan: bool = False,
+        note: str = "",
     ) -> str:
         count = f"({index + 1}/{total})"
         shown: tuple[Rect | None, str, str] | None = None
@@ -211,7 +296,7 @@ class StepLoop:
         loop = asyncio.get_running_loop()
         since = loop.time()
         nudged = False
-        extra = ""
+        extra = f"{count} {note}" if note else ""
         # A step that is already "done" when it appears must not advance by itself (the screen may
         # simply still show an old result): it waits for Next until it was seen not done.
         armed = False

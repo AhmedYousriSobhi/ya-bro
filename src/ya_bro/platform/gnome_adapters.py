@@ -279,3 +279,53 @@ class AtspiPerception:
 
     async def read_text(self, ref: ElementRef) -> str:
         return await asyncio.to_thread(self._read_text, ref)
+
+
+# AT-SPI action names that press or flip a control, in the order we prefer them.
+PRESS_ACTIONS = ("click", "press", "activate", "toggle", "check", "select")
+NEVER_ACT_ROLES = frozenset({"password text", "password_text"})
+
+
+class AtspiActuator:
+    """Do-it through AT-SPI actions (ADR-0009 §1.2): no pointer injection, no portal consent.
+
+    Reuses the perceiver's scoped lookup, so it can only press inside an allowed window, and it
+    presses only when exactly one element matches the step's target: it never guesses.
+    """
+
+    def __init__(self, perception: AtspiPerception) -> None:
+        self._perception = perception
+        self._aborted = False
+
+    def _press(self, step) -> bool:
+        t = step.target
+        if t is None or t.role.lower() in NEVER_ACT_ROLES:
+            return False
+        refs = self._perception._find(t.app_id, t.role, t.name, "")
+        if len(refs) != 1:
+            return False
+        found = self._perception._resolve(refs[0])
+        if found is None:
+            return False
+        node = found[1]
+        try:
+            names = {
+                Atspi.Action.get_action_name(node, i): i
+                for i in range(Atspi.Action.get_n_actions(node))
+            }
+        except GLib.Error:
+            return False
+        index = next((names[n] for n in PRESS_ACTIONS if n in names), None)
+        if index is None or self._aborted:
+            return False
+        try:
+            return bool(Atspi.Action.do_action(node, index))
+        except GLib.Error:
+            return False
+
+    async def act(self, step) -> bool:
+        self._aborted = False
+        return await asyncio.to_thread(self._press, step)
+
+    async def abort(self) -> None:
+        self._aborted = True

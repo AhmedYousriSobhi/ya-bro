@@ -4,6 +4,9 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Added
+- Do-it on GNOME (#27, ADR-0009, first part): `broctl show PLAN --do-it` has Bro press the controls itself through AT-SPI actions (no pointer injection, no portal consent), one step at a time and visibly: it narrates, flies the pointer to the control, waits (`act_pause`), presses, then checks the step's `expect` (`verify` seconds). It only presses a control it found with High confidence and exactly one match, never in a password field, and only when `[do_it] allowed = true` for the app. R2 steps ask first ("press it for you? OK") with Next and Stop; R3 steps, dangerous names, a missing or doubtful control, and two failed presses (one retry) go back to Show-me: Bro points, you press. Stop (button or key) before or during a press halts at once and calls `Actuator.abort`. New: `AtspiActuator`, `StepLoop(actuator=)`, `Timing.act_pause` and `verify`, persona moments `act_confirm` and `act_failed` (English and Arabic drafts). Tested with 12 loop tests on fakes and a real Calculator run in the isolated shell (7 × 6 = 42 pressed with no injected click; an actuator that cannot press fails it). **Not built:** text entry, the RemoteDesktop portal + libei path (drags, canvas, apps with weak AT-SPI actions; spike S7), the "want me to undo that?" offer, slow/normal/brisk pacing, and the S7 coverage run across GIMP, LibreOffice, Settings and Firefox.
+
 ## [0.2.0] - 2026-11-23
 Second pre-alpha release. Bro can now take plain words, guard your privacy, and offer help when you seem stuck. The agent is called **Bro**; "Ya" is the call that summons it.
 

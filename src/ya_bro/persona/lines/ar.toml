@@ -464,3 +464,25 @@ text = "العنصر ده مش موجود في الشاشة دي. ثانية أ�
 moment = "replanning"
 humour = 0
 text = "مش لاقيه هنا. هبص تاني وأعمل خطة جديدة."
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "هدوس على «{name}» بدالك. ماشي؟"
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "أدوس على «{name}» دلوقتي؟"
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "ماشتغلتش، فدي عليك: هشاورلك وإنت دوس."
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "معرفتش أعملها. كملها إنت."
