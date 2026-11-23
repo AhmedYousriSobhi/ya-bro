@@ -1,0 +1,162 @@
+# Plain-English explanations of workbench error codes. The suggested command is for the user to confirm.
+# Source: workbench docs/agents/ERROR-CODES.md (contract 2.5).
+
+[[fixit]]
+code = "WB-DOCTOR-CGROUP-V2"
+meaning = "cgroup v2 is not the unified hierarchy."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-DOCKER"
+meaning = "Docker is not reachable or not on the systemd cgroup driver."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-DOCKER-CGROUPS"
+meaning = "Docker's cgroup driver or version is not supported."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-GOVERNOR"
+meaning = "The governor is not reachable."
+suggest = "benchctl start"
+
+[[fixit]]
+code = "WB-DOCTOR-KERNEL"
+meaning = "The kernel is older than 5.19 (no memory.reclaim)."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-LIBVIRT"
+meaning = "libvirt is not reachable (some profiles only)."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-MEMLOCK"
+meaning = "The hard memlock limit is too low for the governor."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-MEMORY-PSI"
+meaning = "/proc/pressure/memory is missing."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-OOMD-BACKSTOP"
+meaning = "The optional systemd-oomd backstop is installed but not active."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-SIM-CONTAINERS"
+meaning = "A simulation container is unhealthy."
+suggest = "benchctl status"
+
+[[fixit]]
+code = "WB-DOCTOR-SWAP"
+meaning = "No swap, or heavily used swap."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-TOOL-DOCKER"
+meaning = "The docker tool is missing."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-TOOL-TC"
+meaning = "The tc tool is missing (some profiles only)."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-TOOL-VAGRANT"
+meaning = "The vagrant tool is missing (some profiles only)."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-TOOL-VIRSH"
+meaning = "The virsh tool is missing (some profiles only)."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-DOCTOR-TSH"
+meaning = "The local tsh is newer than the Teleport server."
+suggest = "benchctl doctor"
+
+[[fixit]]
+code = "WB-EXTRA-MISSING"
+meaning = "An optional extra is not installed."
+hint = "install the extra: pip install -e '.[mcp]'"
+
+[[fixit]]
+code = "WB-NEEDS-YES"
+meaning = "A destructive command needs --yes in agent mode."
+hint = "repeat the command with --yes, if the user agrees"
+
+[[fixit]]
+code = "WB-NO-LAB-REPORT"
+meaning = "No such lab, no such run, or the run has no report (aborted or still running)."
+suggest = "benchctl run lab NAME"
+
+[[fixit]]
+code = "WB-NO-RUN"
+meaning = "The web page holds no finished scenario run to export (none yet, another scenario, or one still playing)."
+suggest = "benchctl scenario run NAME"
+
+[[fixit]]
+code = "WB-PART-NOT-RUNNING"
+meaning = "A part this needs is not running (Prometheus, or the web page)."
+suggest = "benchctl start"
+
+[[fixit]]
+code = "WB-REFUSED-CHECKSUM"
+meaning = "A Slurm tarball's hash and GitHub's digest for it disagree."
+suggest = "benchctl get slurm-checksum VERSION"
+
+[[fixit]]
+code = "WB-REFUSED-GOVERNOR"
+meaning = "The governor admits no new work at its current memory level."
+suggest = "benchctl status"
+
+[[fixit]]
+code = "WB-REFUSED-MEMORY"
+meaning = "Not enough free memory to start this; the governor's pre-flight said no."
+suggest = "benchctl plan"
+
+[[fixit]]
+code = "WB-REFUSED-NETWORK"
+meaning = "The cluster network cannot be created or does not match the addressing plan."
+suggest = "benchctl down"
+
+[[fixit]]
+code = "WB-STACK-NOT-RUNNING"
+meaning = "No container of the workbench is running."
+suggest = "benchctl start"
+
+[[fixit]]
+code = "WB-UNKNOWN-NODE"
+meaning = "No such node."
+suggest = "benchctl get nodes"
+
+[[fixit]]
+code = "WB-UNKNOWN-PROFILE"
+meaning = "No such size preset."
+suggest = "benchctl get profiles"
+
+[[fixit]]
+code = "WB-UNKNOWN-SCENARIO"
+meaning = "No such scenario."
+suggest = "benchctl get scenarios"
+
+[[fixit]]
+code = "WB-UNKNOWN-TARGET"
+meaning = "No such node or service."
+suggest = "benchctl get services"
+
+[[fixit]]
+code = "WB-UNKNOWN-VERB"
+meaning = "No such command."
+suggest = "benchctl --help"
+
+[[fixit]]
+code = "WB-USAGE"
+meaning = "The command line is wrong."
+suggest = "benchctl VERB --help"

@@ -22,7 +22,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `docs/research/` — landscape research (AI tools, non-AI tools, Linux platform facts, factsheet)
 - `CHANGELOG.md` — Keep a Changelog format
 - `.github/` — issue and PR templates
-- `packs/` — per-app knowledge packs (format v1, ADR-0027; loader `src/ya_bro/packs.py`; `broctl pack list|check`)
+- `packs/` — per-app knowledge packs (format v1, ADR-0027; `workbench` and `gnome-calculator`; loader `src/ya_bro/packs.py`; `broctl pack list|check`)
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
 - `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop, ADR-0026), plans (TOML plans), packs (app knowledge, ADR-0027), tone (the bro's lines), policy, config, logs, targets, token_server, ipc, dirs, cli; OS code only under `platform/`)

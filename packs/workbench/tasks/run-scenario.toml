@@ -1,0 +1,15 @@
+[plan]
+goal = "run a workbench scenario"
+keywords = ["scenario", "run", "play", "workbench", "benchctl"]
+
+[[step]]
+narration = "Run: ./scripts/benchctl scenario list"
+why = "That shows the scenario names you can play."
+
+[[step]]
+narration = "Run: ./scripts/benchctl scenario run NAME, with a name from the list."
+why = "It plays the scenario against the running stack. The cluster must be started first."
+
+[[step]]
+narration = "Run: ./scripts/benchctl get scenario-status"
+why = "That shows how the run is going."

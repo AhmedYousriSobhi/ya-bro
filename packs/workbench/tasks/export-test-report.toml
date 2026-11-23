@@ -1,0 +1,11 @@
+[plan]
+goal = "export a workbench test report"
+keywords = ["export", "report", "test", "bug", "workbench", "benchctl"]
+
+[[step]]
+narration = "Run: ./scripts/benchctl get scenario-status"
+why = "The report is of the web page's last finished scenario run."
+
+[[step]]
+narration = "Run: ./scripts/benchctl export test-report"
+why = "It writes a report you can attach to a bug report. With no finished run you get WB-NO-RUN."

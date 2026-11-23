@@ -4,6 +4,7 @@ packs/<id>/
   pack.toml     id, name, version, trust, locales, [match], [sources]
   knowledge.md  vocabulary, mental model, common mistakes (kept small: it rides in every prompt)
   tasks/*.toml  Show-me plans (the plans.py format) for common goals
+  fixits.toml   [[fixit]] code, meaning, suggest (a command to offer) or hint (plain words)
 The core only reads packs; nothing in one is imported or executed.
 """
 
@@ -22,6 +23,7 @@ MAX_KNOWLEDGE_CHARS = 16_000  # about 4k tokens, ADR-0012 §4
 TRUST = ("data-only", "hooks")
 MATCH_KEYS = ("desktop_ids", "window_classes", "argv0", "urls")
 _ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}")
+_CODE = re.compile(r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+")
 _VERSION = re.compile(r"\d+\.\d+\.\d+")
 
 SHIPPED = Path(__file__).resolve().parents[2] / "packs"
@@ -29,6 +31,16 @@ SHIPPED = Path(__file__).resolve().parents[2] / "packs"
 
 class PackError(ValueError):
     pass
+
+
+@dataclass(frozen=True)
+class Fixit:
+    """What an app's error code means. `suggest` is only ever offered, never run (R2, ADR-0009)."""
+
+    code: str
+    meaning: str
+    suggest: str = ""
+    hint: str = ""
 
 
 @dataclass(frozen=True)
@@ -43,6 +55,7 @@ class Pack:
     sources: dict[str, tuple[str, ...]] = field(default_factory=dict)
     knowledge: str = ""
     tasks: dict[str, Path] = field(default_factory=dict)
+    fixits: dict[str, Fixit] = field(default_factory=dict)
 
     def matches(
         self, app_id: str = "", window_class: str = "", argv0: str = "", url: str = ""
@@ -67,6 +80,32 @@ def _strings(table: dict, key: str, where: str, *, allow_str: bool = False) -> t
     if not isinstance(value, (list, tuple)) or not all(isinstance(v, str) and v for v in value):
         raise PackError(f"{where}: {key} must be a list of non-empty strings")
     return tuple(value)
+
+
+def _fixits(root: Path, argv0: tuple[str, ...]) -> dict[str, Fixit]:
+    path = root / "fixits.toml"
+    if not path.is_file():
+        return {}
+    try:
+        rows = tomllib.loads(path.read_text()).get("fixit", [])
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        raise PackError(f"cannot read fixits.toml: {e}") from e
+    commands = {Path(a).name for a in argv0}
+    out: dict[str, Fixit] = {}
+    for i, row in enumerate(rows, 1):
+        where = f"fixits.toml entry {i}"
+        fields = {k: row.get(k, "") for k in ("code", "meaning", "suggest", "hint")}
+        if not all(isinstance(v, str) for v in fields.values()):
+            raise PackError(f"{where}: values must be strings")
+        if not _CODE.fullmatch(fields["code"]) or not fields["meaning"]:
+            raise PackError(f"{where}: needs a code like WB-REFUSED-MEMORY and a meaning")
+        if fields["code"] in out:
+            raise PackError(f"{where}: duplicate code {fields['code']}")
+        first = fields["suggest"].split(maxsplit=1)[:1]
+        if first and Path(first[0]).name not in commands:
+            raise PackError(f"{where}: suggest must run one of the pack's own commands")
+        out[fields["code"]] = Fixit(**fields)
+    return out
 
 
 def load(root: Path) -> Pack:
@@ -121,7 +160,8 @@ def load(root: Path) -> Pack:
         except plans.PlanError as e:
             raise PackError(f"tasks/{path.name}: {e}") from e
         tasks[path.stem] = path
-    return Pack(pid, name, version, root, trust, locales, match, sources, knowledge, tasks)
+    fixits = _fixits(root, match.get("argv0", ()))
+    return Pack(pid, name, version, root, trust, locales, match, sources, knowledge, tasks, fixits)
 
 
 def roots(extra: list[Path] | None = None) -> list[Path]:

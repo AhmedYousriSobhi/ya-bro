@@ -12,12 +12,16 @@ Legend: done · in progress · todo
 | M2 Perception + bridge | in progress | #4 (AT-SPI perceiver done for GTK, scope enforced, text read), #18 (extension and bridge done) |
 | M3 Overlay | in progress | #3 (ring, bubble, buttons, placement done; avatar and pointer flight are basic) |
 | M4 Step loop | in progress | #5 (scripted Show-me loop done, ADR-0026; Claude brain open), #19, #20 |
-| M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #21, #22, #31 |
+| M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21, #31 |
 | M6 Struggle + persona | todo | #9, #23, #24 |
 | M7 MVP hardening | todo | #25, #26 |
 | v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
 
 ## Log
+### 2026-11-23: #22 workbench pack
+Done: `packs/workbench` (match on `benchctl`, knowledge from AGENTS.md, four narration-only terminal tasks, 32 `fixits.toml` rows copied from ERROR-CODES.md contract 2.5); loader reads and checks `fixits.toml`; 8 new tests.
+Not done: web-UI selectors and `signals.toml` (no format yet; signals need #9), `hooks.toml` and the `/api/state` hook (#31), tasks cannot point at or verify anything in a terminal until #21, no GIMP pack, no English/Arabic phrase-matching eval, Arabic text; fixits were copied by hand-run script and will drift from workbench's file; depends on PR #89.
+
 ### 2026-11-23: #8 pack format v1
 Done: `ya_bro.packs` (load, validate, resolve by app id, window class, argv0 or URL), ADR-0027, `broctl pack list|check`, `packs/gnome-calculator`, 12 unit tests. Tasks are TOML, not YAML.
 Not done: selectors, signals, fixits, hooks, docs retrieval, toolkit packs, auto-pack fallback, `pack new|test|doctor`, version ranges; the Brain does not read packs yet; the workbench and GIMP packs and the 30-phrasing match eval from ADR-0012 (#22).
