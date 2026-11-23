@@ -34,7 +34,7 @@ from ya_bro.platform.gnome_adapters import (  # noqa: E402
 from ya_bro.policy import LocalPolicy, ShowMePolicy  # noqa: E402
 from ya_bro.steps import StepLoop, Timing  # noqa: E402
 from ya_bro.tone import Tone  # noqa: E402
-from ya_bro.types import Plan  # noqa: E402
+from ya_bro.types import Plan, Rect, WindowInfo  # noqa: E402
 
 
 async def run(
@@ -130,6 +130,67 @@ async def run(
     return 0
 
 
+class _NoPerception:
+    """Pack-only mode reads nothing: the steps name no control to find."""
+
+    async def find(self, app_id, role, name="", text=""):
+        return []
+
+    async def locate(self, ref):
+        return None
+
+    async def read_text(self, ref):
+        return ""
+
+
+class _NoBridge:
+    """Pack-only mode has no app window to scope: the bubble is plain text in its own window."""
+
+    _win = WindowInfo("0", "pack", "", Rect(0, 0, 1, 1), focused=True)
+
+    async def windows(self):
+        return [self._win]
+
+    async def focused_window(self):
+        return self._win
+
+
+async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None) -> int:
+    """`broctl ask --pack ID`: walk through a pack's task in a plain window. It reads no screen and
+    names no control (a terminal or web tool has none to point at yet), so the user does each step
+    and presses Next. Needs neither the Shell extension nor an allowed app."""
+    found, _problems = packs.load_all()
+    pack = next((p for p in found if p.id == pack_id), None)
+    if pack is None or not pack.tasks:
+        print(f"no pack {pack_id!r} with tasks (see `broctl pack list`)")
+        return 2
+    if not goal:
+        from ya_bro.platform.ask_window import AskWindow
+
+        goal = await AskWindow(f"What do you want to do with {pack.name}?").get() or ""
+        if not goal:
+            print("cancelled")
+            return 0
+    try:
+        plan = await plans.ScriptedBrain(list(pack.tasks.values())).plan(goal, pack_id)
+    except plans.PlanError as e:
+        print(f"{e}. Tasks in {pack_id}: {', '.join(sorted(pack.tasks))}")
+        return 1
+    cfg = config.load(pack_id)
+    loop = StepLoop(
+        _NoPerception(),
+        overlay or DockedOverlay(),
+        _NoBridge(),
+        ShowMePolicy(),
+        Timing(done_hold=1.5),
+        log=lambda event, **f: print(event, *(f"{k}={v}" for k, v in f.items()), flush=True),
+        tone=Tone(cfg.humour, "ar" if cfg.language == "ar" else "en", cfg.less_chatty),
+    )
+    print(f"{len(plan.steps)} steps for {pack.name}. You run each one; Next goes on, Stop ends.")
+    print(f"finished: {await loop.run(plan, pack_id)}")
+    return 0
+
+
 async def ask(goal: str, app: str, bridge: GnomeBridge) -> tuple[brains.FallbackBrain, Plan]:
     """Plan from plain words: a pack task if one matches, else Claude (ADR-0008 §4)."""
     found, _problems = packs.load_all()
@@ -180,7 +241,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry", action="store_true", help="with --ask: print the plan and stop")
     ap.add_argument("--do-it", action="store_true", help="press the controls itself (R0/R1)")
     ap.add_argument("--docked", action="store_true", help="bubble in a plain window, no ring")
+    ap.add_argument("--pack", default="", help="walk through this pack's task in a plain window")
     args = ap.parse_args(argv)
+    if args.pack:
+        return asyncio.run(
+            run_pack(args.pack, args.ask),
+            loop_factory=gi.events.GLibEventLoopPolicy().new_event_loop,
+        )
     if args.plan and args.ask:
         ap.error("give a plan file or --ask GOAL, not both")
     token = sys.stdin.readline().strip()

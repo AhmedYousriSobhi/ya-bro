@@ -45,7 +45,7 @@ One small character with six moods: it **points** at the control, **thinks** whe
 | Check the screen: advance by itself, notice a wrong key, explain it with **Why?** | ✅ |
 | Next / Why? / Repeat / Stop, and a stop key (Super+Shift+Esc) that always works | ✅ |
 | Sees **only the app you allow** (default-deny), or one web tool by origin | ✅ |
-| Knowledge packs per app (format, loader, a workbench pack) | ✅ |
+| Knowledge packs per app (format, loader, a workbench pack; [run Bro on workbench](docs/guides/workbench.md)) | ✅ |
 | Bash hook that sees allowed commands finish (name, exit code, duration only) | ✅ |
 | Policy engine and redaction (risk tiers, secret scrubbing) | ✅ |
 | First-run consent (nothing is sent unless you say yes), a list of everything sent, state dots on the bro, `panic` and `forget` ([#25](https://github.com/AhmedYousriSobhi/ya-bro/issues/25)) | ✅ |

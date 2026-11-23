@@ -527,6 +527,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     ask.add_argument("--app", default="", help="app id (default: the focused allowed window)")
     ask.add_argument("--dry", action="store_true", help="print the plan and stop")
+    ask.add_argument(
+        "--pack", default="", help="use this pack's tasks in a plain window (no app, no extension)"
+    )
     show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
     show.add_argument("plan", help="plan file (TOML), see docs/DEVELOPMENT.md")
     show.add_argument("--app", default="", help="app id (default: the focused allowed window)")
@@ -663,6 +666,8 @@ def main(argv: list[str] | None = None) -> int:
                 *(["--docked"] * args.docked),
             ],
         )
+    if args.noun == "ask" and args.pack:
+        return _gnome_demo("show", 0, show=["--pack", args.pack, "--ask", args.goal])
     if args.noun == "ask":
         extra = ["--app", args.app] if args.app else []
         return _gnome_demo("show", 0, show=["--ask", args.goal, *extra, *(["--dry"] * args.dry)])
