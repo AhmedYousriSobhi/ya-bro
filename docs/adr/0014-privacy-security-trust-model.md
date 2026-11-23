@@ -63,7 +63,7 @@ SPEC §7 and CLAUDE.md already require:
 | User intent and authority | Prompt injection from screen, web, terminal or pack text | Untrusted-content framing; local `Policy` decides every action; R3 actions are never automated; the LLM cannot raise its own permissions |
 | The machine | Malicious pack hooks or MCP servers | Packs are data-only by default; hooks need explicit trust per pack; the exact command is shown |
 | Behaviour log | Profiling or leakage | Struggle data is types/counts only, local, with a 30-day retention cap |
-| API keys and portal tokens | Theft | Secret Service (libsecret) storage; `.env` fallback with 0600; never logged |
+| API keys and portal tokens | Theft | Secret Service (libsecret) storage; `.env` fallback with 0600; never logged. *As built (#5):* `broctl key set` stores the Anthropic key in the Secret Service (hidden prompt, never in argv; the helper takes it over a pipe), lookup is environment, keyring, `.env`, and tests grep logs, the sent ledger, output and tracebacks for it. The 0600 check on `.env` is not built; portal tokens are not stored yet. |
 | Ya-Bro's own IPC | Local abuse by other processes | D-Bus methods are narrow, typed and accept no code. Actuator accepts only policy-signed single actions from core (sender check on the unique bus name). |
 
 **2. Data flows**

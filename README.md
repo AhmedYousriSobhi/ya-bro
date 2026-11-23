@@ -115,7 +115,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 | **Words** | `persona say \| list \| lint \| style` (preview and review what the bro says) |
 | **Measure** | `eval pointing`, `eval struggle [--sweep]` |
 
-Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. `ANTHROPIC_API_KEY` (in your environment or a git-ignored `.env`) is what `broctl ask` uses; `broctl doctor` only checks that it is present, never its value. `[brain] model = "..."` and `max_calls` in `config.toml` choose the model and cap the calls per task.
+Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` for plain lines); see [DEVELOPMENT.md](docs/DEVELOPMENT.md) for plans and settings. The API key `broctl ask` uses is looked up in your environment (`ANTHROPIC_API_KEY`), then your system keyring (Secret Service: GNOME Keyring, KWallet), then a git-ignored `.env`. Store it once with `broctl key set` (hidden prompt, never on the command line); `broctl key status` says whether one is set and where it comes from, `broctl key clear` removes it, and `broctl doctor` only says present or missing, never the value. `[brain] model = "..."` and `max_calls` in `config.toml` choose the model and cap the calls per task.
 
 ## Documentation
 

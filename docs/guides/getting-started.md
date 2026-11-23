@@ -90,10 +90,13 @@ Try pressing a wrong key on purpose: the bro teases you and waits for you to und
 ## Ask in plain words
 
 ```bash
-export ANTHROPIC_API_KEY=...        # or put it in a git-ignored .env file
+uv run broctl key set               # hidden prompt; the key goes into your system keyring
+uv run broctl key status            # present or not, and where from (never the key itself)
 uv run broctl ask "multiply 7 by 6" --dry   # print the plan only
 uv run broctl ask "what is seven times six"  # walk through it
 ```
+
+Bro looks for the key in your environment (`ANTHROPIC_API_KEY`), then your keyring, then a git-ignored `.env` file, in that order. `broctl key set` needs a Secret Service (GNOME Keyring or KWallet running and unlocked) and the system `python3` with PyGObject; without one it says so and you can use the environment variable or `.env` instead. `broctl key clear` removes the stored key, and `broctl forget --everything` offers to as well (a key in `.env` or the environment is yours to delete).
 
 Bro first looks for a matching task in the app's knowledge pack (nothing is sent anywhere). If none fits, and you said yes to sending during `broctl setup`, it asks Claude. Each request carries your question, the names of the controls in the allowed app's window (secrets scrubbed), and the pack's notes, never a screenshot; `broctl sent` lists every request. Without a key or without your yes, only pack tasks answer. A plan Claude wrote is shown first (how many steps, and the first one): press **Next** to start or **Stop** to cancel. If a control it counted on is not there, Bro asks Claude again for the remaining steps. Anything risky is marked as yours to press.
 

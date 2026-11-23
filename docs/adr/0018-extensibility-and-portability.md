@@ -46,7 +46,7 @@ On other platforms, the equivalents of the Linux mechanisms are well known from 
    | `IdleSource` | Mutter IdleMonitor, ext-idle-notify, XScreenSaver | `CGEventSourceSecondsSinceLastEventType` | `GetLastInputInfo` |
    | `ShellHook` | bash/zsh/fish snippets → spool | same (zsh default) | PowerShell profile hook |
    | `Voice` | Wyoming services; PipeWire AEC | Wyoming; CoreAudio voice processing | Wyoming; WASAPI AEC |
-   | `SecretStore` | libsecret | Keychain | Credential Manager |
+   | `SecretStore` (as built: `keystore.Backend`, one API key, #5) | libsecret via a helper under the system python3 | Keychain | Credential Manager |
    | `Brain`, `Policy`, `Persona`, `StruggleDetector`, `PackRegistry` | OS-independent | same | same |
 
    The macOS and Windows columns are orientation only. They are unverified and would each get their own ADR at port time.

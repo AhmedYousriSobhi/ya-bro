@@ -20,7 +20,7 @@ gi.require_version("Gio", "2.0")
 from gi.repository import Gio, GLib  # noqa: E402
 
 from ya_bro import brain as brains  # noqa: E402
-from ya_bro import config, packs, plans, privacy  # noqa: E402
+from ya_bro import config, keystore, packs, plans, privacy  # noqa: E402
 from ya_bro.platform.gnome_adapters import (  # noqa: E402
     BRIDGE,
     PREFIX,
@@ -120,7 +120,7 @@ async def ask(goal: str, app: str, bridge: GnomeBridge) -> tuple[brains.Fallback
         return seen
 
     cfg = config.load(app)
-    key = brains.load_key()
+    key = brains.load_key(store=keystore.default_store())
     model = (
         brains.ClaudeBrain(
             key,

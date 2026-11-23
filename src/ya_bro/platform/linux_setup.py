@@ -15,7 +15,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ya_bro import dirs
+from ya_bro import dirs, keystore
 
 EXT_UUID = "ya-bro@ahmedyousrisobhi.github.io"
 SCHEMA_IFACE = "org.gnome.desktop.interface"
@@ -98,20 +98,31 @@ def extension_state(runner: Runner) -> Check:
     return Check("extension", "ok" if state == 1 else "warn", name)
 
 
-def api_key(env: dict[str, str]) -> Check:
-    present = bool(env.get("ANTHROPIC_API_KEY"))  # never print the value
-    return Check("api key", "ok" if present else "warn", "present" if present else "missing")
+def api_key(
+    env: dict[str, str],
+    store: keystore.Backend | None = None,
+    dotenv: Path | None = None,
+) -> Check:
+    found = keystore.find(env, dotenv, store)  # never print the value
+    if not found:
+        return Check("api key", "warn", "missing", "run `broctl key set`")
+    return Check("api key", "ok", f"present ({found.source})")
 
 
-def run_all(env: dict[str, str] | None = None, runner: Runner | None = None) -> list[Check]:
+def run_all(
+    env: dict[str, str] | None = None,
+    runner: Runner | None = None,
+    store: keystore.Backend | None = None,
+) -> list[Check]:
     runner = runner or run
+    real = env is None  # a caller that hands in an environment gets no `.env` lookup (hermetic)
     env = dict(os.environ) if env is None else env
     return [
         session_type(env),
         *a11y_bus(runner),
         extension_state(runner),
         allowed_apps_check(runner),
-        api_key(env),
+        api_key(env, store, Path(".env") if real else Path(os.devnull)),
     ]
 
 
