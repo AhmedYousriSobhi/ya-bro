@@ -20,7 +20,8 @@ Legend: done · in progress · todo
 ## Log
 ### 2026-11-23: #3 docked overlay (first part)
 Done: `DockedOverlay` (GTK4 bubble window, same Overlay contract, Esc and close are Stop, RTL direction), `broctl show --docked`, real-frame test (real clicks, a mutation fails it). Found: the GLib asyncio loop does not service GTK's Wayland source while sleeping, so the overlay drives the context itself.
-Not done: automatic fallback on a missing extension, the GTK ask window, the Arabic bubble was not looked at on a real frame, focus behaviour (presenting the window takes focus from the app being shown, which a docked mode may not want), KWin layer-shell. #3 stays open.
+Then the ask window (`broctl ask` with no goal; real-frame test).
+Not done: automatic fallback on a missing extension (it would have no window list, so AT-SPI scope could not be enforced), a hotkey for the ask window, the Arabic bubble was not looked at on a real frame, focus behaviour (presenting the window takes focus from the app being shown, which a docked mode may not want), KWin layer-shell. #3 stays open.
 
 ### 2026-11-23: #2 spike S2, first AT-SPI coverage run
 Done: `tests/fixtures/shell_atspi_coverage.py` (whole-tree census per role: found, named, rect in window) and [S2 findings](research/spikes/S2-atspi-coverage.md); LibreOffice Writer measured (names near complete; most nodes hidden), then VS Code (tree present and named once `--force-renderer-accessibility` is on; its window id is `com.microsoft.VSCode`, not the `.desktop` id, so allowing `code` shows nothing). `YB_UNSAFE=1` for `headless-shell.sh` lets a test list windows to find such ids.

@@ -72,6 +72,13 @@ async def run(
     if not app:
         print("no allowed window is open; open the app you allowed (broctl apps list)")
         return 1
+    if plan is None and not goal:
+        from ya_bro.platform.ask_window import AskWindow
+
+        goal = await AskWindow().get() or ""
+        if not goal:
+            print("cancelled")
+            return 0
     if plan is None:
         try:
             cascade, plan = await ask(goal, app, bridge)
@@ -164,13 +171,18 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="broctl show")
     ap.add_argument("plan", type=Path, nargs="?")
     ap.add_argument("--app", default="")
-    ap.add_argument("--ask", default="", metavar="GOAL", help="plan from plain words instead")
+    ap.add_argument(
+        "--ask",
+        default="",
+        metavar="GOAL",
+        help="plan from plain words (empty: open the ask window)",
+    )
     ap.add_argument("--dry", action="store_true", help="with --ask: print the plan and stop")
     ap.add_argument("--do-it", action="store_true", help="press the controls itself (R0/R1)")
     ap.add_argument("--docked", action="store_true", help="bubble in a plain window, no ring")
     args = ap.parse_args(argv)
-    if bool(args.plan) == bool(args.ask):
-        ap.error("give a plan file or --ask GOAL")
+    if args.plan and args.ask:
+        ap.error("give a plan file or --ask GOAL, not both")
     token = sys.stdin.readline().strip()
     return asyncio.run(
         run(args.plan, args.app, token, args.ask, args.dry, args.do_it, args.docked),
