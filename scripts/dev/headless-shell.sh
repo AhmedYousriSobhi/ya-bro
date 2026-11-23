@@ -64,7 +64,7 @@ if [ "${YB_DEVKIT:-0}" = 1 ]; then
   [ -n "$HOST_WL" ] && [ -S "$HOST_RT/$HOST_WL" ] || { echo "devkit mode needs a running Wayland session" >&2; exit 1; }
   WAYLAND_DISPLAY="$HOST_RT/$HOST_WL" gnome-shell --devkit --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) >$T/shell.log 2>&1 &
 else
-  gnome-shell --headless --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) --virtual-monitor ${YB_MONITOR:-1280x800} >$T/shell.log 2>&1 &
+  gnome-shell --headless $([ "${YB_UNSAFE:-0}" = 1 ] && echo --unsafe-mode) --wayland --wayland-display=yabro-test $([ "${YB_X11:-0}" = 1 ] || echo --no-x11) --virtual-monitor ${YB_MONITOR:-1280x800} >$T/shell.log 2>&1 &
 fi
 SHELL_PID=$!
 for i in $(seq 1 60); do
