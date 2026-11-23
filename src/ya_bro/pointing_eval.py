@@ -184,10 +184,10 @@ async def _run_file(path: Path) -> list[Result]:
     return out
 
 
-def run(directory: Path) -> Report:
-    files = sorted(Path(directory).glob("*.json"))
+def run(directory: Path, pattern: str = "*.json") -> Report:
+    files = sorted(Path(directory).glob(pattern))
     if not files:
-        raise EvalError(f"no snapshots in {directory}")
+        raise EvalError(f"no snapshots matching {pattern} in {directory}")
     report = Report()
     for path in files:
         report.results += asyncio.run(_run_file(path))

@@ -12,6 +12,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
 
+from ya_bro import grounding
+from ya_bro.grounding import Tier
 from ya_bro.interfaces import CompositorBridge, Overlay, Perception, Policy
 from ya_bro.tone import Tone
 from ya_bro.types import Mode, Plan, Rect, Step
@@ -86,13 +88,18 @@ class StepLoop:
         async for event in self._overlay.events():
             self._events.put_nowait(event)
 
-    async def _locate(self, step: Step, app_id: str) -> Rect | None:
+    async def _locate(self, step: Step, app_id: str) -> tuple[Rect | None, Tier]:
         if step.target is None:
-            return None
-        found = await self._perception.find(app_id, step.target.role, step.target.name)
-        if not found:
-            return None
-        return await self._perception.locate(found[0])
+            return None, Tier.NONE
+        window = await self._bridge.focused_window()
+        p = await grounding.point(
+            self._perception,
+            app_id,
+            step.target.role,
+            step.target.name,
+            window.rect if window else None,
+        )
+        return p.rect, p.tier
 
     async def _satisfied(self, step: Step, app_id: str) -> bool:
         if step.expect is None:
@@ -110,7 +117,9 @@ class StepLoop:
         refs = await self._perception.find(app_id, e.role, e.name)
         return tuple([await self._perception.read_text(r) for r in refs])
 
-    def _text(self, step: Step, rect: Rect | None, count: str) -> str:
+    def _text(self, step: Step, rect: Rect | None, count: str, tier: Tier = Tier.HIGH) -> str:
+        if step.target is not None and rect is not None and tier is Tier.MEDIUM:
+            return f"{count} {self._tone.unsure(step.target.name)} {step.narration}"
         if step.target is None or rect is not None:
             return f"{count} {step.narration}"
         return f"{count} {self._tone.cant_find(step.target.name)}"
@@ -174,8 +183,8 @@ class StepLoop:
                     changed_since, mismatch, mismatch_text = None, False, None
                     if why_is_mistake:  # the mistake was undone: its explanation no longer applies
                         extra, shown, why_is_mistake = "", None, False
-                rect = await self._locate(step, app_id)
-                text = extra or self._text(step, rect, count)
+                rect, tier = await self._locate(step, app_id)
+                text = extra or self._text(step, rect, count, tier)
                 if predone and not extra:
                     text = f"{count} {self._tone.pre_done()}"
                 if mismatch and not extra:

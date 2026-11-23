@@ -53,11 +53,19 @@ def score(want: str, got: str) -> float:
     return 1.0 if a == b else 0.9 * SequenceMatcher(None, a, b).ratio()
 
 
-def _usable(rect: Rect | None) -> bool:
-    return rect is not None and rect.w > 0 and rect.h > 0
+def _usable(rect: Rect | None, bounds: Rect | None) -> bool:
+    """ADR-0004 sanity: a real size, and (when the window is known) its centre inside the window."""
+    if rect is None or rect.w <= 0 or rect.h <= 0:
+        return False
+    if bounds is None:
+        return True
+    cx, cy = rect.center
+    return bounds.x <= cx < bounds.x + bounds.w and bounds.y <= cy < bounds.y + bounds.h
 
 
-async def point(perception: Perception, app_id: str, role: str, name: str) -> Pointing:
+async def point(
+    perception: Perception, app_id: str, role: str, name: str, bounds: Rect | None = None
+) -> Pointing:
     scored = sorted(
         ((score(name, ref.name), ref) for ref in await perception.find(app_id, role)),
         key=lambda pair: -pair[0],
@@ -65,7 +73,7 @@ async def point(perception: Perception, app_id: str, role: str, name: str) -> Po
     scored = [pair for pair in scored if pair[0] >= MIN_SCORE]
     for i, (best, ref) in enumerate(scored[:_TRY]):
         rect = await perception.locate(ref)
-        if not _usable(rect):
+        if not _usable(rect, bounds):
             continue
         rest = [s for j, (s, _) in enumerate(scored) if j != i]
         margin = best - max(rest, default=0.0)

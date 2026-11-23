@@ -26,7 +26,7 @@ Platform: **Linux only** for now. macOS/Windows are possible later, so keep OS-s
 - `extension/` — Ya-Bro GNOME Shell extension, bridge + overlay (created by the GNOME extension issue, ADR-0023)
 - `broctl` — the control CLI (`broctl <noun> <verb>`, ADR-0024, `src/ya_bro/cli.py`); management commands go here, not under `ya-bro`
 - `src/ya_bro/` — source (interfaces, types, steps (the Show-me loop, ADR-0026), plans (TOML plans), packs (app knowledge, ADR-0027), grounding (pointing tiers), pointing_eval (the pointing eval harness), tone (the bro's lines), policy (risk tiers, ADR-0014), redact (secret scrubbing), config, logs, targets, token_server, ipc, dirs, cli; OS code only under `platform/`)
-- `evals/` — labelled eval sets (`evals/pointing/`, run with `broctl eval pointing`; the synthetic ones come from `scripts/dev/make_pointing_corpus.py`)
+- `evals/` — labelled eval sets (`evals/pointing/`, run with `broctl eval pointing`; `synthetic-*` come from `scripts/dev/make_pointing_corpus.py`, `recorded-*` from real apps via `tests/fixtures/shell_pointing.py` with `YB_SNAP_DIR=evals/pointing`)
 - `examples/plans/` — runnable Show-me plans (`broctl show examples/plans/calculator.toml`)
 - `docs/assets/` — images and the Show-me reference GIF (regenerate with `scripts/dev/record_demo.py`)
 - `tests/` — unit tests, `tests/fakes/` (one fake per interface), `tests/fixtures/` (AT-SPI fixture apps)

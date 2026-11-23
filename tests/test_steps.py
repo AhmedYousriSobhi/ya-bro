@@ -393,3 +393,35 @@ def test_tone_lines_cap_screen_text_and_rotate():
     assert len(seen) == 3  # three different lines in a row
     assert "warned" not in Tone(0).mismatch("7", "5")
     assert Tone(0).why_mismatch("7", "", "").startswith("The screen shows something else")
+
+
+async def test_close_but_not_exact_name_is_pointed_at_with_a_hedge():
+    near = ElementRef(APP, "button", "Create…")
+    perception, overlay, loop, plan = build({near: Rect(10, 20, 80, 30)}, [step()])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    _, rect, text = overlay.calls[0]
+    assert rect == Rect(10, 20, 80, 30)
+    assert text == "(1/1) I think it's this one, “Create”: Click Create."
+    task.cancel()
+
+
+async def test_two_elements_with_the_same_name_get_the_hedge_too():
+    twin = ElementRef(APP, "button", "Create", "other")
+    perception, overlay, loop, plan = build(
+        {CREATE: Rect(10, 20, 80, 30), twin: Rect(10, 80, 80, 30)}, [step()]
+    )
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    assert "I think it's this one" in overlay.calls[0][2]
+    task.cancel()
+
+
+async def test_a_ring_outside_the_focused_window_is_never_drawn():
+    elements = {CREATE: Rect(2000, 20, 80, 30)}  # centre is off the 800x600 window
+    perception, overlay, loop, plan = build(elements, [step()])
+    task = asyncio.create_task(loop.run(plan, APP))
+    await settle()
+    _, rect, text = overlay.calls[0]
+    assert rect is None and "can't find" in text
+    task.cancel()

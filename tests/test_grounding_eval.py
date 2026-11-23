@@ -121,7 +121,7 @@ def test_empty_folder_is_refused(tmp_path):
 
 
 def test_shipped_corpus_is_300_cases_in_both_locales_and_passes():
-    r = pointing_eval.run(CORPUS)
+    r = pointing_eval.run(CORPUS, "synthetic-*.json")
     assert r.total == 300
     assert set(r.by("locale")) == {"en", "ar"} and len(r.by("app")) == 6
     assert {"exact", "drift", "duplicate", "missing", "spelling"} <= set(r.by("kind"))
@@ -148,3 +148,29 @@ def test_broctl_eval(tmp_path, capsys):
     snapshot(tmp_path, [{"id": "1", "role": "button", "name": "Mirror", "truth": "a"}])
     assert cli.main(["eval", "pointing", "--dir", str(tmp_path), "-v"]) == 1
     assert "miss app/en/1" in capsys.readouterr().out
+
+
+def test_a_rectangle_whose_centre_is_outside_the_window_is_not_pointed_at():
+    from ya_bro.types import Rect
+
+    els = [
+        el("far", "button", "Go", (5000, 5000, 50, 20)),
+        el("in", "button", "Gone", (10, 10, 50, 20)),
+    ]
+    perception = SnapshotPerception("app", els)
+    window = Rect(0, 0, 800, 600)
+    p = asyncio.run(grounding.point(perception, "app", "button", "Go", window))
+    assert p.ref.path == "in" and p.tier is Tier.MEDIUM  # the exact one is off-window: skipped
+    only = SnapshotPerception("app", els[:1])
+    assert asyncio.run(grounding.point(only, "app", "button", "Go", window)).tier is Tier.NONE
+    assert asyncio.run(grounding.point(only, "app", "button", "Go")).tier is Tier.HIGH
+
+
+def test_recorded_snapshots_are_real_trees_from_three_apps_and_pass():
+    files = sorted(CORPUS.glob("recorded-*.json"))
+    assert len(files) >= 3
+    for f in files:
+        assert json.loads(f.read_text())["source"] == "recorded"
+    r = pointing_eval.run(CORPUS, "recorded-*.json")
+    assert r.total >= 150 and r.passes and not r.blocks_release
+    assert {a for a in r.by("app")} >= {"org.gnome.Calculator", "org.gnome.Settings"}
