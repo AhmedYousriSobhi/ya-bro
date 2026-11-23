@@ -45,6 +45,11 @@ max_humour = 0
 [moments.risk_confirm]     # R2/R3 confirmations, anything about credentials or money
 max_humour = 0
 sensitive = true
+[moments.act_confirm]      # Do-it, R2: ask before pressing it for the user
+max_humour = 0
+sensitive = true
+[moments.act_failed]       # Do-it did not work twice: handing the step back
+max_humour = 0
 
 # Topics humour never touches and generated lines never mention (whole words, lower case).
 [banned]

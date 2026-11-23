@@ -80,7 +80,7 @@ def effective_risk(step: Step, pack_risk: Risk = Risk.R0, command: str = "") -> 
 
 
 class LocalPolicy:
-    """Decides each step. `do_it` stays off until the actuator exists (#27).
+    """Decides each step. `do_it` is on only when the caller has an actuator and the app allows it.
 
     `packs` may raise an element's risk or mark it secret; they never lower anything (ADR-0012 §9).
     """
@@ -111,7 +111,7 @@ class LocalPolicy:
                 return PolicyDecision(True, needs_confirmation=True, reason="the user's own click")
             return PolicyDecision(True)
         if not self._do_it:
-            return PolicyDecision(False, reason="only Show-me is built")
+            return PolicyDecision(False, reason="Do-it is off")
         if secret:
             return PolicyDecision(False, reason="the bro never acts on a password field")
         if risk is Risk.R3:
@@ -124,4 +124,4 @@ class LocalPolicy:
 
 
 class ShowMePolicy(LocalPolicy):
-    """The Show-me loop's policy: Do-it stays off."""
+    """The Show-me loop's policy: Do-it off."""

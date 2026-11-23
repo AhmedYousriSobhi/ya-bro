@@ -464,3 +464,25 @@ text = "That control isn't on this screen. Give me a moment to work out another 
 moment = "replanning"
 humour = 0
 text = "I can't find that one here. Let me look again and make a new plan."
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "I'll press “{name}” for you. OK?"
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "Press “{name}” for you now?"
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "That didn't work, so it's yours: I'll point and you press it."
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "I couldn't do that one. Over to you."

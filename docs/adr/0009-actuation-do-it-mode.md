@@ -1,6 +1,6 @@
 # ADR-0009: Actuation (Do-it mode)
 
-- Status: Proposed
+- Status: Proposed (AT-SPI backend and the Do-it step loop built in #27, `broctl show --do-it`; the portal + libei path and text entry are not)
 - Date: 2026-11-20
 - Issue: #13
 - Depends on: ADR-0002, ADR-0003, ADR-0007, ADR-0014
