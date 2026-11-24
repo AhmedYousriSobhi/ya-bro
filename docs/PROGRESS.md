@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #124 tab completion
+Done: `broctl completion bash|zsh` generated from the parser, setup offers to install it, real-bash tests with a mutation.
+Not done: value completion (pack, target, app ids), fish, a live shell trial.
+
 ### 2026-11-24: #129 tell the user where the tool lives
 Done: `dir` on targets, `targets allow --dir`, the setup question, the go-to-folder first step, tests incl. the real frame.
 Not done: guessing the folder, a live run.

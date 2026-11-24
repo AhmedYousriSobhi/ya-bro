@@ -69,6 +69,7 @@ uv tool install --editable .   # puts `broctl` on your PATH (~/.local/bin): no m
 broctl setup                 # pick tools and/or one app; the two required steps default to yes (`--yes` skips asking)
 broctl load           # loads the extension without logging out (3 steps it prints)
                              # after an update: `broctl setup`, then log out and in (`broctl doctor` says when)
+# tab completion: `broctl setup` offers it; or `broctl completion bash > ~/.local/share/bash-completion/completions/broctl`
 gnome-calculator &           # then press C, and:
 broctl show examples/plans/calculator.toml
 ```
