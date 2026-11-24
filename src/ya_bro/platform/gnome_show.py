@@ -28,6 +28,7 @@ from ya_bro import (  # noqa: E402
     privacy,
     shell_command,
     targets,
+    terminal,
     token_server,
 )
 from ya_bro.command_watch import CommandWatch  # noqa: E402
@@ -192,6 +193,9 @@ async def _hover(token: str = ""):
             "do; embedded terminals such as VS Code's or an Electron app's do not: allow that app "
             "with `broctl apps allow <id>`)"
         )
+        kind = terminal.terminal_kind(dict(os.environ))
+        if kind != "window":
+            why = f"{kind}: {terminal.EMBEDDED_HINT}. Fix: {terminal.EMBEDDED_FIX}"
     except GLib.Error as e:
         why = f"the Bro extension is not reachable ({e.message}); see `broctl doctor`"
     return DockedOverlay(), _NoBridge(), False, why
