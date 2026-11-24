@@ -134,7 +134,7 @@ Run `broctl doctor` first; paste its output into an issue if you are stuck (it i
 |---|---|
 | `cannot reach the Bro extension` | Not loaded in this session: log out and in, then `broctl doctor` |
 | doctor says **extension code** is old | You updated Bro: run `broctl setup`, then log out and in |
-| The bubble is a plain box with no face, not beside the terminal | Run `broctl doctor`: if its `terminal` line warns, you are in a panel inside another app; open Ptyxis or GNOME Terminal as its own window. Otherwise the terminal's title did not reach Bro: check you ran `broctl hook install` and opened a **new** terminal; read `~/.local/state/ya-bro/companion.log` |
+| The bubble is a plain window, not beside the terminal | Run `broctl doctor`: if its `terminal` line warns, you are in a panel inside another app; open Ptyxis or GNOME Terminal as its own window. Otherwise the terminal's title did not reach Bro: check you ran `broctl hook install` and opened a **new** terminal; read `~/.local/state/ya-bro/companion.log` |
 | `./scripts/...: No such file or directory` | You were in the wrong folder: run `broctl targets allow <tool> --command <cmd> --dir <folder>` so the walk-through starts with `cd` |
 | `no allowed window is open` | Open the allowed app; `broctl apps list` shows what is allowed |
 | Nothing appears and the run says `step_paused` | Click the allowed app's window: the ring shows only on the focused window |
