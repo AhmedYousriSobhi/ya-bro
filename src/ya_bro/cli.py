@@ -533,7 +533,7 @@ def _load(wait_seconds: int = 120) -> int:
     return 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="broctl", description="Control the Bro sidekick")
     parser.add_argument("--version", action="version", version=f"broctl {__version__}")
     sub = parser.add_subparsers(dest="noun", metavar="<command>")
@@ -668,7 +668,18 @@ def main(argv: list[str] | None = None) -> int:
     lst.add_argument("--lang", choices=("en", "ar"), default="en")
     pv.add_parser("lint", help="check the persona data (exit 1 on a problem)")
     pv.add_parser("style", help="print the tone guide that goes in the Brain's prompt")
-    args = parser.parse_args(argv)
+    comp = sub.add_parser("completion", help="print the tab-completion script for your shell")
+    comp.add_argument("shell", choices=("bash", "zsh"))
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    if args.noun == "completion":
+        from ya_bro import completion
+
+        print(completion.script(build_parser(), args.shell), end="")
+        return 0
 
     if args.noun == "persona":
         return _persona(args)
@@ -731,5 +742,5 @@ def main(argv: list[str] | None = None) -> int:
         return _apps(args)
     if args.noun == "targets":
         return _targets(args)
-    parser.print_help()
+    build_parser().print_help()
     return 0

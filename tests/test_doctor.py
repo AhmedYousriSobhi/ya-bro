@@ -49,6 +49,7 @@ def test_extension_error_state():
 
 def _quiet(monkeypatch, tmp_path):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     monkeypatch.setattr(ls, "extension_target", lambda: tmp_path / "ext")
     monkeypatch.setattr(ls, "extension_source", lambda: None)
 
@@ -58,7 +59,7 @@ def test_setup_steps_default_to_yes_and_n_skips(tmp_path, monkeypatch):
     runner = fake({})
     out = []
     # consent: no, then nothing chosen, accessibility: Enter (yes), extension: n
-    answers = iter(["", "", "", "n"])
+    answers = iter(["", "", "", "n", ""])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[], tools=[])
     assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
     assert sum(x.startswith("skipped") for x in out) == 1
@@ -139,7 +140,7 @@ def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
     out = []
     gimp = desktop_apps.DesktopApp("org.gimp.GIMP", "GIMP", "")
     # consent n; "1" = an installed app; GIMP is in the list; two steps default yes
-    answers = iter(["", "1", "1", "", ""])
+    answers = iter(["", "1", "1", "", "", ""])
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[gimp], tools=[])
     assert any("see: org.gimp.GIMP" in x for x in out)
     assert any("1. GIMP" in x for x in out)  # the list is shown without typing a search first
@@ -174,7 +175,9 @@ def test_a_tool_is_allowed_as_a_target_not_an_app(tmp_path, monkeypatch):
     out = []
     wb = doctor.Tool("workbench", "workbench", ("benchctl",))
     # consent n; pick the tool (1); web page; accessibility and extension default yes
-    answers = iter(["", "1", "http://127.0.0.1:8080", "", "", ""])  # web page, folder: none
+    answers = iter(
+        ["", "1", "http://127.0.0.1:8080", "", "", "", ""]
+    )  # web page, folder, a11y, ext, completion
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[], tools=[wb])
     t = targets.load_all()[0]
     assert (t.id, t.origins, t.commands) == ("workbench", ("http://127.0.0.1:8080",), ("benchctl",))
@@ -189,7 +192,7 @@ def test_a_bad_tool_address_is_refused_without_saving(tmp_path, monkeypatch):
     _quiet(monkeypatch, tmp_path)
     out = []
     wb = doctor.Tool("workbench", "workbench", ("benchctl",))
-    answers = iter(["", "1", "http://x/path?secret=1", "", "", ""])
+    answers = iter(["", "1", "http://x/path?secret=1", "", "", "", ""])
     doctor.setup(ask=lambda _: next(answers), runner=fake({}), say=out.append, apps=[], tools=[wb])
     assert targets.load_all() == [] and any("not saved" in x for x in out)
 
@@ -354,7 +357,9 @@ def test_setup_asks_where_a_tool_runs_and_saves_the_folder(tmp_path, monkeypatch
     work = tmp_path / "opti-sim"
     work.mkdir()
     wb = doctor.Tool("workbench", "workbench", ("benchctl",))
-    answers = iter(["", "1", "", str(work), "", ""])  # consent n, tool, no web page, folder, steps
+    answers = iter(
+        ["", "1", "", str(work), "", "", ""]
+    )  # consent n, tool, no web page, folder, steps
     doctor.setup(
         ask=lambda _: next(answers), runner=fake({}), say=lambda _: None, apps=[], tools=[wb]
     )

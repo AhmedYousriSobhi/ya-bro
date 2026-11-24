@@ -198,6 +198,14 @@ def setup(
             say(f"skipped: {name}")
     if app:
         say(ls.allow_app(runner, app))
+    reply = "y" if assume_yes else ask("Install tab completion for broctl in bash? [Y/n] ")
+    if reply.strip().lower() in ("", "y", "yes"):
+        from ya_bro import completion
+        from ya_bro.cli import build_parser
+
+        say(f"tab completion installed to {completion.install(build_parser())} (new shells)")
+    else:
+        say("skipped: tab completion (later: `broctl completion bash`)")
     say(
         "Next: log out and back in once (GNOME loads the extension at login), then `broctl doctor`."
     )
