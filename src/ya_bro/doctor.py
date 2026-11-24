@@ -156,13 +156,17 @@ def _allow_tool(ask: Callable[[str], str], say: Callable[[str], None], tool: Too
     web = ask(
         f"{tool.name}'s web page address, if any (Enter = none, e.g. http://127.0.0.1:8080): "
     ).strip()
+    folder = ask(
+        f"The folder where {tool.name}'s commands run (e.g. ~/projects/{tool.id}; Enter = none): "
+    ).strip()
     try:
-        path = targets.save(targets.Target(tool.id, (web,) if web else (), tool.commands))
+        path = targets.save(targets.Target(tool.id, (web,) if web else (), tool.commands, folder))
     except targets.TargetError as e:
         say(f"not saved: {e}")
         return False
     where = f"its page at {web} (only while that tab is active)" if web else "no web page"
-    say(f"{tool.name} allowed: command {', '.join(tool.commands)}, {where}. Saved in {path}.")
+    home = f", run from {folder}" if folder else ""
+    say(f"{tool.name} allowed: command {', '.join(tool.commands)}{home}, {where}. Saved in {path}.")
     say("  (the hook records only those command names; run `broctl hook install` if you have not)")
     return True
 

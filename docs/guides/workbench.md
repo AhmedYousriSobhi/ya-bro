@@ -16,7 +16,7 @@ Do [Getting started](getting-started.md) first (extension loaded, `broctl doctor
 
 ## 1. Bro beside your terminal (the main way)
 
-One-time setup. Install `broctl` once (`uv tool install --editable .` in the Bro checkout) and pick workbench as a **tool** in `broctl setup` (it asks for the web page address; do not allow Firefox or Chrome as an app, that exposes every window of the browser). Needs the extension loaded, see getting started; **the extension changed: run `broctl setup` to copy the new files, then log out and in (GNOME on Wayland keeps the code it loaded at login; `broctl load` only loads an extension that is not loaded yet, and `broctl doctor` shows "extension code" when yours is old)**):
+One-time setup. Install `broctl` once (`uv tool install --editable .` in the Bro checkout) and pick workbench as a **tool** in `broctl setup` (it asks for the web page address and the folder where workbench's commands run; do not allow Firefox or Chrome as an app, that exposes every window of the browser). Needs the extension loaded, see getting started; **the extension changed: run `broctl setup` to copy the new files, then log out and in (GNOME on Wayland keeps the code it loaded at login; `broctl load` only loads an extension that is not loaded yet, and `broctl doctor` shows "extension code" when yours is old)**):
 
 ```bash
 broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
@@ -26,6 +26,12 @@ Then, in that terminal:
 
 ```bash
 broctl ask "start the cluster" --pack workbench
+```
+
+Bro starts with a step that takes you to workbench's folder (`cd '<folder>'`, with Copy, Write it and Next if you are already there), because `./scripts/benchctl` only works from there. Tell it the folder once, in `broctl setup` or later:
+
+```bash
+broctl targets allow workbench --command benchctl --dir ~/path/to/workbench
 ```
 
 Use a terminal whose window title follows the shell (Ptyxis, GNOME Terminal and other VTE terminals). Terminals inside another app (VS Code's, or the Claude desktop app's) do not change their window title, so Bro cannot tell which window is the terminal: the bubble is then a plain window with Copy only, and `~/.local/state/ya-bro/companion.log` says why. For such a terminal allow the whole app with `broctl apps allow <id>` (it then sees that app's window position, not its content).
@@ -80,4 +86,4 @@ Revoke at any time: `broctl targets revoke workbench`. `broctl panic` stops ever
 1. Bro cannot point at elements on the web page yet (#31 `/api/state`, and web selectors in the pack format).
 2. **Yes** on the stuck bubble does not start a conversation or read the terminal.
 3. No Do-it for terminals or the page (#27 covers AT-SPI controls only).
-4. The pack's tasks assume you are in the workbench folder and use `./scripts/benchctl`; if `benchctl` is on your PATH the steps still say `./scripts/benchctl`.
+4. If `benchctl` is on your PATH the steps still say `./scripts/benchctl` (the folder step is skipped only when there is no folder set).
