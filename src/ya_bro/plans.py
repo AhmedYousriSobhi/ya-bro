@@ -16,12 +16,16 @@ risk = 0
 
 from __future__ import annotations
 
+import shlex
 import tomllib
+from dataclasses import replace
 from pathlib import Path
 
+from ya_bro import shell_command
 from ya_bro.types import ElementRef, Expect, Plan, Risk, Step
 
 MAX_STEPS = 50
+MAX_TEXT = 200
 
 
 class PlanError(ValueError):
@@ -68,6 +72,22 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
             if not isinstance(name, str) or not isinstance(text, str) or not (name or text):
                 raise PlanError(f"{where} expect: needs a name or a text")
             expect = Expect(e["role"], name, bool(e.get("appears", True)), text)
+        command = s.get("command", "")
+        if command and (not isinstance(command, str) or not shell_command.valid(command)):
+            raise PlanError(
+                f"{where}: command must be one printable line of at most 200 characters"
+            )
+        text = s.get("text", "")
+        if text and (
+            not isinstance(text, str)
+            or target is None
+            or len(text) > MAX_TEXT
+            or not text.isprintable()
+        ):
+            raise PlanError(
+                f"{where}: text needs a target and must be one printable line of at most "
+                f"{MAX_TEXT} characters"
+            )
         try:
             risk = Risk(int(s.get("risk", 0)))
         except ValueError as e:
@@ -81,6 +101,8 @@ def load(path: Path, app_id: str = "") -> tuple[Plan, str, list[str]]:
                 risk=risk,
                 expect=expect,
                 why=str(s.get("why", "")),
+                command=command,
+                text=text,
             )
         )
     keywords = [k.lower() for k in head.get("keywords", []) if isinstance(k, str)]
@@ -121,3 +143,18 @@ def rebind(plan: Plan, app_id: str) -> Plan:
         replace(s, target=replace(s.target, app_id=app_id)) if s.target else s for s in plan.steps
     ]
     return Plan(plan.goal, steps, plan.extents_offset)
+
+
+def with_folder_step(plan: Plan, name: str, folder: str) -> Plan:
+    """Commands such as `./scripts/benchctl` only work from the tool's folder: when the user told
+    Bro where that is (`broctl targets allow --dir`), the first step is to go there."""
+    first = next((s.command for s in plan.steps if s.command), "")
+    if not folder or not first.startswith("./"):
+        return plan
+    go = Step(
+        intent="go to the tool's folder",
+        narration=f"First go to the {name} folder (press Next if you are already there).",
+        command=f"cd {shlex.quote(folder)}",
+        why="The commands that follow are relative to that folder.",
+    )
+    return replace(plan, steps=[go, *plan.steps])

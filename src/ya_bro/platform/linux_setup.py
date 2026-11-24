@@ -11,11 +11,12 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ya_bro import dirs, keystore
+from ya_bro import dirs, keystore, terminal
 
 EXT_UUID = "ya-bro@ahmedyousrisobhi.github.io"
 SCHEMA_IFACE = "org.gnome.desktop.interface"
@@ -98,6 +99,60 @@ def extension_state(runner: Runner) -> Check:
     return Check("extension", "ok" if state == 1 else "warn", name)
 
 
+def _newest_mtime(root: Path) -> float:
+    # mtime, not ctime: copying files again (setup copies even unchanged ones) rewrites every ctime
+    # but keeps the mtime, so a re-run of setup does not look like new code.
+    # gschemas.compiled is rebuilt by every setup run and is not code the shell loads
+    files = (f for f in root.rglob("*") if f.is_file() and f.name != "gschemas.compiled")
+    return max((f.stat().st_mtime for f in files), default=0.0)
+
+
+def extension_code_check(
+    runner: Runner,
+    source: Path | None = None,
+    target: Path | None = None,
+    now: Callable[[], float] = time.time,
+) -> Check:
+    """Is the extension the shell runs the one in this checkout? GNOME on Wayland keeps the code it
+    loaded at login, and `broctl load` only says "already loaded", so an old copy goes unnoticed."""
+    source = source or extension_source()
+    target = target or extension_target()
+    if not target.is_dir():
+        return Check("extension code", "warn", "not installed", "run `broctl setup`")
+    if source is not None:
+        for f in sorted(source.rglob("*")):
+            if f.is_file() and f.name != "gschemas.compiled":
+                twin = target / f.relative_to(source)
+                if not twin.is_file() or twin.read_bytes() != f.read_bytes():
+                    return Check(
+                        "extension code",
+                        "warn",
+                        "the installed copy differs from this checkout",
+                        "run `broctl setup` (it copies the new files), then log out and in",
+                    )
+    rc, pid = runner(["pgrep", "-o", "-x", "gnome-shell"])
+    rc2, age = (
+        runner(["ps", "-o", "etimes=", "-p", pid.strip()]) if rc == 0 and pid.strip() else (1, "")
+    )
+    if rc2 == 0 and age.strip().isdigit() and _newest_mtime(target) > now() - int(age.strip()):
+        return Check(
+            "extension code",
+            "warn",
+            "installed after the running shell started, so the shell runs older code",
+            "log out and in (GNOME on Wayland cannot reload extension code)",
+        )
+    return Check("extension code", "ok", "current")
+
+
+def terminal_check(env: dict[str, str]) -> Check:
+    """Can Bro tell this terminal's window? Only a terminal in its own window that follows the
+    shell's title (VTE: Ptyxis, GNOME Terminal, Console) works without allowing its app."""
+    kind = terminal.terminal_kind(env)
+    if kind == "window":
+        return Check("terminal", "ok", "a VTE terminal window: Bro can sit beside it")
+    return Check("terminal", "warn", f"{kind}: {terminal.EMBEDDED_HINT}", terminal.EMBEDDED_FIX)
+
+
 def api_key(
     env: dict[str, str],
     store: keystore.Backend | None = None,
@@ -121,6 +176,7 @@ def run_all(
         session_type(env),
         *a11y_bus(runner),
         extension_state(runner),
+        *([terminal_check(env), extension_code_check(runner)] if real else []),  # this machine's
         allowed_apps_check(runner),
         api_key(env, store, Path(".env") if real else Path(os.devnull)),
     ]

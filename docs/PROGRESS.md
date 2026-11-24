@@ -15,9 +15,74 @@ Legend: done · in progress · todo
 | M5 Packs + terminal | in progress | #8 (format v1 and loader done, ADR-0027), #22 (workbench pack, terminal part done), #21 (bash hook, spool and VTE reading done), #31 |
 | M6 Struggle + persona | in progress | #9 (core detector, shell, idle and AT-SPI sources, and the offer bubble done; some signals open), #23 (persona done; nothing generates lines), #24 (replay eval done: 62 scenarios, passes the gates) |
 | M7 MVP hardening | in progress | #25 (consent screen, sent ledger, forget, panic, state dots done; wiring to a real request waits for #5), #26 (licence gate done) |
-| v0.15 Do-it / v0.2 KWin + voice | todo | #27, #28, #29, #30 |
+| v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #134 face in the plain window
+Done: the docked window draws `extension/assets/bro/<mood>.svg` beside the text, an unknown mood falls back to idle, real-frame check with a mutation.
+Not done: a live look at it.
+
+### 2026-11-24: #124 tab completion
+Done: `broctl completion bash|zsh` generated from the parser, setup offers to install it, real-bash tests with a mutation.
+Not done: value completion (pack, target, app ids), fish, a live shell trial.
+
+### 2026-11-24: #129 tell the user where the tool lives
+Done: `dir` on targets, `targets allow --dir`, the setup question, the go-to-folder first step, tests incl. the real frame.
+Not done: guessing the folder, a live run.
+
+### 2026-11-24: #127 core keeps the title token alive
+Done: `TerminalWriter.set_title`, a once-a-second keeper while a run lasts, nudge removed; probes on live Ptyxis (prompt emission stays, one-time title is replaced).
+Not done: a live run of the whole walk-through in Ptyxis, blink-free scoping (needs extension grace period).
+
+### 2026-11-24: #125 title token under Ubuntu's prompt
+Done: the token title is emitted from the end of PS1, the nudge reaches every idle terminal, tests use Ubuntu's prompt (hook and real frame, both with mutations).
+Not done: the live Ptyxis run after this fix, prompt frameworks that replace PS1, the face in the plain-window fallback.
+
+### 2026-11-24: #122 setup UX and a global broctl
+Done: app list instead of a typed search, tools from packs as targets in setup, browser warning, default-yes for the two required steps and `--yes`, `uv tool install --editable .`, docs.
+Not done: a package for installing without a checkout, running-apps list, a live run of the new setup.
+
+### 2026-11-24: #131 which terminal am I in
+Done: `broctl doctor` `terminal` line (VTE window or embedded panel, with the fix), the plain-window message names the kind and the fix, the guide explains how to tell (`echo $VTE_VERSION`), doctor "extension code" uses mtimes so a re-run of setup is not a false alarm.
+Not done: a live run in Ptyxis.
+
+### 2026-11-24: #120 stale extension and fallback reason
+Done: doctor "extension code" check, `broctl load` refuses "already loaded" for old code, the pack walk-through says why it is not beside a terminal, docs corrected. Found by the maintainer's live run: old installed extension, old loaded code, and an Electron panel terminal.
+Not done: the live Ptyxis trial of #115/#117, a way to scope embedded terminals other than allowing the whole app.
+
+### 2026-11-24: #27 Do-it text entry
+Done: `Step.text`, validation, R2 confirm that shows the text, secret and password refusal, `EditableText` entry that never overwrites; unit tests and a real GTK4 run with a mutation.
+Not done: portal + libei, multi-line and rich text, Arabic in a real app, undo offer, live desktop.
+
+### 2026-11-23: #117 terminal scoped by a title token
+Done: the hook puts a per-run token in the terminal title, core pushes it to the extension and nudges the idle terminal, so the bubble hovers with no `apps allow` for the terminal; pty tests and a real-frame run with no app allowed.
+Not done: Ptyxis honouring OSC 2 for the window title (unverified), zsh and fish, the live desktop.
+
+### 2026-11-23: #115 terminal companion
+Done: plan `command`, snippet and Copy/Write it buttons (extension, GNOME and docked overlays), hook idle marker and `bind -x` insert, guarded `TerminalWriter`, `CommandWatch` auto-advance, hover beside an allowed terminal, background companion; 7 real-pty tests with mutations, 7 loop tests, and a real VTE run in the isolated shell with screenshots.
+Not done: the live desktop (needs `broctl load` for the new extension), zsh and fish, Ptyxis and Console, typing without the hook, a mutation run of the real-frame test, Write it with two idle terminals.
+
+### 2026-11-23: running Bro on workbench
+Done: `broctl ask GOAL --pack workbench` (plain window, pack task, user presses Next; real-frame test) and `docs/guides/workbench.md`. Found: there was no way to run the pack at all: the workbench pack matches only `argv0`, so a terminal window never selects it, and `broctl show` needs an allowed focused window, which a CLI tool never has.
+Not done: pointing at web page elements (#31, selectors), explaining an error code when the user accepts the stuck offer, Do-it on terminals, zsh/fish, Firefox, the web token path was not re-run on the live desktop here (it was verified with real Chrome in #61).
+
+### 2026-11-23: #18 CI draft corrected (not active)
+Done: the unit-test line in `docs/ci/ci.yml` now uses the same marker selection as `scripts/check.sh` (the old `-m "not atspi"` would also have run the gnome, keyring and live tests, which cannot work on a runner).
+Not done: **CI is still not active**: pushing `.github/workflows/` needs a token with `workflow` scope and the current one has `repo`, `read:org` and `gist` only (checked with `gh auth status`); the maintainer must copy the file or widen the token. The GNOME headless job and the 48/49/51 version matrix (#30) are not written: they need a container with each Shell version and I could not test one here. #18 stays open.
+
+### 2026-11-23: #3 docked overlay (first part)
+Done: `DockedOverlay` (GTK4 bubble window, same Overlay contract, Esc and close are Stop, RTL direction), `broctl show --docked`, real-frame test (real clicks, a mutation fails it). Found: the GLib asyncio loop does not service GTK's Wayland source while sleeping, so the overlay drives the context itself.
+Then the ask window (`broctl ask` with no goal; real-frame test).
+Not done: automatic fallback on a missing extension (it would have no window list, so AT-SPI scope could not be enforced), a hotkey for the ask window, the Arabic bubble was not looked at on a real frame, focus behaviour (presenting the window takes focus from the app being shown, which a docked mode may not want), KWin layer-shell. #3 stays open.
+
+### 2026-11-23: #2 spike S2, first AT-SPI coverage run
+Done: `tests/fixtures/shell_atspi_coverage.py` (whole-tree census per role: found, named, rect in window) and [S2 findings](research/spikes/S2-atspi-coverage.md); LibreOffice Writer measured (names near complete; most nodes hidden), then VS Code (tree present and named once `--force-renderer-accessibility` is on; its window id is `com.microsoft.VSCode`, not the `.desktop` id, so allowing `code` shows nothing). `YB_UNSAFE=1` for `headless-shell.sh` lets a test list windows to find such ids.
+Not done: Firefox (snap refuses a private run), GIMP, Inkscape, KDE Settings (not installed); no position accuracy check; no go/no-go on the vision fallback. #2 stays open.
+
+### 2026-11-23: #27 Do-it through AT-SPI actions
+Done: `StepLoop` takes an `Actuator`; `broctl show --do-it` (needs `[do_it] allowed`) presses controls itself via `AtspiActuator` (narrate, pointer, pause, press, verify, one retry), with `LocalPolicy(do_it=True)` deciding each step: R2 asks first, R3, secrets, dangerous names and any doubtful or missing control go back to Show-me. Stop aborts before and during a press. 12 loop tests on fakes; a real-Calculator run in the isolated shell presses 7 × 6 = 42 with no injected click, and a mutation (an actuator that cannot press) fails it.
+Not done: **portal + libei injection (S7, drags, canvas, apps without AT-SPI actions)**, text entry, undo offer, pacing setting, the 30-action coverage run (GIMP, LibreOffice, Settings, Firefox), a `do_it` toggle command (the config key is set by hand); only GTK4 Calculator was run for real; the double-press risk if an app's `do_action` hangs and the user retries is untested. #27 stays open.
+
 ### 2026-11-23: struggle sources and offer bubble joined
 Done: one watcher for both (`gnome_offers` takes all sources; `gnome_struggle` is the `--print-only` twin), the Perceiver role for both, and `tests/test_gnome_offer_atspi.py` (real GTK3 error dialogs to bubble to click). Found by it: the AccessDenied described in CHANGELOG, which no earlier test could see because the harness itself owned Core.
 Not done: only the error-dialog path is proven end to end on a real frame; menu thrash, dialog bounce and undo reach the same host but their bubble has not been drawn in a real test.

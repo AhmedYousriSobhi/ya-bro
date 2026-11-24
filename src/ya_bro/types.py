@@ -66,6 +66,10 @@ class Step:
     risk: Risk = Risk.R0
     expect: Expect | None = None
     why: str = ""
+    command: str = (
+        ""  # a shell command the user is to run; shown as a snippet (see ya_bro.shell_command)
+    )
+    text: str = ""  # text for Do-it to enter into the target field (one printable line, #27)
 
 
 @dataclass(frozen=True, slots=True)

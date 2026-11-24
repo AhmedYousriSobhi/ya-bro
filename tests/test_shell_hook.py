@@ -2,6 +2,7 @@
 
 import os
 import pty
+import re
 import select
 import shutil
 import stat
@@ -17,6 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "shell" / "ya-bro.bash"
 PROMPT = "YBP$ "
 pytestmark = pytest.mark.skipif(shutil.which("bash") is None, reason="bash not installed")
+
+
+def _plain(text: str) -> str:
+    """Output without title sequences, which the hook may leave after the prompt."""
+    return re.sub(r"\x1b\][02];[^\x07]*\x07", "", text)
 
 
 class Bash:
@@ -49,7 +55,7 @@ class Bash:
     def read_until_prompt(self, timeout: float = 10.0) -> str:
         end = time.monotonic() + timeout
         buf = ""
-        while not buf.endswith(PROMPT):
+        while not _plain(buf).endswith(PROMPT):
             if time.monotonic() > end:
                 raise TimeoutError(f"no prompt; got {buf!r}")
             if select.select([self.fd], [], [], 0.1)[0]:
@@ -251,3 +257,265 @@ def test_spool_files_are_private(runtime, spool):
     assert stat.S_IMODE(os.stat(runtime / "ya-bro").st_mode) == 0o700
     for name in ("shell.spool", "commands"):
         assert stat.S_IMODE(os.stat(runtime / "ya-bro" / name).st_mode) == 0o600
+
+
+# ---- "Write it" (ADR-0029): the terminal here is the test: it answers the status query itself ----
+
+
+def _tty_of(sh):
+    return os.readlink(f"/proc/{sh.pid}/fd/0")
+
+
+def _answer(sh, writer_thread_result, timeout=3.0):
+    """Act as the terminal emulator: wait for the status query on the pty, answer it."""
+    end = time.monotonic() + timeout
+    seen = ""
+    while time.monotonic() < end:
+        if select.select([sh.fd], [], [], 0.05)[0]:
+            seen += os.read(sh.fd, 4096).decode(errors="replace")
+            if "\x1b[5n" in seen:
+                os.write(sh.fd, b"\x1b[0n")
+                return seen
+    return seen
+
+
+def _write(sh, runtime, command, answer=True):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from ya_bro.terminal_write import TerminalWriter
+
+    writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY), wait=2)
+    with ThreadPoolExecutor(1) as ex:
+        fut = ex.submit(writer.write, command)
+        seen = _answer(sh, None, 3.0) if answer else ""
+        result = fut.result(10)
+    time.sleep(0.2)
+    return result, seen + _drain(sh)
+
+
+def _drain(sh):
+    out = ""
+    while select.select([sh.fd], [], [], 0.2)[0]:
+        out += os.read(sh.fd, 4096).decode(errors="replace")
+    return out
+
+
+def test_write_puts_the_command_at_the_prompt_and_does_not_run_it(tmp_path, runtime, spool):
+    spool.set_commands(["fakectl", "echo"])
+    sh = Bash(tmp_path, runtime)
+    try:
+        result, shown = _write(sh, runtime, "echo hello-from-bro")
+        assert result.ok, result.reason
+        assert "echo hello-from-bro" in shown  # echoed at the prompt by readline
+        assert "hello-from-bro\r\n" not in shown.replace("echo hello-from-bro", "")  # not run
+        assert spool.poll() == []  # nothing ran
+        os.write(sh.fd, b"\n")  # the user's own Enter
+        assert "hello-from-bro" in sh.read_until_prompt()
+    finally:
+        sh.close()
+
+
+def test_write_is_refused_when_the_line_is_not_empty_and_keeps_what_was_typed(
+    tmp_path, runtime, spool
+):
+    sh = Bash(tmp_path, runtime)
+    try:
+        os.write(sh.fd, b"half typed")
+        time.sleep(0.3)
+        _drain(sh)
+        result, shown = _write(sh, runtime, "echo clobber")
+        assert not result.ok and "already text" in result.reason
+        os.write(sh.fd, b"\n")
+        assert "clobber" not in sh.read_until_prompt()
+    finally:
+        sh.close()
+
+
+def test_write_is_refused_while_a_command_is_running(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    sh = Bash(tmp_path, runtime)
+    try:
+        os.write(sh.fd, b"sleep 5\n")
+        time.sleep(0.5)
+        writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY))
+        result = writer.write("echo nope")
+        assert not result.ok and "idle prompt" in result.reason
+        assert "\x1b[5n" not in _drain(sh)  # nothing was sent to the terminal
+        os.write(sh.fd, b"\x03")
+    finally:
+        sh.close()
+
+
+def test_write_without_the_hook_sends_nothing(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    sh = Bash(tmp_path, runtime, hook=False)
+    try:
+        writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY))
+        assert not writer.write("echo x").ok
+        assert "\x1b[5n" not in _drain(sh)
+    finally:
+        sh.close()
+
+
+def test_write_refuses_dangerous_and_malformed_commands(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    sh = Bash(tmp_path, runtime)
+    try:
+        writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY))
+        for bad in ("rm -rf ~", "sudo reboot", "echo a\nrm x", "", "x" * 300, "echo \x1b[5n"):
+            assert not writer.write(bad).ok, bad
+        assert "\x1b[5n" not in _drain(sh)
+    finally:
+        sh.close()
+
+
+def test_a_silent_terminal_leaves_nothing_behind(tmp_path, runtime, spool):
+    sh = Bash(tmp_path, runtime)
+    try:
+        result, _ = _write(sh, runtime, "echo late", answer=False)
+        assert not result.ok and "did not answer" in result.reason
+        assert not list((runtime / "ya-bro").glob("suggest.pts_*[0-9]"))  # the file was removed
+    finally:
+        sh.close()
+
+
+def test_the_real_terminal_is_never_written_under_pytest(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    sh = Bash(tmp_path, runtime)
+    try:
+        with pytest.raises(RuntimeError, match="never written"):
+            TerminalWriter(runtime / "ya-bro").write("echo x")  # the default opener
+        assert "\x1b[5n" not in _drain(sh)
+    finally:
+        sh.close()
+
+
+# ---- scope token in the terminal title (ADR-0029 §8) ----
+
+TOKEN = "yb-" + "ab12" * 8
+
+
+def test_the_hook_puts_the_scope_token_in_the_title_at_each_prompt(tmp_path, runtime, spool):
+    spool.set_scope_token(TOKEN)
+    sh = Bash(tmp_path, runtime)
+    try:
+        out = sh.run("true")
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in out
+    finally:
+        sh.close()
+
+
+def test_no_token_file_means_the_title_is_left_alone(tmp_path, runtime, spool):
+    sh = Bash(tmp_path, runtime)
+    try:
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_a_token_file_that_is_not_a_token_is_never_echoed_into_the_title(tmp_path, runtime, spool):
+    (runtime / "ya-bro" / "scope-token").write_text("evil\x1b]0;x\x07\n")
+    sh = Bash(tmp_path, runtime)
+    try:
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_the_title_goes_when_core_stops(tmp_path, runtime, spool):
+    spool.set_scope_token(TOKEN)
+    sh = Bash(tmp_path, runtime)
+    try:
+        spool.close()
+        assert "\x1b]2;" not in sh.run("true")
+    finally:
+        sh.close()
+
+
+def test_the_token_title_wins_over_a_distro_prompt_that_sets_its_own_title(
+    tmp_path, runtime, spool
+):
+    spool.set_scope_token(TOKEN)
+    ubuntu = "PS1='\\[\\e]0;\\u@\\h: \\w\\a\\]'\"$PS1\""  # what Ubuntu's .bashrc does
+    sh = Bash(tmp_path, runtime, rc=ubuntu)
+    try:
+        out = sh.run("true")
+        titles = re.findall(r"\x1b\][02];([^\x07]*)\x07", out)
+        assert len(titles) >= 2  # the distro's title and ours
+        assert titles[-1] == f"ya-bro {TOKEN}"  # ours is the one left on the window
+    finally:
+        sh.close()
+
+
+def _writer(runtime, opener=lambda p: os.open(p, os.O_WRONLY)):
+    from ya_bro.terminal_write import TerminalWriter
+
+    return TerminalWriter(runtime / "ya-bro", opener=opener)
+
+
+def test_set_title_puts_the_token_in_an_idle_terminals_title_and_nothing_else(
+    tmp_path, runtime, spool
+):
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")  # a fresh prompt so the hook marks the terminal
+        _drain(sh)
+        assert _writer(runtime).set_title(TOKEN) == 1
+        seen = _drain(sh)
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in seen
+        assert "\x1b[5n" not in seen  # no status query: nothing is asked of the shell
+    finally:
+        sh.close()
+
+
+def test_set_title_also_reaches_a_busy_terminal(tmp_path, runtime, spool):
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")
+        os.write(sh.fd, b"sleep 3\n")
+        time.sleep(0.6)  # the hook has marked it busy
+        _drain(sh)
+        assert _writer(runtime).set_title(TOKEN) == 1
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in _drain(sh)
+    finally:
+        sh.close()
+
+
+def test_set_title_reaches_every_hooked_terminal(tmp_path, runtime, spool):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    one, two = Bash(tmp_path / "a", runtime), Bash(tmp_path / "b", runtime)
+    try:
+        one.run("")
+        two.run("")
+        opened = []
+
+        def opener(path):
+            opened.append(path)
+            return os.open("/dev/null", os.O_WRONLY)
+
+        assert _writer(runtime, opener).set_title(TOKEN) == 2
+        assert sorted(opened) == sorted([_tty_of(one), _tty_of(two)])
+    finally:
+        one.close()
+        two.close()
+
+
+def test_set_title_writes_nothing_without_a_hooked_terminal_or_with_a_bad_token(
+    tmp_path, runtime, spool
+):
+    def opener(path):
+        raise AssertionError("no terminal may be opened")
+
+    assert _writer(runtime, opener).set_title(TOKEN) == 0  # no hook, no marker
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")
+        for bad in ("", "yb-short", TOKEN + "\x1b]0;x\x07", "x" * 35):
+            assert _writer(runtime, opener).set_title(bad) == 0
+    finally:
+        sh.close()

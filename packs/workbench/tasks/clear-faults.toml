@@ -3,14 +3,17 @@ goal = "clear workbench faults"
 keywords = ["clear", "faults", "fault", "reset", "workbench", "benchctl"]
 
 [[step]]
-narration = "Run: ./scripts/benchctl get faults"
+narration = "Run this."
+command = "./scripts/benchctl get faults"
 why = "Look at what is wrong before you clear it."
 
 [[step]]
-narration = "Run: ./scripts/benchctl clear faults"
+narration = "Run this."
+command = "./scripts/benchctl clear faults"
 why = "It clears every injected node fault at once, like Clear faults in the web page."
 risk = 2
 
 [[step]]
-narration = "Run: ./scripts/benchctl get faults again."
+narration = "Run this again to check the faults are gone."
+command = "./scripts/benchctl get faults"
 why = "It should now list nothing."

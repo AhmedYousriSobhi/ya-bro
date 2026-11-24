@@ -42,12 +42,15 @@ def _targets(args: argparse.Namespace) -> int:
             found = targets.load_all()
             for t in found:
                 web, cli = ", ".join(t.origins) or "-", ", ".join(t.commands) or "-"
-                print(f"{t.id}\tweb: {web}\tcli: {cli}")
+                where = f"\tdir: {t.dir}" if t.dir else ""
+                print(f"{t.id}\tweb: {web}\tcli: {cli}{where}")
             if not found:
                 print("no targets: Bro sees no web page or command")
             return 0
         if args.verb == "allow":
-            path = targets.save(targets.Target(args.id, tuple(args.origin), tuple(args.command)))
+            path = targets.save(
+                targets.Target(args.id, tuple(args.origin), tuple(args.command), args.dir)
+            )
             print(f"allowed {args.id} ({path})")
             if args.origin:
                 from ya_bro.token_server import DEFAULT_PORT
@@ -462,12 +465,52 @@ def _gnome_demo(cmd: str, seconds: int, text: str = "", show: list[str] | None =
             server.stop()
 
 
+def _companion(pack: str, goal: str, wait: bool) -> int:
+    """Bro beside the terminal (ADR-0029). It runs in the background so this terminal's prompt
+    comes back: "Write it" needs an idle prompt, and a command to run needs one too."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+
+    from ya_bro import dirs
+
+    if wait:
+        return _gnome_demo("show", 0, show=["--pack", pack, "--ask", goal])
+    py = shutil.which("python3", path="/usr/bin:/usr/local/bin")
+    if not py or subprocess.run([py, "-c", "import gi"], capture_output=True).returncode:
+        print("needs the system python3 with PyGObject (sudo apt install python3-gi)")
+        return 1
+    # The hook only marks a prompt idle while this folder exists, and the next prompt is drawn
+    # right after we return, so it must exist before we do (the companion re-creates it).
+    run = dirs.runtime_dir() / "ya-bro"
+    run.mkdir(mode=0o700, parents=True, exist_ok=True)
+    log = dirs.state_dir() / "companion.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parent.parent)}
+    with open(log, "w") as out:
+        subprocess.Popen(
+            [py, "-m", "ya_bro.platform.gnome_show", "--pack", pack, "--ask", goal],
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=out,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    print("Bro is up beside your terminal. Use its bubble: Copy, Write it, Next, Stop.")
+    print(f"(`broctl panic` stops it; messages go to {log})")
+    return 0
+
+
 def _load(wait_seconds: int = 120) -> int:
     import time
 
     from ya_bro.platform import linux_setup as ls
 
     if ls.extension_loaded(ls.run):
+        code = ls.extension_code_check(ls.run)
+        if code.status != "ok":
+            print(f"the Bro extension is loaded, but {code.detail}.\n  {code.fix}")
+            return 1
         print("the Bro extension is already loaded")
         return 0
     copied = ls.copy_to_clipboard(ls.run, ls.HOTLOAD_SNIPPET)
@@ -490,13 +533,18 @@ def _load(wait_seconds: int = 120) -> int:
     return 1
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="broctl", description="Control the Bro sidekick")
     parser.add_argument("--version", action="version", version=f"broctl {__version__}")
     sub = parser.add_subparsers(dest="noun", metavar="<command>")
     sub.add_parser("version", help="print the version")
     sub.add_parser("doctor", help="check this machine (safe to paste in a bug report)")
-    sub.add_parser("setup", help="first-run setup; asks before each persistent change")
+    setup = sub.add_parser("setup", help="first-run setup; asks before each persistent change")
+    setup.add_argument(
+        "--yes",
+        action="store_true",
+        help="take the two required steps without asking (privacy answers are still asked)",
+    )
     point = sub.add_parser("point", help="draw the Bro ring on your allowed app's window")
     point.add_argument("--seconds", type=int, default=30)
     point.add_argument("--text", default="Ya bro is here. Press Stop or Super+Shift+Esc.")
@@ -517,14 +565,32 @@ def main(argv: list[str] | None = None) -> int:
     allow.add_argument(
         "--command", action="append", default=[], help="CLI command name, e.g. benchctl"
     )
+    allow.add_argument(
+        "--dir", default="", help="folder its commands run from, so Bro can say where to go"
+    )
     tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
     ask = sub.add_parser("ask", help="say what you want to do; Bro plans it and walks you through")
-    ask.add_argument("goal", help="in your own words, e.g. 'multiply 7 by 6'")
+    ask.add_argument(
+        "goal",
+        nargs="?",
+        default="",
+        help="in your own words, e.g. 'multiply 7 by 6'; omit to type it in a window",
+    )
     ask.add_argument("--app", default="", help="app id (default: the focused allowed window)")
     ask.add_argument("--dry", action="store_true", help="print the plan and stop")
+    ask.add_argument(
+        "--wait", action="store_true", help="with --pack: stay in this terminal until it ends"
+    )
+    ask.add_argument(
+        "--pack", default="", help="use this pack's tasks in a plain window (no app, no extension)"
+    )
     show = sub.add_parser("show", help="walk through a plan one step at a time (Show-me)")
     show.add_argument("plan", help="plan file (TOML), see docs/DEVELOPMENT.md")
     show.add_argument("--app", default="", help="app id (default: the focused allowed window)")
+    show.add_argument("--docked", action="store_true", help="bubble in a plain window, no ring")
+    show.add_argument(
+        "--do-it", action="store_true", help="press the controls itself (needs [do_it] allowed)"
+    )
     sub.add_parser("load", help="load the extension now, without logging out")
     apps = sub.add_parser("apps", help="manage which apps Bro may see (default: none)")
     verbs = apps.add_subparsers(dest="verb", required=True, metavar="<verb>")
@@ -602,7 +668,18 @@ def main(argv: list[str] | None = None) -> int:
     lst.add_argument("--lang", choices=("en", "ar"), default="en")
     pv.add_parser("lint", help="check the persona data (exit 1 on a problem)")
     pv.add_parser("style", help="print the tone guide that goes in the Brain's prompt")
-    args = parser.parse_args(argv)
+    comp = sub.add_parser("completion", help="print the tab-completion script for your shell")
+    comp.add_argument("shell", choices=("bash", "zsh"))
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    if args.noun == "completion":
+        from ya_bro import completion
+
+        print(completion.script(build_parser(), args.shell), end="")
+        return 0
 
     if args.noun == "persona":
         return _persona(args)
@@ -637,14 +714,25 @@ def main(argv: list[str] | None = None) -> int:
     if args.noun == "setup":
         from ya_bro import doctor
 
-        return doctor.setup()
+        return doctor.setup(assume_yes=args.yes)
     if args.noun == "load":
         return _load()
     if args.noun == "point":
         return _gnome_demo("point", args.seconds, args.text)
     if args.noun == "show":
         extra = ["--app", args.app] if args.app else []
-        return _gnome_demo("show", 0, show=[str(args.plan), *extra])
+        return _gnome_demo(
+            "show",
+            0,
+            show=[
+                str(args.plan),
+                *extra,
+                *(["--do-it"] * args.do_it),
+                *(["--docked"] * args.docked),
+            ],
+        )
+    if args.noun == "ask" and args.pack:
+        return _companion(args.pack, args.goal, args.wait)
     if args.noun == "ask":
         extra = ["--app", args.app] if args.app else []
         return _gnome_demo("show", 0, show=["--ask", args.goal, *extra, *(["--dry"] * args.dry)])
@@ -654,5 +742,5 @@ def main(argv: list[str] | None = None) -> int:
         return _apps(args)
     if args.noun == "targets":
         return _targets(args)
-    parser.print_help()
+    build_parser().print_help()
     return 0

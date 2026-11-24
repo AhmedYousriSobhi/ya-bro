@@ -1,21 +1,34 @@
 # Getting started
 
-About 10 minutes, no guessing. At the end you will watch Bro walk you through multiplying 7 by 6 in GNOME Calculator, pointing at each key.
+Ten minutes, no guessing. Bro is a small sidekick that shows you the steps **on your real screen**, one at a time, instead of you reading a guide. You ask, it points at the button (or shows the command), and it notices when you did it.
 
-> **Pre-alpha.** Bro works today with hand-written plans on GNOME Wayland. It has no voice, no LLM brain and no "do it for me" mode yet. See the [status table](../../README.md#status).
+> **Pre-alpha.** It works today on GNOME Wayland with the tasks in its knowledge packs, hand-written plans, or Claude (with your API key). No voice and no "Bro does everything" mode yet; see the [status table](../../README.md#status).
+
+## The short version
+
+```bash
+git clone https://github.com/AhmedYousriSobhi/ya-bro.git && cd ya-bro
+sudo apt install python3-gi gir1.2-atspi-2.0 wl-clipboard
+uv sync && uv tool install --editable .     # puts `broctl` on your PATH
+broctl setup        # answer Enter (yes) to the two required steps, pick your tool or app
+# log out and in once (GNOME only loads a new extension at login)
+broctl doctor       # every line should say [ok  ]
+broctl ask "what you want to do"
+```
+
+Stuck at any point? Run `broctl doctor`: it checks everything and says how to fix what is wrong. Details and fixes are below, in the order you will hit them.
 
 ## 1. What you need
 
 | Need | Check | Install |
 |---|---|---|
-| Ubuntu 26.04 (or any GNOME 50 desktop) on **Wayland** | `echo $XDG_SESSION_TYPE` prints `wayland`; `gnome-shell --version` prints 50.x | Log in with the "Ubuntu" session, not "Ubuntu on Xorg" |
-| Python 3.12+ with PyGObject and AT-SPI bindings | `python3 -c "import gi"` prints nothing | `sudo apt install python3-gi gir1.2-atspi-2.0` |
-| GNOME Shell tools and GLib | `which gnome-extensions glib-compile-schemas` | `sudo apt install gnome-shell libglib2.0-bin` |
-| `uv` (runs the project) | `uv --version` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| `wl-clipboard` (optional) | `which wl-copy` | `sudo apt install wl-clipboard` (lets `broctl load` copy a line for you) |
-| GNOME Calculator (for the demo) | `which gnome-calculator` | `sudo apt install gnome-calculator` |
+| Ubuntu 26.04 (or any GNOME 50 desktop) on **Wayland** | `echo $XDG_SESSION_TYPE` prints `wayland` | Log in with the "Ubuntu" session, not "Ubuntu on Xorg" |
+| PyGObject and AT-SPI | `python3 -c "import gi"` prints nothing | `sudo apt install python3-gi gir1.2-atspi-2.0` |
+| GNOME Shell tools | `which gnome-extensions glib-compile-schemas` | `sudo apt install gnome-shell libglib2.0-bin` |
+| `uv` | `uv --version` | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
+| `wl-clipboard` (optional) | `which wl-copy` | `sudo apt install wl-clipboard` |
 
-KDE Plasma and X11 desktops are not supported yet.
+KDE Plasma and X11 are not supported yet. Check with `broctl doctor` once Bro is installed.
 
 ## 2. Install
 
@@ -23,142 +36,136 @@ KDE Plasma and X11 desktops are not supported yet.
 git clone https://github.com/AhmedYousriSobhi/ya-bro.git
 cd ya-bro
 uv sync
-uv run broctl --version        # prints: broctl 0.2.0
+uv tool install --editable .      # `broctl` now works from any folder
+broctl --version
 ```
 
-Optional: `uv tool install --editable .` puts `broctl` on your PATH so you can drop the `uv run` below.
+Keep the checkout: the install points at it. Update later with `git pull` and `broctl setup` again.
 
-## 3. Check your machine
+## 3. Set up
 
 ```bash
-uv run broctl doctor
+broctl setup
 ```
 
-Every line starts with `[ok  ]` or `[WARN]` and tells you how to fix a warning. On a fresh machine you will see warnings for the extension and for allowed apps: that is what the next step fixes. A warning about `api key` is fine for now (there is no LLM brain yet). The output is safe to paste in a bug report.
+Bro starts blind: it sees nothing until you name something, and it asks before every change to your system. Press **Enter** to accept the default shown in capitals (`[Y/n]` means yes). `broctl setup --yes` skips the questions.
 
-## 4. Set up (one app, your choice)
+1. **Pick what Bro may see.** You get a numbered list. Pick a **tool** (a command and/or a web page, for example workbench) or one **app** (for example Calculator). Type a word to filter the list, a number to choose, `q` to stop.
+2. **For a tool:** its web page address (Enter to skip) and **the folder its commands run from**. Bro uses the folder to start the walk-through with a `cd` step, so you are never in the wrong place.
+3. **Accessibility** (required): lets apps tell Bro where their buttons are. Enter for yes.
+4. **Shell extension** (required): copies the small Bro extension into your GNOME and turns it on. It draws the ring and the bubble and reports window positions, only for what you allowed. Enter for yes.
+5. The first time, it shows what it reads and asks whether you allow sending your question to Claude. The default is no, and nothing is sent unless you say yes. `broctl consent revoke` changes your mind later.
+
+Then **log out and back in once.** GNOME on Wayland loads an extension only at login. This is normal for every GNOME extension; it is not a reboot. `broctl doctor` says when you need to do it again (after an update that changes the extension).
+
+Check: `broctl doctor` shows `[ok  ]` lines. A warning about the API key is fine until you want Claude to write plans.
+
+## 4. Use it
+
+### In a terminal (for tools like workbench)
 
 ```bash
-uv run broctl setup
+broctl hook install        # asks before editing ~/.bashrc; then open a NEW terminal
+broctl ask "start the cluster" --pack workbench
 ```
 
-Bro starts blind. It sees nothing until you name **one app**, and it asks before every change to your system. The first time, it also shows what it reads and what it would send, and asks whether you allow sending (the default is no, and nothing is sent today; change your mind any time with `broctl consent revoke`).
+Bro's bubble, with its face, appears at the top-right of your terminal, one step at a time: a sentence and the command in a box.
 
-1. **Pick the app.** Type a word (`calculator`), press Enter, then type the number from the list. (Know the id already? Type it, e.g. `org.gnome.Calculator`.)
-2. **Accessibility** (`Do this? [y/N]`): lets apps expose their buttons to Bro. This is a GNOME setting for the whole desktop. Answer `y`.
-3. **Shell extension** (`Do this? [y/N]`): copies the small Bro extension into `~/.local/share/gnome-shell/extensions/` and enables it. It draws the ring and reports window positions, but only for the app you named. Answer `y`.
-4. Setup prints `Bro may now see: <your app>`.
-
-Anything other than `y` skips that step, so you can stop at any point and run it again.
-
-## 5. Load the extension (no logout)
-
-GNOME only notices a new extension at login. To avoid logging out:
-
-```bash
-uv run broctl load
-```
-
-and follow the three steps it prints: press **Alt+F2**, type `lg`, press Enter (Looking Glass opens), paste the line (it is already in your clipboard when `wl-copy` is installed), press Enter, then **Esc**. The command waits and prints `loaded`. It lasts until your next login, then GNOME loads it normally. If you prefer, just log out and back in instead.
-
-Check: `uv run broctl doctor` shows `extension: ENABLED`.
-
-## 6. Run the demo
-
-```bash
-gnome-calculator &
-uv run broctl apps allow org.gnome.Calculator     # skip if setup already allowed it
-uv run broctl show examples/plans/calculator.toml
-```
-
-1. Press **C** in the Calculator so the display is empty.
-2. **Click the Calculator window.** The ring only appears on the window you are using.
-3. An amber ring lands on **7** with a bubble: "(1/4) Press 7." Press 7. The bro sees the display change and moves to **×**, then **6**, then **=**. At 42 the ring leaves.
-
-What you can do while it runs:
-
-| Control | What it does |
+| Button | What it does |
 |---|---|
-| Press the key it points at | It reads the screen and moves on by itself |
-| **Next** | Skip ahead. If you have not done the step it asks first; press Next again to skip anyway |
-| **Why?** | Explains the step. After a wrong key it explains your mistake: what the screen shows versus what it needed |
-| **Repeat** | Shows the step again |
-| **Stop**, or **Super+Shift+Esc** | Ends the walkthrough and hides everything at once |
+| **Copy** | puts the command on your clipboard; paste with Ctrl+Shift+V |
+| **Write it** | types the command at your prompt. It never presses Enter: you check it and press Enter |
+| **Next** | skip the step (asks first if you have not done it) |
+| **Why?** | explains the step, or what went wrong |
+| **Stop** | ends everything (also **Super+Shift+Esc**) |
 
-Try pressing a wrong key on purpose: the bro teases you and waits for you to undo it. Put `humour = 0` in `~/.config/ya-bro/config.toml` for plain lines, `language = "ar"` for Egyptian Arabic (the Arabic lines are drafts), or `less_chatty = true` for fewer extras; `broctl persona list` shows everything it can say.
+When you run the command, Bro sees it finish and moves on by itself.
 
-## Ask in plain words
+**Which terminal am I in?** Use a terminal that is **its own window**: Ptyxis (called "Terminal" on Ubuntu 26.04), GNOME Terminal or Console. A terminal panel inside another app (VS Code, the Claude desktop app) does not work beside the window. To check, run `broctl doctor`: its `terminal` line says `ok` or what to do. By hand: `echo $VTE_VERSION` prints a number in a supported terminal and nothing in a panel. See the [workbench guide](workbench.md).
+
+### On a desktop app (Calculator demo)
 
 ```bash
-uv run broctl key set               # hidden prompt; the key goes into your system keyring
-uv run broctl key status            # present or not, and where from (never the key itself)
-uv run broctl ask "multiply 7 by 6" --dry   # print the plan only
-uv run broctl ask "what is seven times six"  # walk through it
+gnome-calculator &         # press C so the display is empty, then click its window
+broctl apps allow org.gnome.Calculator     # skip if setup already allowed it
+broctl show examples/plans/calculator.toml
 ```
 
-Bro looks for the key in your environment (`ANTHROPIC_API_KEY`), then your keyring, then a git-ignored `.env` file, in that order. `broctl key set` needs a Secret Service (GNOME Keyring or KWallet running and unlocked) and the system `python3` with PyGObject; without one it says so and you can use the environment variable or `.env` instead. `broctl key clear` removes the stored key, and `broctl forget --everything` offers to as well (a key in `.env` or the environment is yours to delete).
+An amber ring lands on **7** with a bubble: "(1/4) Press 7." Press 7. Bro sees the display change and moves to **×**, **6**, then **=**. The same buttons as above apply (**Repeat** shows the step again).
 
-Bro first looks for a matching task in the app's knowledge pack (nothing is sent anywhere). If none fits, and you said yes to sending during `broctl setup`, it asks Claude. Each request carries your question, the names of the controls in the allowed app's window (secrets scrubbed), and the pack's notes, never a screenshot; `broctl sent` lists every request. Without a key or without your yes, only pack tasks answer. A plan Claude wrote is shown first (how many steps, and the first one): press **Next** to start or **Stop** to cancel. If a control it counted on is not there, Bro asks Claude again for the remaining steps. Anything risky is marked as yours to press.
+### Ask in your own words
 
-## 7. Write your own plan
+```bash
+broctl ask "multiply 7 by 6"
+broctl ask                      # no sentence: a small window asks you
+broctl ask "..." --dry          # only print the plan
+```
 
-A plan is a short TOML file. Copy `examples/plans/calculator.toml` and change the steps:
+Bro first looks for a matching task in the knowledge pack (nothing leaves your machine). If none fits, and you allowed sending, it asks Claude. That needs an API key: `broctl key set` (hidden prompt, stored in your system keyring). Each request carries only your question and the names of the controls in the allowed window, never a screenshot; `broctl sent` lists every request.
+
+### Let Bro press the buttons itself (Do-it)
+
+Off by default, and only for apps you enable: put this in `~/.config/ya-bro/config.toml`'s app section (see [DEVELOPMENT.md](../DEVELOPMENT.md)):
 
 ```toml
-[plan]
-goal = "do the thing"
-app = "org.example.App"
-
-[[step]]
-narration = "Click Save."
-target = {role = "button", name = "Save"}
-expect = {role = "button", name = "Saved"}      # what the screen shows when it worked
-why = "Save keeps your work."
+[do_it]
+allowed = true
 ```
 
-`broctl apps available` lists installed app ids. Full format: [DEVELOPMENT.md](../DEVELOPMENT.md#show-me-plans-broctl-show). The app must expose an accessibility tree (GTK apps do). If the ring sits a few pixels off in some app, add `extents_offset = [dx, dy]` to `[plan]` ([finding S9](../research/spikes/S9-extents-offset.md)).
+Then `broctl show plan.toml --do-it`. Bro says what it will do, flies the pointer to the control, waits a second, then presses. It asks first before anything that changes things, hands anything risky (buying, deleting, sending, passwords) back to you, and **Stop** halts it at once.
 
-## 8. If something goes wrong
+## 5. Make it yours
+
+Put these in `~/.config/ya-bro/config.toml`:
+
+| Setting | Effect |
+|---|---|
+| `humour = 0` | plain lines, no jokes |
+| `language = "ar"` | Egyptian Arabic (drafts) |
+| `less_chatty = true` | fewer extras |
+
+`broctl persona list` shows everything Bro can say. Your own tools: `broctl targets list`, `allow`, `revoke`; apps: `broctl apps list`, `allow`, `revoke`.
+
+## 6. If something goes wrong
+
+Run `broctl doctor` first; paste its output into an issue if you are stuck (it is safe to share).
 
 | What you see | Fix |
 |---|---|
-| `cannot reach the Bro extension` or `ServiceUnknown` | The extension is not loaded in this session. Run `uv run broctl load` (or log out and in), then `uv run broctl doctor` |
-| `no allowed window is open` | Open the app you allowed and check `uv run broctl apps list` |
-| Nothing appears, and the run says `step_paused` | Click the allowed app's window: the ring only shows on the focused window |
-| `another core already runs; stop it first` | A previous `broctl show` or `point` is still running: `pkill -f gnome_show` (or `gnome_demo`) |
+| `cannot reach the Bro extension` | Not loaded in this session: log out and in, then `broctl doctor` |
+| doctor says **extension code** is old | You updated Bro: run `broctl setup`, then log out and in |
+| The bubble is a plain window, not beside the terminal | Run `broctl doctor`: if its `terminal` line warns, you are in a panel inside another app; open Ptyxis or GNOME Terminal as its own window. Otherwise the terminal's title did not reach Bro: check you ran `broctl hook install` and opened a **new** terminal; read `~/.local/state/ya-bro/companion.log` |
+| `./scripts/...: No such file or directory` | You were in the wrong folder: run `broctl targets allow <tool> --command <cmd> --dir <folder>` so the walk-through starts with `cd` |
+| `no allowed window is open` | Open the allowed app; `broctl apps list` shows what is allowed |
+| Nothing appears and the run says `step_paused` | Click the allowed app's window: the ring shows only on the focused window |
+| `another core already runs` | Run `broctl panic`, then try again |
 | `needs the system python3 with PyGObject` | `sudo apt install python3-gi gir1.2-atspi-2.0` |
-| `extension: not known to the shell` in doctor | Run `uv run broctl setup` and answer `y` to the extension, then `uv run broctl load` (doctor says "re-login"; `load` saves you the logout) |
-| The ring is slightly off the button | See [extents offset](../research/spikes/S9-extents-offset.md); the Calculator example already corrects it |
-| It looks stuck | Press **Stop** in the bubble or **Super+Shift+Esc**, then run the command again |
-| Anything else | `uv run broctl doctor` and paste the output into an issue |
+| The ring is a few pixels off | See [extents offset](../research/spikes/S9-extents-offset.md) |
+| It looks stuck | **Stop** in the bubble, or **Super+Shift+Esc**, then run the command again |
 
-## 9. Privacy: what Bro can see
+## 7. Privacy: what Bro can see
 
-- **Only the app you allow.** Default-deny: with no app named, the extension reports nothing. Revoke with `uv run broctl apps revoke <app-id>`.
-- Everything it draws is visible, and Stop always works. Small dots under the bro say what it is doing right now (blue: reading your app; green: listening; red: sending; orange: acting). You cannot turn them off while that state is active.
-- `uv run broctl sent` lists every request that left your machine (the kind and the size, never the content). Today it says nothing was sent.
-- `uv run broctl panic` stops every Bro process at once, even a frozen one, and turns proactive mode off. `uv run broctl forget` deletes logs and offers (`--everything` also removes allowed apps and targets, the stored API key, the shell hook lines and your consent).
-- It never types for you or clicks for you (Show-me mode only points).
-- Logs are written to `~/.local/state/ya-bro/logs/` and contain event types and counts, never typed text or screen content. Logs older than 7 days are pruned.
-- Honest limit: the GNOME accessibility setting is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's own code, not by the operating system ([ADR-0023](../adr/0023-gnome-shell-extension-bridge.md)).
+- **Only what you allow.** With nothing named, the extension reports nothing. `broctl apps revoke <id>` and `broctl targets revoke <id>` take it back.
+- Everything Bro draws is visible and **Stop always works**. Small dots under the bro show what it is doing: blue reading your app, green listening, red sending, orange acting.
+- `broctl sent` lists every request that left your machine (kind and size, never content).
+- `broctl panic` stops every Bro process at once. `broctl forget` deletes logs; `--everything` also removes allowed apps and tools, the stored key, the shell hook lines and your consent.
+- It never types a password or clicks a purchase, delete or send control for you.
+- Logs (`~/.local/state/ya-bro/logs/`) hold event types and counts, never typed text or screen content.
+- Honest limit: the GNOME accessibility setting is desktop-wide and the extension runs inside the shell, so the "only what you allow" rule is enforced by Bro's own code, not by the operating system ([ADR-0023](../adr/0023-gnome-shell-extension-bridge.md)).
 
-## 10. Undo everything
+## 8. Undo everything
 
 ```bash
-uv run broctl apps revoke org.gnome.Calculator            # stop seeing any app
+broctl forget --everything          # logs, allowed apps and tools, key, hook lines, consent
 gnome-extensions disable ya-bro@ahmedyousrisobhi.github.io
 rm -rf ~/.local/share/gnome-shell/extensions/ya-bro@ahmedyousrisobhi.github.io
-uv run broctl forget --everything                         # optional: logs, offers, settings, hook lines, the stored API key
+uv tool uninstall ya-bro            # removes `broctl`
 ```
 
-The accessibility setting is left on because other tools may rely on it; to turn it off: `gsettings set org.gnome.desktop.interface toolkit-accessibility false`.
+The accessibility setting stays on because other tools may use it; to turn it off: `gsettings set org.gnome.desktop.interface toolkit-accessibility false`.
 
-## Advanced: a web tool instead of a whole browser
+## Next
 
-To let Bro see one web page without exposing your other tabs, allow it as a **target**:
-
-```bash
-uv run broctl targets allow mytool --origin http://127.0.0.1:8080
-```
-
-The page proves it is that origin by putting a token in its title; see [ADR-0025](../adr/0025-pack-scoped-targets.md) and [DEVELOPMENT.md](../DEVELOPMENT.md#trying-a-tab-scoped-target). Browser pages expose little to the accessibility tree, so walkthroughs on web pages are not ready yet.
+- Running Bro on a tool with a terminal and a web page: [workbench guide](workbench.md).
+- Writing your own plan or knowledge pack: [DEVELOPMENT.md](../DEVELOPMENT.md#show-me-plans-broctl-show).
+- Letting Bro see just one web page instead of a whole browser: [ADR-0025](../adr/0025-pack-scoped-targets.md).

@@ -45,7 +45,7 @@ One small character with six moods: it **points** at the control, **thinks** whe
 | Check the screen: advance by itself, notice a wrong key, explain it with **Why?** | ✅ |
 | Next / Why? / Repeat / Stop, and a stop key (Super+Shift+Esc) that always works | ✅ |
 | Sees **only the app you allow** (default-deny), or one web tool by origin | ✅ |
-| Knowledge packs per app (format, loader, a workbench pack) | ✅ |
+| Knowledge packs per app (format, loader, a workbench pack; [run Bro on workbench](docs/guides/workbench.md)) | ✅ |
 | Bash hook that sees allowed commands finish (name, exit code, duration only) | ✅ |
 | Policy engine and redaction (risk tiers, secret scrubbing) | ✅ |
 | First-run consent (nothing is sent unless you say yes), a list of everything sent, state dots on the bro, `panic` and `forget` ([#25](https://github.com/AhmedYousriSobhi/ya-bro/issues/25)) | ✅ |
@@ -65,10 +65,13 @@ You need Ubuntu 26.04 (or any GNOME 50 desktop) on **Wayland**, `uv`, and `sudo 
 ```bash
 git clone https://github.com/AhmedYousriSobhi/ya-bro.git && cd ya-bro
 uv sync
-uv run broctl setup          # pick ONE app to allow; asks before every change
-uv run broctl load           # loads the extension without logging out (3 steps it prints)
+uv tool install --editable .   # puts `broctl` on your PATH (~/.local/bin): no more `uv run`; keep this checkout
+broctl setup                 # pick tools and/or one app; the two required steps default to yes (`--yes` skips asking)
+broctl load           # loads the extension without logging out (3 steps it prints)
+                             # after an update: `broctl setup`, then log out and in (`broctl doctor` says when)
+# tab completion: `broctl setup` offers it; or `broctl completion bash > ~/.local/share/bash-completion/completions/broctl`
 gnome-calculator &           # then press C, and:
-uv run broctl show examples/plans/calculator.toml
+broctl show examples/plans/calculator.toml
 ```
 
 Click the Calculator window and follow the ring. The full walkthrough, with what each prompt means and fixes for common problems, is the **[user guide](docs/guides/getting-started.md)**.
@@ -97,7 +100,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 - **Screen text is data, not orders.** Words on a page never change what the bro does.
 - **Content-free monitoring.** Logs, the shell hook and the struggle detector keep event types and counts only, never typed text or screen content, and the detector is off for every app until you turn it on.
 - **Kill switch and receipts.** `broctl panic` stops every Bro process even if the core is frozen, `broctl sent` lists each request that left your machine (kind and size, never content), `broctl forget` deletes what it logged, and dots under the bro show when it is watching, listening, sending or acting.
-- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's code, not by the OS ([details](docs/guides/getting-started.md#9-privacy-what-ya-bro-can-see)).
+- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's code, not by the OS ([details](docs/guides/getting-started.md#7-privacy-what-bro-can-see)).
 
 ## The `broctl` command
 
@@ -121,7 +124,7 @@ Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` 
 
 | | |
 |---|---|
-| [User guide](docs/guides/getting-started.md) | Setup and first run |
+| [User guide](docs/guides/getting-started.md) | Install, set up, first walk-through, fixes: written for someone who has never seen Bro |
 | [SPEC.md](SPEC.md) | What we are building and why |
 | [docs/adr/](docs/adr/README.md) | Architecture decisions, risks, build plan |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | What is done and what is not |

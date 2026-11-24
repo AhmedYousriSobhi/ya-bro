@@ -103,3 +103,33 @@ def test_broctl_targets_cli(tmp_path, monkeypatch, capsys):
     assert main(["targets", "allow", "x", "--origin", "http://a.com/p"]) == 1
     assert main(["targets", "revoke", "workbench"]) == 0
     assert "revoked" in capsys.readouterr().out
+
+
+def test_a_tools_folder_roundtrips_and_must_be_absolute_and_exist(tmp_path):
+    work = tmp_path / "opti-sim"
+    work.mkdir()
+    cfg = tmp_path / "cfg"
+    targets.save(targets.Target("workbench", (), ("benchctl",), str(work)), cfg)
+    (t,) = targets.load_all(cfg)
+    assert t.dir == str(work)
+    for bad in ("relative/dir", "/does/not/exist", "/tmp/\nx", "/" + "a" * 200):
+        with pytest.raises(targets.TargetError):
+            targets.save(targets.Target("workbench", (), ("benchctl",), bad), cfg)
+
+
+def test_a_target_file_with_a_relative_folder_is_skipped(tmp_path):
+    d = tmp_path / "targets"
+    d.mkdir()
+    (d / "x.toml").write_text('[target]\nid = "x"\n[cli]\ncommands = ["c"]\ndir = "relative"\n')
+    assert targets.load_all(tmp_path) == []
+
+
+def test_targets_allow_dir_and_list_show_the_folder(tmp_path, monkeypatch, capsys):
+    from ya_bro.cli import main
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    work = tmp_path / "w"
+    work.mkdir()
+    assert main(["targets", "allow", "wb", "--command", "benchctl", "--dir", str(work)]) == 0
+    assert main(["targets", "list"]) == 0
+    assert f"dir: {work}" in capsys.readouterr().out

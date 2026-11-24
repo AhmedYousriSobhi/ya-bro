@@ -63,7 +63,10 @@ def own_perceiver(bus: Gio.DBusConnection) -> int:
 class GnomeOverlay:
     """Overlay1 over D-Bus. Pings every 2 s (the extension hides after ~6 s of silence)."""
 
-    def __init__(self, bus: Gio.DBusConnection, bridge: GnomeBridge, avatar: bool = True) -> None:
+    def __init__(
+        self, bus: Gio.DBusConnection, bridge: GnomeBridge, avatar: bool = True, corner: str = ""
+    ) -> None:
+        self._corner = corner  # "top-right": park a bubble-only step out of a terminal's way
         self._bus = bus
         self._bridge = bridge
         self._avatar = avatar
@@ -99,6 +102,7 @@ class GnomeOverlay:
         bubble_text: str,
         buttons: tuple[str, ...] = (),
         mood: str = "",
+        snippet: str = "",
     ) -> None:
         self.last_target = target
         args = {
@@ -112,6 +116,8 @@ class GnomeOverlay:
         }
         if mood:
             args["mood"] = GLib.Variant("s", mood)
+        if snippet:
+            args["snippet"] = GLib.Variant("s", snippet)
         if target:
             args["target"] = GLib.Variant("(iiii)", (target.x, target.y, target.w, target.h))
         else:
@@ -119,7 +125,8 @@ class GnomeOverlay:
             win = next((w for w in self._bridge.raw_windows() if w["focused"]), None)
             if win:
                 x, y, w, _h = win["frame"]
-                args["bubble_at"] = GLib.Variant("(ii)", (x + 20, y + 20))
+                at = (x + w - 410, y + 48) if self._corner == "top-right" else (x + 20, y + 20)
+                args["bubble_at"] = GLib.Variant("(ii)", at)
         _call(self._bus, OVERLAY, "ShowStep", GLib.Variant("(a{sv})", (args,)))
         if self._ping is None:
             self._ping = asyncio.get_running_loop().create_task(self._keepalive())
@@ -279,3 +286,80 @@ class AtspiPerception:
 
     async def read_text(self, ref: ElementRef) -> str:
         return await asyncio.to_thread(self._read_text, ref)
+
+
+# AT-SPI action names that press or flip a control, in the order we prefer them.
+PRESS_ACTIONS = ("click", "press", "activate", "toggle", "check", "select")
+NEVER_ACT_ROLES = frozenset({"password text", "password_text"})
+
+
+class AtspiActuator:
+    """Do-it through AT-SPI actions (ADR-0009 §1.2): no pointer injection, no portal consent.
+
+    Reuses the perceiver's scoped lookup, so it can only press inside an allowed window, and it
+    presses only when exactly one element matches the step's target: it never guesses.
+    """
+
+    def __init__(self, perception: AtspiPerception) -> None:
+        self._perception = perception
+        self._aborted = False
+
+    def _press(self, step) -> bool:
+        t = step.target
+        if t is None or t.role.lower() in NEVER_ACT_ROLES:
+            return False
+        refs = self._perception._find(t.app_id, t.role, t.name, "")
+        if len(refs) != 1:
+            return False
+        found = self._perception._resolve(refs[0])
+        if found is None:
+            return False
+        node = found[1]
+        try:
+            names = {
+                Atspi.Action.get_action_name(node, i): i
+                for i in range(Atspi.Action.get_n_actions(node))
+            }
+        except GLib.Error:
+            return False
+        index = next((names[n] for n in PRESS_ACTIONS if n in names), None)
+        if index is None or self._aborted:
+            return False
+        try:
+            return bool(Atspi.Action.do_action(node, index))
+        except GLib.Error:
+            return False
+
+    def _type(self, step) -> bool:
+        """Enter step.text into the target field: only an editable, non-password field that is
+        empty (the user's own text is never overwritten), and only if it reads back exactly."""
+        t = step.target
+        if t is None or t.role.lower() in NEVER_ACT_ROLES:
+            return False
+        refs = self._perception._find(t.app_id, t.role, t.name, "")
+        if len(refs) != 1:
+            return False
+        found = self._perception._resolve(refs[0])
+        if found is None:
+            return False
+        node = found[1]
+        try:
+            if node.get_role_name() in NEVER_ACT_ROLES or self._aborted:
+                return False
+            if not node.get_state_set().contains(Atspi.StateType.EDITABLE):
+                return False
+            if Atspi.Text.get_character_count(node) != 0:
+                return False
+            if not Atspi.EditableText.insert_text(node, 0, step.text, len(step.text.encode())):
+                return False
+            count = Atspi.Text.get_character_count(node)
+            return Atspi.Text.get_text(node, 0, count) == step.text
+        except GLib.Error:
+            return False
+
+    async def act(self, step) -> bool:
+        self._aborted = False
+        return await asyncio.to_thread(self._type if step.text else self._press, step)
+
+    async def abort(self) -> None:
+        self._aborted = True

@@ -464,3 +464,58 @@ text = "That control isn't on this screen. Give me a moment to work out another 
 moment = "replanning"
 humour = 0
 text = "I can't find that one here. Let me look again and make a new plan."
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "I'll press “{name}” for you. OK?"
+
+[[line]]
+moment = "act_confirm"
+humour = 0
+requires = ["name"]
+text = "Press “{name}” for you now?"
+
+[[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "I'll type “{want}” into “{name}” for you. OK?"
+
+[[line]]
+moment = "act_type_confirm"
+humour = 0
+requires = ["name", "want"]
+text = "Type “{want}” in “{name}” now?"
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "That didn't work, so it's yours: I'll point and you press it."
+
+[[line]]
+moment = "act_failed"
+humour = 0
+text = "I couldn't do that one. Over to you."
+
+[[line]]
+moment = "copied"
+humour = 0
+text = "Copied. Paste it in your terminal with Ctrl+Shift+V."
+
+[[line]]
+moment = "written"
+humour = 0
+text = "It's at your prompt. Check it, then press Enter."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+requires = ["got"]
+text = "That ended with code {got}. Run it again, or press Next to skip."
+
+[[line]]
+moment = "cmd_failed"
+humour = 0
+text = "That ended with an error. Run it again, or press Next to skip."

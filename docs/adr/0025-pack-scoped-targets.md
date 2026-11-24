@@ -17,6 +17,7 @@ The per-app allowlist (#43) gives Ya-Bro one or more whole apps. Tools such as w
    origins = ["http://127.0.0.1:8080"]
    [cli]
    commands = ["benchctl"]
+   dir = "/home/me/workbench"   # optional: where its commands run from (#129)
    ```
 2. **Default-deny stays.** Nothing is reported for a browser or terminal until a target is allowed, and then only what matches the target.
 3. **Web.** A browser window is reportable only while its active tab's origin matches. The web UI can also report its own state to core (workbench `/api/state`, #31), which avoids reading the browser's accessibility tree for that page.
