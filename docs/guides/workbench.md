@@ -16,16 +16,16 @@ Do [Getting started](getting-started.md) first (extension loaded, `broctl doctor
 
 ## 1. Bro beside your terminal (the main way)
 
-One-time setup (needs the extension loaded, see getting started; **the extension changed: run `uv run broctl setup` to copy the new files, then log out and in (GNOME on Wayland keeps the code it loaded at login; `broctl load` only loads an extension that is not loaded yet, and `broctl doctor` shows "extension code" when yours is old)**):
+One-time setup. Install `broctl` once (`uv tool install --editable .` in the Bro checkout) and pick workbench as a **tool** in `broctl setup` (it asks for the web page address; do not allow Firefox or Chrome as an app, that exposes every window of the browser). Needs the extension loaded, see getting started; **the extension changed: run `broctl setup` to copy the new files, then log out and in (GNOME on Wayland keeps the code it loaded at login; `broctl load` only loads an extension that is not loaded yet, and `broctl doctor` shows "extension code" when yours is old)**):
 
 ```bash
-uv run broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
+broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
 ```
 
 Then, in that terminal:
 
 ```bash
-uv run broctl ask "start the cluster" --pack workbench
+broctl ask "start the cluster" --pack workbench
 ```
 
 Use a terminal whose window title follows the shell (Ptyxis, GNOME Terminal and other VTE terminals). Terminals inside another app (VS Code's, or the Claude desktop app's) do not change their window title, so Bro cannot tell which window is the terminal: the bubble is then a plain window with Copy only, and `~/.local/state/ya-bro/companion.log` says why. For such a terminal allow the whole app with `broctl apps allow <id>` (it then sees that app's window position, not its content).
@@ -47,11 +47,11 @@ Tasks: `start-cluster`, `run-scenario`, `clear-faults`, `export-test-report` (`b
 The hook tells Bro only the command **name**, exit code and duration of `benchctl`, never arguments or output, and nothing at all while Bro is not running.
 
 ```bash
-uv run broctl targets allow workbench --command benchctl
-uv run broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
-uv run broctl struggle enable workbench
-uv run broctl struggle on
-uv run broctl struggle watch        # leave running; needs the extension loaded
+broctl targets allow workbench --command benchctl
+broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
+broctl struggle enable workbench
+broctl struggle on
+broctl struggle watch        # leave running; needs the extension loaded
 ```
 
 Now when `benchctl` fails three times in a row, a bubble asks "you stuck, bro?" (Yes, No, Not for this app). `broctl shell watch` prints the commands Bro would see, which is the quickest way to check the hook works. The pack's error-code explanations (`WB-...`) live in `packs/workbench/fixits.toml`; today **Yes** only greets, it does not yet read the terminal and explain the code (reading a VTE terminal exists in `ya_bro.terminal` but is not wired to the offer). Bash only; zsh and fish are not built.
@@ -62,19 +62,19 @@ Bro must see the workbench tab and no other tab. It cannot read a URL, so the pa
 
 1. **Allow the origin**, and make sure the whole browser is not allowed (that would show every tab):
    ```bash
-   uv run broctl targets allow workbench --origin http://127.0.0.1:8088 --command benchctl
-   uv run broctl apps list             # if your browser is listed:
-   uv run broctl apps revoke <browser id>
+   broctl targets allow workbench --origin http://127.0.0.1:8088 --command benchctl
+   broctl apps list             # if your browser is listed:
+   broctl apps revoke <browser id>
    ```
 2. **Start the page with the helper on**, in the workbench repo:
    ```bash
    WORKBENCH_DESKTOP_HELPER=1 python -m webui      # or ./scripts/benchctl start with the same variable set
    ```
    and sign in with `./scripts/benchctl open`. Once, in the page's browser console: `localStorage.setItem('workbench-desktop-helper', '1')`, then reload.
-3. **Run a Bro command that stays up** while you use the page, for example `uv run broctl point` (it runs the small loopback server on 127.0.0.1:47800 that hands the token only to the page's own origin; the token exists only while it runs).
+3. **Run a Bro command that stays up** while you use the page, for example `broctl point` (it runs the small loopback server on 127.0.0.1:47800 that hands the token only to the page's own origin; the token exists only while it runs).
 4. The ring and bubble appear on the workbench tab and leave when you switch tabs. Use Chromium or Chrome; Firefox is not verified.
 
-Revoke at any time: `uv run broctl targets revoke workbench`. `uv run broctl panic` stops everything.
+Revoke at any time: `broctl targets revoke workbench`. `broctl panic` stops everything.
 
 ## Gaps, in the order they hurt
 1. Bro cannot point at elements on the web page yet (#31 `/api/state`, and web selectors in the pack format).

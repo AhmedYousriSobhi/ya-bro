@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #122 setup UX and a global broctl
+Done: app list instead of a typed search, tools from packs as targets in setup, browser warning, default-yes for the two required steps and `--yes`, `uv tool install --editable .`, docs.
+Not done: a package for installing without a checkout, running-apps list, a live run of the new setup.
+
 ### 2026-11-24: #120 stale extension and fallback reason
 Done: doctor "extension code" check, `broctl load` refuses "already loaded" for old code, the pack walk-through says why it is not beside a terminal, docs corrected. Found by the maintainer's live run: old installed extension, old loaded code, and an Electron panel terminal.
 Not done: the live Ptyxis trial of #115/#117, a way to scope embedded terminals other than allowing the whole app.

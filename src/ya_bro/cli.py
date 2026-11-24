@@ -536,7 +536,12 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="noun", metavar="<command>")
     sub.add_parser("version", help="print the version")
     sub.add_parser("doctor", help="check this machine (safe to paste in a bug report)")
-    sub.add_parser("setup", help="first-run setup; asks before each persistent change")
+    setup = sub.add_parser("setup", help="first-run setup; asks before each persistent change")
+    setup.add_argument(
+        "--yes",
+        action="store_true",
+        help="take the two required steps without asking (privacy answers are still asked)",
+    )
     point = sub.add_parser("point", help="draw the Bro ring on your allowed app's window")
     point.add_argument("--seconds", type=int, default=30)
     point.add_argument("--text", default="Ya bro is here. Press Stop or Super+Shift+Esc.")
@@ -692,7 +697,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.noun == "setup":
         from ya_bro import doctor
 
-        return doctor.setup()
+        return doctor.setup(assume_yes=args.yes)
     if args.noun == "load":
         return _load()
     if args.noun == "point":

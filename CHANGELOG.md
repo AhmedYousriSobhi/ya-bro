@@ -4,6 +4,9 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+### Changed
+- Setup is usable (#122, found on the live desktop): `broctl setup` shows a numbered, paged list of installed apps (letters filter, Enter = more, q skips) instead of asking you to type a search; offers the tools that packs know (workbench) as **targets** (its command, and an optional web page address that is in scope only while its tab is active) next to "an installed app"; picking a browser as an app needs a second yes and points at the tool route; the two steps Bro cannot work without (accessibility, extension) now default to yes (`[Y/n]`), and `broctl setup --yes` takes them without asking. The privacy answers still default to no and are still asked. `uv tool install --editable .` puts `broctl` on your PATH (verified from another directory; keep the checkout, the packs and the extension are read from it). Docs use `broctl`, not `uv run broctl`. **Not built:** listing running apps or windows, a `.deb` or PyPI package, changing the allowed app without re-running setup beyond `broctl apps`.
+
 ### Fixed
 - A stale extension no longer goes unnoticed (#120, found on the live desktop): `broctl doctor` has an "extension code" check (installed copy differs from this checkout, or installed after the running shell started, so the shell runs older code), and `broctl load` says so instead of "already loaded" (exit 1). `broctl ask --pack` now prints why the bubble is a plain window and not beside the terminal (extension unreachable or old, hook or title token not seen, embedded terminals that never change the window title). Docs: `broctl setup` plus a new login updates the extension; `broctl load` cannot. Also removed a duplicated #115 changelog entry. Tested: doctor and load tests, plus the real-frame run with the token write removed prints the reason.
 
