@@ -16,7 +16,7 @@ Do [Getting started](getting-started.md) first (extension loaded, `broctl doctor
 
 ## 1. Bro beside your terminal (the main way)
 
-One-time setup (needs the extension loaded, see getting started; **the extension changed, so run `broctl load` again or log out and in**):
+One-time setup (needs the extension loaded, see getting started; **the extension changed: run `uv run broctl setup` to copy the new files, then log out and in (GNOME on Wayland keeps the code it loaded at login; `broctl load` only loads an extension that is not loaded yet, and `broctl doctor` shows "extension code" when yours is old)**):
 
 ```bash
 uv run broctl hook install          # asks before editing ~/.bashrc; open a new terminal after
@@ -27,6 +27,8 @@ Then, in that terminal:
 ```bash
 uv run broctl ask "start the cluster" --pack workbench
 ```
+
+Use a terminal whose window title follows the shell (Ptyxis, GNOME Terminal and other VTE terminals). Terminals inside another app (VS Code's, or the Claude desktop app's) do not change their window title, so Bro cannot tell which window is the terminal: the bubble is then a plain window with Copy only, and `~/.local/state/ya-bro/companion.log` says why. For such a terminal allow the whole app with `broctl apps allow <id>` (it then sees that app's window position, not its content).
 
 The prompt comes back at once and Bro's bubble appears at the terminal's top-right with one step at a time: a sentence, and the command in a code box. Buttons:
 

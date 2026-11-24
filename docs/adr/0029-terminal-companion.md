@@ -22,4 +22,5 @@
 
 ## Consequences
 - Works with any terminal that answers the status query (VTE does; others unverified) and bash with the hook installed. zsh, fish, and a raw `read`/vim prompt are not covered; the idle marker keeps the query away from running programs.
-- Extension changes (new buttons, snippet) need `broctl load` or a new login on a live desktop.
+- Extension changes (new buttons, snippet) need `broctl setup` (copies the files) and a new login on a live desktop; `broctl load` cannot replace code the shell already loaded (found on the live desktop, #120; `broctl doctor` now reports it).
+- Terminals embedded in another app (VS Code, Electron apps) do not put OSC 2 in the window title, so title-token scoping does not reach them (#120). The bubble falls back to a plain window and says why; the way out is `broctl apps allow <id>` for that app.

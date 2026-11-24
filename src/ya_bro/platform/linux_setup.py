@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -98,6 +99,47 @@ def extension_state(runner: Runner) -> Check:
     return Check("extension", "ok" if state == 1 else "warn", name)
 
 
+def _newest_ctime(root: Path) -> float:
+    return max((f.stat().st_ctime for f in root.rglob("*") if f.is_file()), default=0.0)
+
+
+def extension_code_check(
+    runner: Runner,
+    source: Path | None = None,
+    target: Path | None = None,
+    now: Callable[[], float] = time.time,
+) -> Check:
+    """Is the extension the shell runs the one in this checkout? GNOME on Wayland keeps the code it
+    loaded at login, and `broctl load` only says "already loaded", so an old copy goes unnoticed."""
+    source = source or extension_source()
+    target = target or extension_target()
+    if not target.is_dir():
+        return Check("extension code", "warn", "not installed", "run `broctl setup`")
+    if source is not None:
+        for f in sorted(source.rglob("*")):
+            if f.is_file() and f.name != "gschemas.compiled":
+                twin = target / f.relative_to(source)
+                if not twin.is_file() or twin.read_bytes() != f.read_bytes():
+                    return Check(
+                        "extension code",
+                        "warn",
+                        "the installed copy differs from this checkout",
+                        "run `broctl setup` (it copies the new files), then log out and in",
+                    )
+    rc, pid = runner(["pgrep", "-o", "-x", "gnome-shell"])
+    rc2, age = (
+        runner(["ps", "-o", "etimes=", "-p", pid.strip()]) if rc == 0 and pid.strip() else (1, "")
+    )
+    if rc2 == 0 and age.strip().isdigit() and _newest_ctime(target) > now() - int(age.strip()):
+        return Check(
+            "extension code",
+            "warn",
+            "installed after the running shell started, so the shell runs older code",
+            "log out and in (GNOME on Wayland cannot reload extension code)",
+        )
+    return Check("extension code", "ok", "current")
+
+
 def api_key(
     env: dict[str, str],
     store: keystore.Backend | None = None,
@@ -121,6 +163,7 @@ def run_all(
         session_type(env),
         *a11y_bus(runner),
         extension_state(runner),
+        *([extension_code_check(runner)] if real else []),  # reads this machine's files
         allowed_apps_check(runner),
         api_key(env, store, Path(".env") if real else Path(os.devnull)),
     ]

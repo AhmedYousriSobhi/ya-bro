@@ -504,6 +504,10 @@ def _load(wait_seconds: int = 120) -> int:
     from ya_bro.platform import linux_setup as ls
 
     if ls.extension_loaded(ls.run):
+        code = ls.extension_code_check(ls.run)
+        if code.status != "ok":
+            print(f"the Bro extension is loaded, but {code.detail}.\n  {code.fix}")
+            return 1
         print("the Bro extension is already loaded")
         return 0
     copied = ls.copy_to_clipboard(ls.run, ls.HOTLOAD_SNIPPET)
