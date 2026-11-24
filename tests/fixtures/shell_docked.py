@@ -63,6 +63,11 @@ async def main():
         sorted(buttons()) == ["Next", "Stop", "Why?"],
         str(sorted(buttons())),
     )
+    check("the bro's face is drawn", overlay._face.get_paintable() is not None, overlay.mood)
+    await overlay.show_step(None, "Done.", (), mood="happy")
+    check("and follows the mood", overlay.mood == "happy" and overlay._face.get_paintable())
+    await overlay.show_step(None, "(1/2) Press 7.", ("next", "why", "stop"), mood="not-a-mood")
+    check("an unknown mood falls back, never a path", overlay.mood == "idle", overlay.mood)
     win = next(w for w in sh.windows() if w["app_id"] == APP_ID)
     for _ in range(10):  # the first press after a window opens is spent on activating it
         sh.click(win["frame"][0] + 20, win["frame"][1] + 5)

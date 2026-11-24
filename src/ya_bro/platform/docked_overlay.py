@@ -8,6 +8,7 @@ Overlay contract the step loop already uses. Needs PyGObject and a GLib-driven a
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 import gi
 
@@ -19,6 +20,19 @@ from ya_bro.persona import is_rtl  # noqa: E402
 from ya_bro.types import Rect  # noqa: E402
 
 APP_ID = "io.github.ahmedyousrisobhi.YaBro.Docked"
+MOODS = ("idle", "pointing", "thinking", "happy", "teasing", "quiet")  # fixed list, never a path
+FACE_SIZE = 48
+
+
+def _assets() -> Path | None:
+    """The bro's SVGs ship with the extension (ADR-0028); the checkout copy is the source."""
+    here = Path(__file__).resolve()
+    for base in (here.parents[3], here.parents[2]):
+        if (base / "extension" / "assets" / "bro").is_dir():
+            return base / "extension" / "assets" / "bro"
+    return None
+
+
 LABELS = {
     "next": "Next",
     "repeat": "Repeat",
@@ -39,17 +53,23 @@ class DockedOverlay:
         self._copyable = ""
         self._win = Gtk.Window(title="Bro", resizable=False, default_width=360)
         self._win.set_hide_on_close(True)
+        self._assets = _assets()
+        self.mood = ""
+        self._face = Gtk.Picture(can_shrink=False, content_fit=Gtk.ContentFit.CONTAIN)
+        self._face.set_size_request(FACE_SIZE, FACE_SIZE)
+        self._face.set_valign(Gtk.Align.START)
         self._label = Gtk.Label(wrap=True, xalign=0, max_width_chars=44, selectable=False)
-        self._label.set_margin_start(12)
-        self._label.set_margin_end(12)
-        self._label.set_margin_top(12)
+        self._label.set_hexpand(True)
+        text = Gtk.Box(spacing=10, margin_start=12, margin_end=12, margin_top=12)
+        text.append(self._face)
+        text.append(self._label)
         self._snippet = Gtk.Label(xalign=0, selectable=True, visible=False, wrap=False)
         self._snippet.add_css_class("monospace")
         self._snippet.set_margin_start(12)
         self._snippet.set_margin_end(12)
         self._row = Gtk.Box(spacing=6, margin_start=12, margin_end=12, margin_bottom=12)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        box.append(self._label)
+        box.append(text)
         box.append(self._snippet)
         box.append(self._row)
         self._win.set_child(box)
@@ -96,6 +116,7 @@ class DockedOverlay:
     ) -> None:
         self.last_target = target
         self._label.set_text(bubble_text)
+        self._set_face(mood)
         self._snippet.set_text(snippet)
         self._snippet.set_direction(Gtk.TextDirection.LTR)
         self._snippet.set_visible(bool(snippet))
@@ -106,6 +127,11 @@ class DockedOverlay:
         if self._pump is None:
             self._pump = asyncio.get_running_loop().create_task(self._drive())
         self._win.present()  # takes focus: a docked window is the user's to use
+
+    def _set_face(self, mood: str) -> None:
+        self.mood = mood if mood in MOODS else ("pointing" if self.last_target else "idle")
+        svg = self._assets / f"{self.mood}.svg" if self._assets else None
+        self._face.set_filename(str(svg) if svg and svg.is_file() else None)
 
     async def _drive(self) -> None:
         # Measured: under the GLib asyncio loop GTK's Wayland source is not serviced while the

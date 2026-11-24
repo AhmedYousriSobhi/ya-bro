@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #134 face in the plain window
+Done: the docked window draws `extension/assets/bro/<mood>.svg` beside the text, an unknown mood falls back to idle, real-frame check with a mutation.
+Not done: a live look at it.
+
 ### 2026-11-24: #124 tab completion
 Done: `broctl completion bash|zsh` generated from the parser, setup offers to install it, real-bash tests with a mutation.
 Not done: value completion (pack, target, app ids), fish, a live shell trial.
@@ -40,7 +44,7 @@ Not done: a package for installing without a checkout, running-apps list, a live
 
 ### 2026-11-24: #131 which terminal am I in
 Done: `broctl doctor` `terminal` line (VTE window or embedded panel, with the fix), the plain-window message names the kind and the fix, the guide explains how to tell (`echo $VTE_VERSION`), doctor "extension code" uses mtimes so a re-run of setup is not a false alarm.
-Not done: Bro's face in the plain window; shell completion (#124).
+Not done: a live run in Ptyxis.
 
 ### 2026-11-24: #120 stale extension and fallback reason
 Done: doctor "extension code" check, `broctl load` refuses "already loaded" for old code, the pack walk-through says why it is not beside a terminal, docs corrected. Found by the maintainer's live run: old installed extension, old loaded code, and an Electron panel terminal.
