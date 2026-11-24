@@ -436,38 +436,6 @@ def test_the_title_goes_when_core_stops(tmp_path, runtime, spool):
         sh.close()
 
 
-def test_announce_makes_an_idle_terminal_set_the_title_now_and_changes_nothing_else(
-    tmp_path, runtime, spool
-):
-    from concurrent.futures import ThreadPoolExecutor
-
-    from ya_bro.terminal_write import TerminalWriter
-
-    spool.set_scope_token(TOKEN)
-    sh = Bash(tmp_path, runtime)
-    try:
-        sh.run("")  # a fresh prompt so the hook marks the terminal idle
-        writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: os.open(p, os.O_WRONLY))
-        with ThreadPoolExecutor(1) as ex:
-            fut = ex.submit(writer.announce)
-            seen = _answer(sh, None, 3.0)
-            assert fut.result(5) is True
-        seen += _drain(sh)
-        assert f"\x1b]2;ya-bro {TOKEN}\x07" in seen
-        tty = _tty_of(sh).split("/")[-1]
-        assert not (runtime / "ya-bro" / f"suggest.pts_{tty}").exists()
-        assert (runtime / "ya-bro" / f"suggest.pts_{tty}.result").read_text().strip() == "nothing"
-    finally:
-        sh.close()
-
-
-def test_announce_does_nothing_without_exactly_one_idle_terminal(tmp_path, runtime, spool):
-    from ya_bro.terminal_write import TerminalWriter
-
-    writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: 1 / 0)
-    assert writer.announce() is False  # no hook, no idle marker: nothing is opened
-
-
 def test_the_token_title_wins_over_a_distro_prompt_that_sets_its_own_title(
     tmp_path, runtime, spool
 ):
@@ -483,9 +451,41 @@ def test_the_token_title_wins_over_a_distro_prompt_that_sets_its_own_title(
         sh.close()
 
 
-def test_announce_nudges_every_idle_terminal(tmp_path, runtime, spool):
+def _writer(runtime, opener=lambda p: os.open(p, os.O_WRONLY)):
     from ya_bro.terminal_write import TerminalWriter
 
+    return TerminalWriter(runtime / "ya-bro", opener=opener)
+
+
+def test_set_title_puts_the_token_in_an_idle_terminals_title_and_nothing_else(
+    tmp_path, runtime, spool
+):
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")  # a fresh prompt so the hook marks the terminal
+        _drain(sh)
+        assert _writer(runtime).set_title(TOKEN) == 1
+        seen = _drain(sh)
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in seen
+        assert "\x1b[5n" not in seen  # no status query: nothing is asked of the shell
+    finally:
+        sh.close()
+
+
+def test_set_title_also_reaches_a_busy_terminal(tmp_path, runtime, spool):
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")
+        os.write(sh.fd, b"sleep 3\n")
+        time.sleep(0.6)  # the hook has marked it busy
+        _drain(sh)
+        assert _writer(runtime).set_title(TOKEN) == 1
+        assert f"\x1b]2;ya-bro {TOKEN}\x07" in _drain(sh)
+    finally:
+        sh.close()
+
+
+def test_set_title_reaches_every_hooked_terminal(tmp_path, runtime, spool):
     (tmp_path / "a").mkdir()
     (tmp_path / "b").mkdir()
     one, two = Bash(tmp_path / "a", runtime), Bash(tmp_path / "b", runtime)
@@ -498,8 +498,24 @@ def test_announce_nudges_every_idle_terminal(tmp_path, runtime, spool):
             opened.append(path)
             return os.open("/dev/null", os.O_WRONLY)
 
-        assert TerminalWriter(runtime / "ya-bro", opener=opener).announce() is True
+        assert _writer(runtime, opener).set_title(TOKEN) == 2
         assert sorted(opened) == sorted([_tty_of(one), _tty_of(two)])
     finally:
         one.close()
         two.close()
+
+
+def test_set_title_writes_nothing_without_a_hooked_terminal_or_with_a_bad_token(
+    tmp_path, runtime, spool
+):
+    def opener(path):
+        raise AssertionError("no terminal may be opened")
+
+    assert _writer(runtime, opener).set_title(TOKEN) == 0  # no hook, no marker
+    sh = Bash(tmp_path, runtime)
+    try:
+        sh.run("")
+        for bad in ("", "yb-short", TOKEN + "\x1b]0;x\x07", "x" * 35):
+            assert _writer(runtime, opener).set_title(bad) == 0
+    finally:
+        sh.close()
