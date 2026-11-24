@@ -102,7 +102,9 @@ def extension_state(runner: Runner) -> Check:
 def _newest_mtime(root: Path) -> float:
     # mtime, not ctime: copying files again (setup copies even unchanged ones) rewrites every ctime
     # but keeps the mtime, so a re-run of setup does not look like new code.
-    return max((f.stat().st_mtime for f in root.rglob("*") if f.is_file()), default=0.0)
+    # gschemas.compiled is rebuilt by every setup run and is not code the shell loads
+    files = (f for f in root.rglob("*") if f.is_file() and f.name != "gschemas.compiled")
+    return max((f.stat().st_mtime for f in files), default=0.0)
 
 
 def extension_code_check(

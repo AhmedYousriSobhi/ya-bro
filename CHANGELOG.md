@@ -5,6 +5,7 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 ## [Unreleased]
 
 ### Fixed
+- The doctor "extension code" check ignores `gschemas.compiled`, which every `broctl setup` rebuilds, so it no longer warns after a re-run of setup (#136).
 - The plain Bro window (used when no terminal is in scope) shows the bro's face and follows its mood, like the bubble beside a terminal (#134).
 - `broctl doctor` has a `terminal` line that says whether you are in a VTE terminal window (Ptyxis, GNOME Terminal, Console) or a panel inside another app, and the plain-window message says the same with the fix (#131). The "extension code" check compares modification times, so re-running `broctl setup` no longer looks like new code.
 
