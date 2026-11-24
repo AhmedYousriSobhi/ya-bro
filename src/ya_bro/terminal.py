@@ -63,6 +63,23 @@ def explain(packs: list[Pack], argv0: str, text: str) -> tuple[ErrorLine, Fixit]
     return None
 
 
+EMBEDDED_HINT = "its window title never changes, so Bro cannot tell which window it is"
+EMBEDDED_FIX = (
+    "open Ptyxis, GNOME Terminal or Console as its own window and run Bro there, "
+    "or allow the app with `broctl apps allow <id>`"
+)
+
+
+def terminal_kind(env: dict[str, str]) -> str:
+    """`window` for a VTE terminal (Ptyxis, GNOME Terminal, Console sets VTE_VERSION), else what it
+    looks like: a terminal inside VS Code, or one Bro cannot identify (an Electron app's panel)."""
+    if env.get("TERM_PROGRAM") == "vscode":
+        return "this is VS Code's terminal"
+    if env.get("VTE_VERSION"):
+        return "window"
+    return "this terminal is not a VTE window"
+
+
 def hook_block(script: Path) -> str:
     return f'{BEGIN}\n[ -r "{script}" ] && . "{script}"\n{END}\n'
 

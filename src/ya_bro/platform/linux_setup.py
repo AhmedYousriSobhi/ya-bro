@@ -16,7 +16,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from ya_bro import dirs, keystore
+from ya_bro import dirs, keystore, terminal
 
 EXT_UUID = "ya-bro@ahmedyousrisobhi.github.io"
 SCHEMA_IFACE = "org.gnome.desktop.interface"
@@ -99,8 +99,10 @@ def extension_state(runner: Runner) -> Check:
     return Check("extension", "ok" if state == 1 else "warn", name)
 
 
-def _newest_ctime(root: Path) -> float:
-    return max((f.stat().st_ctime for f in root.rglob("*") if f.is_file()), default=0.0)
+def _newest_mtime(root: Path) -> float:
+    # mtime, not ctime: copying files again (setup copies even unchanged ones) rewrites every ctime
+    # but keeps the mtime, so a re-run of setup does not look like new code.
+    return max((f.stat().st_mtime for f in root.rglob("*") if f.is_file()), default=0.0)
 
 
 def extension_code_check(
@@ -130,7 +132,7 @@ def extension_code_check(
     rc2, age = (
         runner(["ps", "-o", "etimes=", "-p", pid.strip()]) if rc == 0 and pid.strip() else (1, "")
     )
-    if rc2 == 0 and age.strip().isdigit() and _newest_ctime(target) > now() - int(age.strip()):
+    if rc2 == 0 and age.strip().isdigit() and _newest_mtime(target) > now() - int(age.strip()):
         return Check(
             "extension code",
             "warn",
@@ -138,6 +140,15 @@ def extension_code_check(
             "log out and in (GNOME on Wayland cannot reload extension code)",
         )
     return Check("extension code", "ok", "current")
+
+
+def terminal_check(env: dict[str, str]) -> Check:
+    """Can Bro tell this terminal's window? Only a terminal in its own window that follows the
+    shell's title (VTE: Ptyxis, GNOME Terminal, Console) works without allowing its app."""
+    kind = terminal.terminal_kind(env)
+    if kind == "window":
+        return Check("terminal", "ok", "a VTE terminal window: Bro can sit beside it")
+    return Check("terminal", "warn", f"{kind}: {terminal.EMBEDDED_HINT}", terminal.EMBEDDED_FIX)
 
 
 def api_key(
@@ -163,7 +174,7 @@ def run_all(
         session_type(env),
         *a11y_bus(runner),
         extension_state(runner),
-        *([extension_code_check(runner)] if real else []),  # reads this machine's files
+        *([terminal_check(env), extension_code_check(runner)] if real else []),  # this machine's
         allowed_apps_check(runner),
         api_key(env, store, Path(".env") if real else Path(os.devnull)),
     ]

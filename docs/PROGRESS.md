@@ -34,6 +34,10 @@ Not done: the live Ptyxis run after this fix, prompt frameworks that replace PS1
 Done: app list instead of a typed search, tools from packs as targets in setup, browser warning, default-yes for the two required steps and `--yes`, `uv tool install --editable .`, docs.
 Not done: a package for installing without a checkout, running-apps list, a live run of the new setup.
 
+### 2026-11-24: #131 which terminal am I in
+Done: `broctl doctor` `terminal` line (VTE window or embedded panel, with the fix), the plain-window message names the kind and the fix, the guide explains how to tell (`echo $VTE_VERSION`), doctor "extension code" uses mtimes so a re-run of setup is not a false alarm.
+Not done: Bro's face in the plain window; shell completion (#124).
+
 ### 2026-11-24: #120 stale extension and fallback reason
 Done: doctor "extension code" check, `broctl load` refuses "already loaded" for old code, the pack walk-through says why it is not beside a terminal, docs corrected. Found by the maintainer's live run: old installed extension, old loaded code, and an Electron panel terminal.
 Not done: the live Ptyxis trial of #115/#117, a way to scope embedded terminals other than allowing the whole app.

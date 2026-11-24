@@ -79,7 +79,9 @@ Bro's bubble, with its face, appears at the top-right of your terminal, one step
 | **Why?** | explains the step, or what went wrong |
 | **Stop** | ends everything (also **Super+Shift+Esc**) |
 
-When you run the command, Bro sees it finish and moves on by itself. Use a terminal that shows its title (Ptyxis, GNOME Terminal, Console). Terminals inside other apps, like VS Code's, are not supported; see the [workbench guide](workbench.md).
+When you run the command, Bro sees it finish and moves on by itself.
+
+**Which terminal am I in?** Use a terminal that is **its own window**: Ptyxis (called "Terminal" on Ubuntu 26.04), GNOME Terminal or Console. A terminal panel inside another app (VS Code, the Claude desktop app) does not work beside the window. To check, run `broctl doctor`: its `terminal` line says `ok` or what to do. By hand: `echo $VTE_VERSION` prints a number in a supported terminal and nothing in a panel. See the [workbench guide](workbench.md).
 
 ### On a desktop app (Calculator demo)
 
@@ -132,7 +134,7 @@ Run `broctl doctor` first; paste its output into an issue if you are stuck (it i
 |---|---|
 | `cannot reach the Bro extension` | Not loaded in this session: log out and in, then `broctl doctor` |
 | doctor says **extension code** is old | You updated Bro: run `broctl setup`, then log out and in |
-| The bubble is a plain box with no face, not beside the terminal | The terminal's title did not reach Bro. Check you ran `broctl hook install` and opened a **new** terminal; read `~/.local/state/ya-bro/companion.log` |
+| The bubble is a plain box with no face, not beside the terminal | Run `broctl doctor`: if its `terminal` line warns, you are in a panel inside another app; open Ptyxis or GNOME Terminal as its own window. Otherwise the terminal's title did not reach Bro: check you ran `broctl hook install` and opened a **new** terminal; read `~/.local/state/ya-bro/companion.log` |
 | `./scripts/...: No such file or directory` | You were in the wrong folder: run `broctl targets allow <tool> --command <cmd> --dir <folder>` so the walk-through starts with `cd` |
 | `no allowed window is open` | Open the allowed app; `broctl apps list` shows what is allowed |
 | Nothing appears and the run says `step_paused` | Click the allowed app's window: the ring shows only on the focused window |

@@ -359,3 +359,20 @@ def test_setup_asks_where_a_tool_runs_and_saves_the_folder(tmp_path, monkeypatch
         ask=lambda _: next(answers), runner=fake({}), say=lambda _: None, apps=[], tools=[wb]
     )
     assert targets.load_all()[0].dir == str(work)
+
+
+def test_a_rewritten_copy_with_old_mtimes_is_not_new_code(tmp_path):
+    import os
+
+    src = _tree(tmp_path / "src", {"overlay.js": "a"})
+    dst = _tree(tmp_path / "dst", {"overlay.js": "a"})
+    old = dst.stat().st_mtime - 5000
+    os.utime(dst / "overlay.js", (old, old))  # setup copied it again: ctime is new, mtime is not
+    assert ls.extension_code_check(_shell(100), src, dst).status == "ok"
+
+
+def test_terminal_check_tells_a_vte_window_from_an_embedded_terminal():
+    assert ls.terminal_check({"VTE_VERSION": "8003"}).status == "ok"
+    vs = ls.terminal_check({"VTE_VERSION": "8003", "TERM_PROGRAM": "vscode"})
+    assert vs.status == "warn" and "VS Code" in vs.detail and "Ptyxis" in vs.fix
+    assert ls.terminal_check({}).status == "warn"
