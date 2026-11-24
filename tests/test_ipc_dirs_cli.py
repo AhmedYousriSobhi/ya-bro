@@ -34,4 +34,4 @@ def test_cli_version(capsys):
     with pytest.raises(SystemExit) as e:
         main(["--version"])
     assert e.value.code == 0
-    assert "broctl 0.2.0" in capsys.readouterr().out
+    assert "broctl 0.3.0" in capsys.readouterr().out

@@ -4,6 +4,8 @@ All notable changes are documented here. Format: [Keep a Changelog](https://keep
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-25
+
 ### Fixed
 - The doctor "extension code" check ignores `gschemas.compiled`, which every `broctl setup` rebuilds, so it no longer warns after a re-run of setup (#136).
 - The plain Bro window (used when no terminal is in scope) shows the bro's face and follows its mood, like the bubble beside a terminal (#134).
