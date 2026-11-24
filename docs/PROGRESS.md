@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #120 stale extension and fallback reason
+Done: doctor "extension code" check, `broctl load` refuses "already loaded" for old code, the pack walk-through says why it is not beside a terminal, docs corrected. Found by the maintainer's live run: old installed extension, old loaded code, and an Electron panel terminal.
+Not done: the live Ptyxis trial of #115/#117, a way to scope embedded terminals other than allowing the whole app.
+
 ### 2026-11-24: #27 Do-it text entry
 Done: `Step.text`, validation, R2 confirm that shows the text, secret and password refusal, `EditableText` entry that never overwrites; unit tests and a real GTK4 run with a mutation.
 Not done: portal + libei, multi-line and rich text, Arabic in a real app, undo offer, live desktop.

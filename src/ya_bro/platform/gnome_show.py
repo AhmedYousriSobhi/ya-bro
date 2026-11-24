@@ -169,7 +169,7 @@ class _NoBridge:
 async def _hover(token: str = "", writer: TerminalWriter | None = None):
     """The bubble beside a terminal window the extension reports, else a plain window. The window is
     reported when its app is allowed, or, with a token, while a hooked shell shows it in the title
-    (ADR-0029 §8). Returns (overlay, bridge, hovering)."""
+    (ADR-0029 §8). Returns (overlay, bridge, hovering, why not)."""
     try:
         bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
         Gio.bus_own_name_on_connection(
@@ -183,11 +183,19 @@ async def _hover(token: str = "", writer: TerminalWriter | None = None):
                 await asyncio.to_thread(writer.announce)
         for _ in range(8 if token else 1):
             if bridge.raw_windows():
-                return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True
+                return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True, ""
             await asyncio.sleep(0.5)
-    except GLib.Error:
-        pass
-    return DockedOverlay(), _NoBridge(), False
+        why = (
+            "the extension reports no terminal window. Either it is an older build than this "
+            "checkout (run `broctl doctor`; after `broctl setup` log out and in), or this terminal "
+            "never showed Bro's title token: it needs the hook (`broctl hook install`, then a new "
+            "shell) and a window title that follows the shell (Ptyxis, GNOME Terminal and the like "
+            "do; embedded terminals such as VS Code's or an Electron app's do not: allow that app "
+            "with `broctl apps allow <id>`)"
+        )
+    except GLib.Error as e:
+        why = f"the Bro extension is not reachable ({e.message}); see `broctl doctor`"
+    return DockedOverlay(), _NoBridge(), False, why
 
 
 async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None) -> int:
@@ -223,16 +231,16 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
         if overlay is None:
             token = token_server.new_token()
             spool.set_scope_token(token)
-            overlay, bridge, hovering = await _hover(token, writer)
+            overlay, bridge, hovering, why = await _hover(token, writer)
         else:
-            bridge = _NoBridge()
-        return await _walk(plan, pack, pack_id, cfg, overlay, bridge, hovering, spool, writer)
+            bridge, why = _NoBridge(), ""
+        return await _walk(plan, pack, pack_id, cfg, overlay, bridge, hovering, spool, writer, why)
     finally:
         spool.close()
 
 
 async def _walk(  # noqa: PLR0913
-    plan: Plan, pack, pack_id: str, cfg, overlay, bridge, hovering: bool, spool, writer
+    plan: Plan, pack, pack_id: str, cfg, overlay, bridge, hovering: bool, spool, writer, why: str
 ) -> int:
     loop = StepLoop(
         _NoPerception(),
@@ -247,6 +255,8 @@ async def _walk(  # noqa: PLR0913
     )
     where = "beside your terminal" if hovering else "in a window"
     print(f"{len(plan.steps)} steps for {pack.name}, shown {where}. Stop or Esc ends it.")
+    if why:
+        print(f"Not beside your terminal: {why}.")
     print(f"finished: {await loop.run(plan, pack_id)}")
     return 0
 

@@ -67,6 +67,7 @@ git clone https://github.com/AhmedYousriSobhi/ya-bro.git && cd ya-bro
 uv sync
 uv run broctl setup          # pick ONE app to allow; asks before every change
 uv run broctl load           # loads the extension without logging out (3 steps it prints)
+                             # after an update: `broctl setup`, then log out and in (`broctl doctor` says when)
 gnome-calculator &           # then press C, and:
 uv run broctl show examples/plans/calculator.toml
 ```

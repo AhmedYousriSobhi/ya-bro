@@ -203,5 +203,64 @@ def test_hotload_snippet_is_one_line_and_names_the_extension():
 
 def test_broctl_load_is_noop_when_loaded(monkeypatch, capsys):
     monkeypatch.setattr(ls, "run", fake({"GetExtensionInfo": (0, "({'state': <1.0>},)")}))
+    monkeypatch.setattr(ls, "extension_code_check", lambda _r: ls.Check("extension code", "ok", ""))
     assert main(["load"]) == 0
     assert "already loaded" in capsys.readouterr().out
+
+
+# ---- a stale extension is noticed (#120) ----
+
+
+def _tree(root, files):
+    for name, text in files.items():
+        f = root / name
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text)
+    return root
+
+
+def _shell(age):
+    return fake({"pgrep": (0, "123\n"), "etimes=": (0, f"{age}\n")})
+
+
+def test_an_installed_copy_that_differs_from_the_checkout_is_reported(tmp_path):
+    src = _tree(tmp_path / "src", {"overlay.js": "new", "schemas/a.xml": "x"})
+    dst = _tree(tmp_path / "dst", {"overlay.js": "old", "schemas/a.xml": "x"})
+    c = ls.extension_code_check(_shell(10), src, dst)
+    assert c.status == "warn" and "differs" in c.detail and "broctl setup" in c.fix
+
+
+def test_a_file_missing_from_the_installed_copy_is_reported(tmp_path):
+    src = _tree(tmp_path / "src", {"overlay.js": "a", "assets/bro.svg": "b"})
+    dst = _tree(tmp_path / "dst", {"overlay.js": "a"})
+    assert ls.extension_code_check(_shell(10), src, dst).status == "warn"
+
+
+def test_code_installed_after_the_shell_started_needs_a_login(tmp_path):
+    src = _tree(tmp_path / "src", {"overlay.js": "a"})
+    dst = _tree(tmp_path / "dst", {"overlay.js": "a"})
+    c = ls.extension_code_check(_shell(1_000_000), src, dst)  # shell older than the files
+    assert c.status == "warn" and "log out" in c.fix
+
+
+def test_a_current_copy_older_than_the_shell_is_ok(tmp_path):
+    src = _tree(tmp_path / "src", {"overlay.js": "a"})
+    dst = _tree(tmp_path / "dst", {"overlay.js": "a"})
+    c = ls.extension_code_check(_shell(5), src, dst, now=lambda: dst.stat().st_ctime + 1000)
+    assert c.status == "ok"
+
+
+def test_not_installed_says_run_setup(tmp_path):
+    c = ls.extension_code_check(_shell(5), tmp_path / "src", tmp_path / "missing")
+    assert c.status == "warn" and "setup" in c.fix
+
+
+def test_load_says_when_the_loaded_extension_is_old(monkeypatch, capsys):
+    from ya_bro import cli
+
+    monkeypatch.setattr(ls, "extension_loaded", lambda _r: True)
+    monkeypatch.setattr(
+        ls, "extension_code_check", lambda _r: ls.Check("extension code", "warn", "old", "log out")
+    )
+    assert cli._load() == 1
+    assert "log out" in capsys.readouterr().out
