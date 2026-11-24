@@ -79,39 +79,45 @@ class TerminalWriter:
             return WriteResult(False, "I see more than one terminal; use Copy")
         return WriteResult(True)
 
+    def _devices(self) -> list[tuple[str, str]]:
+        """(tty name, device path) of each idle terminal that passes the checks."""
+        out = []
+        for tty in self.idle_terminals():
+            dev = "/dev/pts/" + tty.split("_")[1]
+            try:
+                st = os.stat(dev)
+            except OSError:
+                continue
+            if stat.S_ISCHR(st.st_mode) and st.st_uid == os.getuid():
+                out.append((tty, dev))
+        return out
+
     def _device(self) -> tuple[str, str] | WriteResult:
-        """(tty name, device path) of the one idle terminal, checked, or why not."""
+        """The one idle terminal, checked, or why not."""
         found = self.idle_terminals()
         if len(found) != 1:
             return WriteResult(False, "no single idle terminal")
-        tty = found[0]
-        dev = "/dev/pts/" + tty.split("_")[1]
-        try:
-            st = os.stat(dev)
-        except OSError:
-            return WriteResult(False, "that terminal is gone")
-        if not stat.S_ISCHR(st.st_mode) or st.st_uid != os.getuid():
-            return WriteResult(False, "that terminal is not yours")
-        return tty, dev
+        devices = self._devices()
+        if not devices:
+            return WriteResult(False, "that terminal is gone or not yours")
+        return devices[0]
 
     def announce(self) -> bool:
-        """Nudge the one idle terminal so its hook sets the scope token in the title now, not at the
-        next prompt. Same query and guards as write, with no suggestion; the line is left alone."""
-        target = self._device()
-        if isinstance(target, WriteResult):
-            return False
-        tty, dev = target
-        suggest = self._root / f"suggest.{tty}"
-        suggest.unlink(missing_ok=True)  # nothing stale may be inserted by this nudge
-        try:
-            tfd = self._open(dev)
+        """Nudge every idle terminal so its hook sets the scope token in the title now, not at the
+        next prompt. Same query and guards as write, with no suggestion; lines are left alone."""
+        sent = False
+        for tty, dev in self._devices():
+            (self._root / f"suggest.{tty}").unlink(missing_ok=True)  # nothing stale gets inserted
             try:
-                os.write(tfd, QUERY)
-            finally:
-                os.close(tfd)
-        except OSError:
-            return False
-        return True
+                tfd = self._open(dev)
+                try:
+                    os.write(tfd, QUERY)
+                finally:
+                    os.close(tfd)
+            except OSError:
+                continue
+            sent = True
+        return sent
 
     def write(self, command: str) -> WriteResult:
         check = self.can_write(command)
