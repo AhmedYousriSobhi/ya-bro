@@ -47,19 +47,45 @@ def test_extension_error_state():
     assert c.status == "warn" and c.detail == "ERROR"
 
 
-def test_setup_requires_explicit_yes(tmp_path):
+def _quiet(monkeypatch, tmp_path):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
+    monkeypatch.setattr(ls, "extension_target", lambda: tmp_path / "ext")
+    monkeypatch.setattr(ls, "extension_source", lambda: None)
+
+
+def test_setup_steps_default_to_yes_and_n_skips(tmp_path, monkeypatch):
+    _quiet(monkeypatch, tmp_path)
     runner = fake({})
     out = []
-    doctor.setup(ask=lambda _: "", runner=runner, say=out.append, apps=[])
-    assert runner.calls == []
-    assert sum(x.startswith("skipped") for x in out) == 2
-
-
-def test_setup_enables_a11y_on_yes():
-    runner = fake({"set org.gnome.desktop.interface": (0, "")})
-    answers = iter(["", "", "y", "n"])
-    doctor.setup(ask=lambda _: next(answers), runner=runner, say=lambda _: None, apps=[])
+    # consent: no, then nothing chosen, accessibility: Enter (yes), extension: n
+    answers = iter(["", "", "", "n"])
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[], tools=[])
     assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
+    assert sum(x.startswith("skipped") for x in out) == 1
+
+
+def test_setup_yes_flag_takes_the_two_steps_but_still_asks_consent(tmp_path, monkeypatch):
+    _quiet(monkeypatch, tmp_path)
+    runner = fake({"set org.gnome.desktop.interface": (0, "")})
+    asked = []
+
+    def ask(prompt):
+        asked.append(prompt)
+        return ""
+
+    doctor.setup(ask=ask, runner=runner, say=lambda _: None, apps=[], tools=[], assume_yes=True)
+    assert any("sending that to Claude" in p for p in asked)  # privacy stays a question
+    assert not any(p.startswith("Do this") for p in asked)
+    assert ["gsettings", "set", ls.SCHEMA_IFACE, "toolkit-accessibility", "true"] in runner.calls
+
+
+def test_setup_privacy_answers_still_default_to_no(tmp_path, monkeypatch):
+    from ya_bro import privacy
+
+    _quiet(monkeypatch, tmp_path)
+    doctor.setup(ask=lambda _: "", runner=fake({}), say=lambda _: None, apps=[], tools=[])
+    c = privacy.load_consent()
+    assert c.given and not c.send_to_llm and not c.screenshots
 
 
 def test_install_extension_copies_and_enables(tmp_path):
@@ -108,15 +134,69 @@ def test_allow_app_rejects_bad_ids(tmp_path):
 
 
 def test_setup_names_app_after_extension_install(tmp_path, monkeypatch):
-    monkeypatch.setattr(ls, "extension_target", lambda: tmp_path / "ext")
-    monkeypatch.setattr(ls, "extension_source", lambda: None)
-    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "cfg"))
+    _quiet(monkeypatch, tmp_path)
     runner = fake({"set org.gnome.shell.extensions.ya-bro": (0, "")})
     out = []
     gimp = desktop_apps.DesktopApp("org.gimp.GIMP", "GIMP", "")
-    answers = iter(["", "gimp", "1", "n", "y"])
-    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[gimp])
+    # consent n; "1" = an installed app; GIMP is in the list; two steps default yes
+    answers = iter(["", "1", "1", "", ""])
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[gimp], tools=[])
     assert any("see: org.gimp.GIMP" in x for x in out)
+    assert any("1. GIMP" in x for x in out)  # the list is shown without typing a search first
+
+
+def test_app_list_pages_filters_and_skips():
+    apps = [desktop_apps.DesktopApp(f"org.x.App{n}", f"App {n:02}", "") for n in range(40)]
+    out = []
+    answers = iter(["", "", "q"])  # next page, next page, skip
+    assert doctor.choose_app(lambda _: next(answers), out.append, apps) == ""
+    assert any("App 15" in x for x in out) and any("App 30" in x for x in out)
+    out.clear()
+    answers = iter(["app 3", "2"])  # filter, then the second hit
+    assert doctor.choose_app(lambda _: next(answers), out.append, apps) == "org.x.App31"
+
+
+def test_a_browser_needs_a_second_yes_and_points_at_the_tool_route():
+    ff = desktop_apps.DesktopApp("firefox_firefox", "Firefox", "")
+    out = []
+    answers = iter(["1", "n", "q"])  # pick Firefox, refuse the warning, leave
+    assert doctor.choose_app(lambda _: next(answers), out.append, [ff]) == ""
+    assert any("EVERY Firefox window" in x and "tool" in x for x in out)
+    answers = iter(["1", "y"])
+    assert doctor.choose_app(lambda _: next(answers), out.append, [ff]) == "firefox_firefox"
+
+
+def test_a_tool_is_allowed_as_a_target_not_an_app(tmp_path, monkeypatch):
+    from ya_bro import targets
+
+    _quiet(monkeypatch, tmp_path)
+    runner = fake({})
+    out = []
+    wb = doctor.Tool("workbench", "workbench", ("benchctl",))
+    # consent n; pick the tool (1); web page; accessibility and extension default yes
+    answers = iter(["", "1", "http://127.0.0.1:8080", "", ""])
+    doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[], tools=[wb])
+    t = targets.load_all()[0]
+    assert (t.id, t.origins, t.commands) == ("workbench", ("http://127.0.0.1:8080",), ("benchctl",))
+    assert not any(
+        c[:3] == ["gsettings", "set", "org.gnome.shell.extensions.ya-bro"] for c in runner.calls
+    )
+
+
+def test_a_bad_tool_address_is_refused_without_saving(tmp_path, monkeypatch):
+    from ya_bro import targets
+
+    _quiet(monkeypatch, tmp_path)
+    out = []
+    wb = doctor.Tool("workbench", "workbench", ("benchctl",))
+    answers = iter(["", "1", "http://x/path?secret=1", "", ""])
+    doctor.setup(ask=lambda _: next(answers), runner=fake({}), say=out.append, apps=[], tools=[wb])
+    assert targets.load_all() == [] and any("not saved" in x for x in out)
+
+
+def test_real_packs_offer_workbench_as_a_tool():
+    t = {x.id: x for x in doctor.tool_packs()}
+    assert t["workbench"].commands == ("benchctl",)
 
 
 def test_doctor_warns_when_no_app_allowed(tmp_path):
@@ -178,13 +258,13 @@ def test_picker_search_and_pick_by_number():
 
 
 def test_picker_uses_window_class_when_present():
-    assert run_picker(["chrom", "1"])[0] == "chromium-browser"
+    assert run_picker(["chrom", "1", "y"])[0] == "chromium-browser"  # a browser: second yes
 
 
-def test_picker_empty_skips_and_bad_number_searches_again():
-    assert run_picker([""])[0] == ""
-    app, _ = run_picker(["calc", "9", "calc", "1"])
-    assert app == "org.gnome.Calculator"
+def test_picker_q_skips_and_a_bad_number_asks_again():
+    assert run_picker(["q"])[0] == ""
+    app, out = run_picker(["calc", "9", "1"])
+    assert app == "org.gnome.Calculator" and any("not on this page" in x for x in out)
 
 
 def test_picker_no_match_then_trusts_typed_id():
@@ -192,8 +272,9 @@ def test_picker_no_match_then_trusts_typed_id():
     assert app == "org.example.Known" and any("no installed app" in x for x in out)
 
 
-def test_picker_enter_takes_the_only_match():
-    assert run_picker(["gimp", ""])[0] == "org.gimp.GIMP"
+def test_picker_enter_on_the_last_page_starts_over_instead_of_picking():
+    app, out = run_picker(["gimp", "", "1"])
+    assert app == "org.gimp.GIMP" and sum("GIMP" in x for x in out) >= 2
 
 
 def test_hotload_snippet_is_one_line_and_names_the_extension():

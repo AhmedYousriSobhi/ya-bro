@@ -65,11 +65,12 @@ You need Ubuntu 26.04 (or any GNOME 50 desktop) on **Wayland**, `uv`, and `sudo 
 ```bash
 git clone https://github.com/AhmedYousriSobhi/ya-bro.git && cd ya-bro
 uv sync
-uv run broctl setup          # pick ONE app to allow; asks before every change
-uv run broctl load           # loads the extension without logging out (3 steps it prints)
+uv tool install --editable .   # puts `broctl` on your PATH (~/.local/bin): no more `uv run`; keep this checkout
+broctl setup                 # pick tools and/or one app; the two required steps default to yes (`--yes` skips asking)
+broctl load           # loads the extension without logging out (3 steps it prints)
                              # after an update: `broctl setup`, then log out and in (`broctl doctor` says when)
 gnome-calculator &           # then press C, and:
-uv run broctl show examples/plans/calculator.toml
+broctl show examples/plans/calculator.toml
 ```
 
 Click the Calculator window and follow the ring. The full walkthrough, with what each prompt means and fixes for common problems, is the **[user guide](docs/guides/getting-started.md)**.
