@@ -107,3 +107,26 @@ def test_a_step_text_needs_a_target_and_one_printable_line(tmp_path):
     )
     with pytest.raises(plans.PlanError, match="target"):
         plans.load(no_target)
+
+
+def test_a_relative_command_gets_a_go_to_the_folder_step_first(tmp_path):
+    from ya_bro.types import Plan, Step
+
+    plan = Plan("g", [Step("a", "Run.", command="./scripts/benchctl plan"), Step("b", "Run.")])
+    out = plans.with_folder_step(plan, "workbench", "/home/me/my tool")
+    assert [s.command for s in out.steps] == [
+        "cd '/home/me/my tool'",  # quoted: a folder with a space still works
+        "./scripts/benchctl plan",
+        "",
+    ]
+    assert "workbench" in out.steps[0].narration
+    assert plan.steps[0].command == "./scripts/benchctl plan"  # the original is untouched
+
+
+def test_no_folder_or_an_absolute_command_leaves_the_plan_alone():
+    from ya_bro.types import Plan, Step
+
+    rel = Plan("g", [Step("a", "Run.", command="./x")])
+    assert plans.with_folder_step(rel, "t", "") is rel
+    absolute = Plan("g", [Step("a", "Run.", command="benchctl plan")])
+    assert plans.with_folder_step(absolute, "t", "/home/me") is absolute

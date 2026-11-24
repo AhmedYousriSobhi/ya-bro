@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #129 tell the user where the tool lives
+Done: `dir` on targets, `targets allow --dir`, the setup question, the go-to-folder first step, tests incl. the real frame.
+Not done: guessing the folder, a live run.
+
 ### 2026-11-24: #127 core keeps the title token alive
 Done: `TerminalWriter.set_title`, a once-a-second keeper while a run lasts, nudge removed; probes on live Ptyxis (prompt emission stays, one-time title is replaced).
 Not done: a live run of the whole walk-through in Ptyxis, blink-free scoping (needs extension grace period).

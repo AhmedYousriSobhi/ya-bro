@@ -27,6 +27,7 @@ from ya_bro import (  # noqa: E402
     plans,
     privacy,
     shell_command,
+    targets,
     token_server,
 )
 from ya_bro.command_watch import CommandWatch  # noqa: E402
@@ -218,6 +219,8 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
     except plans.PlanError as e:
         print(f"{e}. Tasks in {pack_id}: {', '.join(sorted(pack.tasks))}")
         return 1
+    folder = next((t.dir for t in targets.load_all() if t.id == pack_id and t.dir), "")
+    plan = plans.with_folder_step(plan, pack.name, folder)
     cfg = config.load(pack_id)
     hovering = False
     # The hook records only the commands this plan shows, and only while this run lasts. Its title

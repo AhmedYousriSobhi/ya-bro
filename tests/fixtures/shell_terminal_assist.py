@@ -21,7 +21,7 @@ import gi  # noqa: E402
 import gi.events  # noqa: E402
 from shellkit import Shell, find_pixels  # noqa: E402
 
-from ya_bro import terminal  # noqa: E402
+from ya_bro import targets, terminal  # noqa: E402
 from ya_bro.platform.gnome_adapters import AtspiPerception, GnomeBridge  # noqa: E402
 from ya_bro.platform.gnome_show import run_pack  # noqa: E402
 
@@ -74,6 +74,10 @@ def buttons(sh):
     return [((a + b) / 2 / r, y) for a, b in runs]
 
 
+async def _a(text, out):
+    return text in out.getvalue()
+
+
 def shot(sh, name):
     if SHOTS:
         os.makedirs(SHOTS, exist_ok=True)
@@ -88,7 +92,7 @@ async def main():
     fake.chmod(0o755)
     rc = work / "rc"
     # Ubuntu's .bashrc puts its own title (OSC 0) at the start of PS1; it is drawn after PROMPT_COMMAND
-    rc.write_text(f"PS1='\\[\\e]0;\\u@\\h: \\w\\a\\]YBP$ '\ncd {work}\n. {HOOK}\n")
+    rc.write_text(f"PS1='\\[\\e]0;\\u@\\h: \\w\\a\\]YBP$ '\n. {HOOK}\n")
     env = dict(os.environ, GTK_A11Y="atspi")
     env.pop("DISPLAY", None)
     term = subprocess.Popen(
@@ -96,6 +100,9 @@ async def main():
          "bash", "--noprofile", "--rcfile", str(rc), "-i"],
         env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
     )  # fmt: skip
+    # The tool's folder is known (broctl targets allow --dir), so the walk-through starts with `cd`.
+    targets.save(targets.Target("workbench", (), ("benchctl",), str(work)))
+    go = f"cd {work}"
     sh = Shell()
     sh.start_input()
     perception = AtspiPerception(GnomeBridge(sh.conn))
@@ -139,7 +146,7 @@ async def main():
         sh.key("ctrl", False)
 
         async def pasted():
-            return "./scripts/benchctl plan" in await prompt_text()
+            return go in await prompt_text()
 
         check("Copy puts the command on the clipboard", await until(pasted, 10))
         shot(sh, "2-after-copy-and-paste.png")
@@ -154,7 +161,7 @@ async def main():
 
         async def written():
             t = await prompt_text()
-            return t.rstrip().endswith("./scripts/benchctl plan")
+            return t.rstrip().endswith(go)
 
         check("Write it puts the command at the prompt", await until(written, 10))
         check(
@@ -171,12 +178,31 @@ async def main():
             return "command_ran step=0" in out.getvalue()
 
         check(
-            "Enter runs it and the step finishes by itself",
+            "Enter runs the cd and the step finishes by itself",
             await until(advanced, 15),
             out.getvalue()[-200:],
         )
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(2)
         shot(sh, "4-next-step.png")
+
+        # the next step is the real command, which only works from that folder
+        cmd = "./scripts/benchctl plan"
+        sh.click(*buttons(sh)[1])
+
+        async def written_cmd():
+            return (await prompt_text()).rstrip().endswith(cmd)
+
+        check("Write it puts the real command at the prompt", await until(written_cmd, 10))
+        sh.tap(0xFF0D)
+
+        async def ran():
+            return "benchctl-ran plan" in await prompt_text()
+
+        check("it runs from the tool's folder", await until(ran, 10))
+        check(
+            "and that step finishes by itself too",
+            await until(lambda: _a("command_ran step=1", out), 10),
+        )
         task.cancel()
     term.terminate()
 

@@ -6,6 +6,7 @@ One file per target in `$XDG_CONFIG_HOME/ya-bro/targets/<id>.toml`; having the f
 from __future__ import annotations
 
 import json
+import os
 import re
 import tomllib
 from dataclasses import dataclass, field
@@ -16,6 +17,8 @@ from ya_bro import dirs
 _ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}")
 _ORIGIN = re.compile(r"https?://(?:[A-Za-z0-9.-]{1,253}|\[[0-9a-fA-F:]{2,39}\])(?::\d{1,5})?")
 _COMMAND = re.compile(r"[A-Za-z0-9_.-]{1,32}")
+_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+MAX_DIR = 150
 
 
 class TargetError(ValueError):
@@ -27,6 +30,7 @@ class Target:
     id: str
     origins: tuple[str, ...] = field(default_factory=tuple)
     commands: tuple[str, ...] = field(default_factory=tuple)
+    dir: str = ""  # the folder the commands run from (absolute), so Bro can say where to go
 
 
 def _clean(target: Target) -> Target:
@@ -41,7 +45,17 @@ def _clean(target: Target) -> Target:
             raise TargetError(f"bad command name {command!r}")
     if not origins and not target.commands:
         raise TargetError("a target needs at least one --origin or --command")
-    return Target(target.id, tuple(dict.fromkeys(origins)), tuple(dict.fromkeys(target.commands)))
+    folder = ""
+    if target.dir:
+        folder = os.path.expanduser(target.dir)
+        if not os.path.isabs(folder) or len(folder) > MAX_DIR or _CONTROL.search(folder):
+            raise TargetError(f"bad folder {target.dir!r}: use one absolute path")
+    return Target(
+        target.id,
+        tuple(dict.fromkeys(origins)),
+        tuple(dict.fromkeys(target.commands)),
+        os.path.normpath(folder) if folder else "",
+    )
 
 
 def _dir(config_dir: Path | None) -> Path:
@@ -50,6 +64,8 @@ def _dir(config_dir: Path | None) -> Path:
 
 def save(target: Target, config_dir: Path | None = None) -> Path:
     t = _clean(target)
+    if t.dir and not os.path.isdir(t.dir):
+        raise TargetError(f"folder {t.dir} does not exist")
     path = _dir(config_dir) / f"{t.id}.toml"
     path.parent.mkdir(parents=True, exist_ok=True)
     lines = ["[target]", f"id = {json.dumps(t.id)}"]
@@ -57,6 +73,8 @@ def save(target: Target, config_dir: Path | None = None) -> Path:
         lines += ["[web]", f"origins = {json.dumps(list(t.origins))}"]
     if t.commands:
         lines += ["[cli]", f"commands = {json.dumps(list(t.commands))}"]
+        if t.dir:
+            lines.append(f"dir = {json.dumps(t.dir)}")
     path.write_text("\n".join(lines) + "\n")
     return path
 
@@ -83,6 +101,7 @@ def load_all(config_dir: Path | None = None) -> list[Target]:
                         data["target"]["id"],
                         tuple(data.get("web", {}).get("origins", ())),
                         tuple(data.get("cli", {}).get("commands", ())),
+                        data.get("cli", {}).get("dir", ""),
                     )
                 )
             )

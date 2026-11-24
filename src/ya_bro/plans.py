@@ -16,7 +16,9 @@ risk = 0
 
 from __future__ import annotations
 
+import shlex
 import tomllib
+from dataclasses import replace
 from pathlib import Path
 
 from ya_bro import shell_command
@@ -141,3 +143,18 @@ def rebind(plan: Plan, app_id: str) -> Plan:
         replace(s, target=replace(s.target, app_id=app_id)) if s.target else s for s in plan.steps
     ]
     return Plan(plan.goal, steps, plan.extents_offset)
+
+
+def with_folder_step(plan: Plan, name: str, folder: str) -> Plan:
+    """Commands such as `./scripts/benchctl` only work from the tool's folder: when the user told
+    Bro where that is (`broctl targets allow --dir`), the first step is to go there."""
+    first = next((s.command for s in plan.steps if s.command), "")
+    if not folder or not first.startswith("./"):
+        return plan
+    go = Step(
+        intent="go to the tool's folder",
+        narration=f"First go to the {name} folder (press Next if you are already there).",
+        command=f"cd {shlex.quote(folder)}",
+        why="The commands that follow are relative to that folder.",
+    )
+    return replace(plan, steps=[go, *plan.steps])

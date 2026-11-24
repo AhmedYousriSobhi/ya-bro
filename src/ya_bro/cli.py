@@ -42,12 +42,15 @@ def _targets(args: argparse.Namespace) -> int:
             found = targets.load_all()
             for t in found:
                 web, cli = ", ".join(t.origins) or "-", ", ".join(t.commands) or "-"
-                print(f"{t.id}\tweb: {web}\tcli: {cli}")
+                where = f"\tdir: {t.dir}" if t.dir else ""
+                print(f"{t.id}\tweb: {web}\tcli: {cli}{where}")
             if not found:
                 print("no targets: Bro sees no web page or command")
             return 0
         if args.verb == "allow":
-            path = targets.save(targets.Target(args.id, tuple(args.origin), tuple(args.command)))
+            path = targets.save(
+                targets.Target(args.id, tuple(args.origin), tuple(args.command), args.dir)
+            )
             print(f"allowed {args.id} ({path})")
             if args.origin:
                 from ya_bro.token_server import DEFAULT_PORT
@@ -561,6 +564,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     allow.add_argument(
         "--command", action="append", default=[], help="CLI command name, e.g. benchctl"
+    )
+    allow.add_argument(
+        "--dir", default="", help="folder its commands run from, so Bro can say where to go"
     )
     tverbs.add_parser("revoke", help="stop allowing a target").add_argument("id")
     ask = sub.add_parser("ask", help="say what you want to do; Bro plans it and walks you through")

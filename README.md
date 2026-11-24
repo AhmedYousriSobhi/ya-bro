@@ -99,7 +99,7 @@ A small **GNOME Shell extension** draws the ring, the bubble and the bro, and re
 - **Screen text is data, not orders.** Words on a page never change what the bro does.
 - **Content-free monitoring.** Logs, the shell hook and the struggle detector keep event types and counts only, never typed text or screen content, and the detector is off for every app until you turn it on.
 - **Kill switch and receipts.** `broctl panic` stops every Bro process even if the core is frozen, `broctl sent` lists each request that left your machine (kind and size, never content), `broctl forget` deletes what it logged, and dots under the bro show when it is watching, listening, sending or acting.
-- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's code, not by the OS ([details](docs/guides/getting-started.md#9-privacy-what-ya-bro-can-see)).
+- **Honest limit.** The GNOME accessibility switch is desktop-wide and the extension runs inside the shell, so the one-app rule is enforced by Bro's code, not by the OS ([details](docs/guides/getting-started.md#7-privacy-what-bro-can-see)).
 
 ## The `broctl` command
 
@@ -123,7 +123,7 @@ Configuration lives in `~/.config/ya-bro/config.toml` (for example `humour = 0` 
 
 | | |
 |---|---|
-| [User guide](docs/guides/getting-started.md) | Setup and first run |
+| [User guide](docs/guides/getting-started.md) | Install, set up, first walk-through, fixes: written for someone who has never seen Bro |
 | [SPEC.md](SPEC.md) | What we are building and why |
 | [docs/adr/](docs/adr/README.md) | Architecture decisions, risks, build plan |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | What is done and what is not |

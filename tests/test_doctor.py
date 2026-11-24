@@ -174,7 +174,7 @@ def test_a_tool_is_allowed_as_a_target_not_an_app(tmp_path, monkeypatch):
     out = []
     wb = doctor.Tool("workbench", "workbench", ("benchctl",))
     # consent n; pick the tool (1); web page; accessibility and extension default yes
-    answers = iter(["", "1", "http://127.0.0.1:8080", "", ""])
+    answers = iter(["", "1", "http://127.0.0.1:8080", "", "", ""])  # web page, folder: none
     doctor.setup(ask=lambda _: next(answers), runner=runner, say=out.append, apps=[], tools=[wb])
     t = targets.load_all()[0]
     assert (t.id, t.origins, t.commands) == ("workbench", ("http://127.0.0.1:8080",), ("benchctl",))
@@ -189,7 +189,7 @@ def test_a_bad_tool_address_is_refused_without_saving(tmp_path, monkeypatch):
     _quiet(monkeypatch, tmp_path)
     out = []
     wb = doctor.Tool("workbench", "workbench", ("benchctl",))
-    answers = iter(["", "1", "http://x/path?secret=1", "", ""])
+    answers = iter(["", "1", "http://x/path?secret=1", "", "", ""])
     doctor.setup(ask=lambda _: next(answers), runner=fake({}), say=out.append, apps=[], tools=[wb])
     assert targets.load_all() == [] and any("not saved" in x for x in out)
 
@@ -345,3 +345,17 @@ def test_load_says_when_the_loaded_extension_is_old(monkeypatch, capsys):
     )
     assert cli._load() == 1
     assert "log out" in capsys.readouterr().out
+
+
+def test_setup_asks_where_a_tool_runs_and_saves_the_folder(tmp_path, monkeypatch):
+    from ya_bro import targets
+
+    _quiet(monkeypatch, tmp_path)
+    work = tmp_path / "opti-sim"
+    work.mkdir()
+    wb = doctor.Tool("workbench", "workbench", ("benchctl",))
+    answers = iter(["", "1", "", str(work), "", ""])  # consent n, tool, no web page, folder, steps
+    doctor.setup(
+        ask=lambda _: next(answers), runner=fake({}), say=lambda _: None, apps=[], tools=[wb]
+    )
+    assert targets.load_all()[0].dir == str(work)
