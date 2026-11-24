@@ -18,6 +18,10 @@ Legend: done · in progress · todo
 | v0.15 Do-it / v0.2 KWin + voice | in progress | #27 (AT-SPI Do-it in the step loop done; portal + libei, text entry open), #28, #29, #30 |
 
 ## Log
+### 2026-11-24: #127 core keeps the title token alive
+Done: `TerminalWriter.set_title`, a once-a-second keeper while a run lasts, nudge removed; probes on live Ptyxis (prompt emission stays, one-time title is replaced).
+Not done: a live run of the whole walk-through in Ptyxis, blink-free scoping (needs extension grace period).
+
 ### 2026-11-24: #125 title token under Ubuntu's prompt
 Done: the token title is emitted from the end of PS1, the nudge reaches every idle terminal, tests use Ubuntu's prompt (hook and real frame, both with mutations).
 Not done: the live Ptyxis run after this fix, prompt frameworks that replace PS1, the face in the plain-window fallback.

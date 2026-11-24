@@ -166,7 +166,7 @@ class _NoBridge:
         return self._win
 
 
-async def _hover(token: str = "", writer: TerminalWriter | None = None):
+async def _hover(token: str = ""):
     """The bubble beside a terminal window the extension reports, else a plain window. The window is
     reported when its app is allowed, or, with a token, while a hooked shell shows it in the title
     (ADR-0029 §8). Returns (overlay, bridge, hovering, why not)."""
@@ -179,8 +179,6 @@ async def _hover(token: str = "", writer: TerminalWriter | None = None):
         bridge = GnomeBridge(bus)
         if token:
             _call(bus, BRIDGE, "SetScopeTokens", GLib.Variant("(as)", ([token],)))
-            if writer is not None:
-                await asyncio.to_thread(writer.announce)
         for _ in range(8 if token else 1):
             if bridge.raw_windows():
                 return GnomeOverlay(bus, bridge, corner="top-right"), bridge, True, ""
@@ -227,16 +225,28 @@ async def run_pack(pack_id: str, goal: str, overlay: DockedOverlay | None = None
     spool = ShellSpool()
     spool.open(sorted({shell_command.argv0(s.command) for s in plan.steps if s.command}))
     writer = TerminalWriter()
+    keeper = None
     try:
         if overlay is None:
             token = token_server.new_token()
             spool.set_scope_token(token)
-            overlay, bridge, hovering, why = await _hover(token, writer)
+            keeper = asyncio.create_task(_keep_title(writer, token))
+            overlay, bridge, hovering, why = await _hover(token)
         else:
             bridge, why = _NoBridge(), ""
         return await _walk(plan, pack, pack_id, cfg, overlay, bridge, hovering, spool, writer, why)
     finally:
+        if keeper:
+            keeper.cancel()
         spool.close()
+
+
+async def _keep_title(writer: TerminalWriter, token: str) -> None:
+    """The terminal is in scope only while its title carries the token, and Ptyxis resets a title
+    that was set once, so core re-sets it every second for as long as the run lasts."""
+    while True:
+        await asyncio.to_thread(writer.set_title, token)
+        await asyncio.sleep(1.0)
 
 
 async def _walk(  # noqa: PLR0913

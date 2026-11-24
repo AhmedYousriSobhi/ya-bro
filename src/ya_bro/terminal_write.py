@@ -25,6 +25,7 @@ from ya_bro import dirs, policy, shell_command
 from ya_bro.types import Risk
 
 _MARK = re.compile(r"prompt\.(pts_\d{1,6})$")
+_TOKEN = re.compile(r"yb-[0-9a-f]{32}")  # token_server.new_token()
 QUERY = b"\x1b[5n"  # the terminal answers ESC [ 0 n
 
 
@@ -51,8 +52,9 @@ class TerminalWriter:
         self._open = opener
         self._wait = wait
 
-    def idle_terminals(self) -> list[str]:
-        """ttys (like `pts_3`) whose hook says the prompt shows, shell alive and still attached."""
+    def _hooked(self, states: tuple[str, ...]) -> list[str]:
+        """ttys (like `pts_3`) whose hook marked them in one of `states`, shell alive and still
+        attached to that tty."""
         out = []
         for mark in sorted(self._root.glob("prompt.pts_*")):
             m = _MARK.search(mark.name)
@@ -63,9 +65,13 @@ class TerminalWriter:
                 alive = os.readlink(f"/proc/{pid_n}/fd/0") == tty
             except (OSError, ValueError):
                 continue
-            if m and state == "idle" and alive:
+            if m and state in states and alive:
                 out.append(m.group(1))
         return out
+
+    def idle_terminals(self) -> list[str]:
+        """Terminals whose hook says the prompt shows."""
+        return self._hooked(("idle",))
 
     def can_write(self, command: str) -> WriteResult:
         if not shell_command.valid(command):
@@ -79,10 +85,10 @@ class TerminalWriter:
             return WriteResult(False, "I see more than one terminal; use Copy")
         return WriteResult(True)
 
-    def _devices(self) -> list[tuple[str, str]]:
-        """(tty name, device path) of each idle terminal that passes the checks."""
+    def _devices(self, ttys: list[str] | None = None) -> list[tuple[str, str]]:
+        """(tty name, device path) of each given terminal (default: idle) that passes the checks."""
         out = []
-        for tty in self.idle_terminals():
+        for tty in self.idle_terminals() if ttys is None else ttys:
             dev = "/dev/pts/" + tty.split("_")[1]
             try:
                 st = os.stat(dev)
@@ -102,22 +108,26 @@ class TerminalWriter:
             return WriteResult(False, "that terminal is gone or not yours")
         return devices[0]
 
-    def announce(self) -> bool:
-        """Nudge every idle terminal so its hook sets the scope token in the title now, not at the
-        next prompt. Same query and guards as write, with no suggestion; lines are left alone."""
-        sent = False
-        for tty, dev in self._devices():
-            (self._root / f"suggest.{tty}").unlink(missing_ok=True)  # nothing stale gets inserted
+    def set_title(self, token: str) -> int:
+        """Put the scope token in the title of every hooked terminal (ADR-0029 §8); returns how
+        many were written. Output only: nothing enters the shell's input, so a busy terminal is as
+        safe as an idle one. Called again every second because some terminals (Ptyxis) reset a
+        title that is set only once."""
+        if not _TOKEN.fullmatch(token):
+            return 0
+        seq = f"\x1b]2;ya-bro {token}\x07".encode()
+        written = 0
+        for _tty, dev in self._devices(self._hooked(("idle", "busy"))):
             try:
                 tfd = self._open(dev)
                 try:
-                    os.write(tfd, QUERY)
+                    os.write(tfd, seq)
                 finally:
                     os.close(tfd)
             except OSError:
                 continue
-            sent = True
-        return sent
+            written += 1
+        return written
 
     def write(self, command: str) -> WriteResult:
         check = self.can_write(command)
