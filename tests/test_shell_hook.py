@@ -2,6 +2,7 @@
 
 import os
 import pty
+import re
 import select
 import shutil
 import stat
@@ -17,6 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "shell" / "ya-bro.bash"
 PROMPT = "YBP$ "
 pytestmark = pytest.mark.skipif(shutil.which("bash") is None, reason="bash not installed")
+
+
+def _plain(text: str) -> str:
+    """Output without title sequences, which the hook may leave after the prompt."""
+    return re.sub(r"\x1b\][02];[^\x07]*\x07", "", text)
 
 
 class Bash:
@@ -49,7 +55,7 @@ class Bash:
     def read_until_prompt(self, timeout: float = 10.0) -> str:
         end = time.monotonic() + timeout
         buf = ""
-        while not buf.endswith(PROMPT):
+        while not _plain(buf).endswith(PROMPT):
             if time.monotonic() > end:
                 raise TimeoutError(f"no prompt; got {buf!r}")
             if select.select([self.fd], [], [], 0.1)[0]:
@@ -460,3 +466,40 @@ def test_announce_does_nothing_without_exactly_one_idle_terminal(tmp_path, runti
 
     writer = TerminalWriter(runtime / "ya-bro", opener=lambda p: 1 / 0)
     assert writer.announce() is False  # no hook, no idle marker: nothing is opened
+
+
+def test_the_token_title_wins_over_a_distro_prompt_that_sets_its_own_title(
+    tmp_path, runtime, spool
+):
+    spool.set_scope_token(TOKEN)
+    ubuntu = "PS1='\\[\\e]0;\\u@\\h: \\w\\a\\]'\"$PS1\""  # what Ubuntu's .bashrc does
+    sh = Bash(tmp_path, runtime, rc=ubuntu)
+    try:
+        out = sh.run("true")
+        titles = re.findall(r"\x1b\][02];([^\x07]*)\x07", out)
+        assert len(titles) >= 2  # the distro's title and ours
+        assert titles[-1] == f"ya-bro {TOKEN}"  # ours is the one left on the window
+    finally:
+        sh.close()
+
+
+def test_announce_nudges_every_idle_terminal(tmp_path, runtime, spool):
+    from ya_bro.terminal_write import TerminalWriter
+
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    one, two = Bash(tmp_path / "a", runtime), Bash(tmp_path / "b", runtime)
+    try:
+        one.run("")
+        two.run("")
+        opened = []
+
+        def opener(path):
+            opened.append(path)
+            return os.open("/dev/null", os.O_WRONLY)
+
+        assert TerminalWriter(runtime / "ya-bro", opener=opener).announce() is True
+        assert sorted(opened) == sorted([_tty_of(one), _tty_of(two)])
+    finally:
+        one.close()
+        two.close()

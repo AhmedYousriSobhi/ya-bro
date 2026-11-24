@@ -87,7 +87,8 @@ async def main():
     fake.write_text('#!/bin/sh\necho "benchctl-ran $1"\n')
     fake.chmod(0o755)
     rc = work / "rc"
-    rc.write_text(f"PS1='YBP$ '\ncd {work}\n. {HOOK}\n")
+    # Ubuntu's .bashrc puts its own title (OSC 0) at the start of PS1; it is drawn after PROMPT_COMMAND
+    rc.write_text(f"PS1='\\[\\e]0;\\u@\\h: \\w\\a\\]YBP$ '\ncd {work}\n. {HOOK}\n")
     env = dict(os.environ, GTK_A11Y="atspi")
     env.pop("DISPLAY", None)
     term = subprocess.Popen(

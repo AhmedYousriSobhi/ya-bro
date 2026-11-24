@@ -55,6 +55,8 @@ _yb_post() {
 
 # While a run holds a scope token (ADR-0029 §8) it goes into the terminal title (OSC 2), so the
 # extension reports this terminal's window only while Bro runs, without allowing the whole app.
+# Distro prompts (Ubuntu's PS1) set the title themselves AFTER PROMPT_COMMAND, so the sequence is
+# also appended to the END of PS1 (below), where nothing can overwrite it.
 _yb_title() {
   local t
   [[ -r $_yb_dir/scope-token ]] || return 0
@@ -62,6 +64,8 @@ _yb_title() {
   [[ $t =~ ^yb-[0-9a-f]{32}$ ]] && printf '\033]2;ya-bro %s\007' "$t"
   return 0
 }
+
+[[ $PS1 == *'_yb_title)'* ]] || PS1+='\[$(_yb_title)\]'
 
 # Last in PROMPT_COMMAND: from here on the next simple command is the user's.
 _yb_arm() {
